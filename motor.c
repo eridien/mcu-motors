@@ -92,9 +92,9 @@ uint16 settingsInit[NUM_SETTING_WORDS] = {
       2,  // min ms->speed: 2 steps/sec (else sw blows up)
     400,  // no-accelleration ms->speed limit
     100,  // accelleration rate: steps/sec/sec
-    400,  // homing ms->speed
-     80,  // homing back-up speed
-    320,  // home offset distance
+   1600,  // homing ms->speed    (40 mm/sec)
+     80,  // homing back-up speed (2 mm/sec)
+     80,  // home offset distance (2 mm)
       0,  // homePos (rot motor is 16000)
 };
 
