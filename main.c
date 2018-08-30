@@ -41,7 +41,9 @@ void main(void) {
   ANSELA = 0; // no analog inputs
   ANSELB = 0; // these &^%$&^ regs cause a lot of trouble
   ANSELC = 0; // they should not default to on and override everything else
-  
+#ifndef BM
+  ANSELD = 0;
+#endif
   i2cInit();
   clkInit();
   motorInit();
@@ -51,8 +53,10 @@ void main(void) {
   
   // main event loop -- never ends
   while(true) {
-    // motorIdx, ms, and sv are globals
+    // motorIdx, mp, mm, ms, and sv are globals
     for(motorIdx=0; motorIdx < NUM_MOTORS; motorIdx++) {
+      mp = motorPort[motorIdx]; // (&PORT)
+      mm = motorMask[motorIdx]; // 0xf0 or 0x0f or step bit
       ms = &mState[motorIdx];
       sv = &(mSet[motorIdx].val);
       checkI2c();

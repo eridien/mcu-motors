@@ -35,27 +35,35 @@ extern struct motorSettings   *sv;
 extern volatile unsigned char *mp; // motor port (like &PORTA)
 extern uint8                   mm; // motor mask (0xf0 or 0x0f or step bit)
 
-extern volatile unsigned char *motorPort[NUM_MOTORS];  // mcu port byte
-extern uint8                   motorMask[NUM_MOTORS];  // bit mask
+extern volatile unsigned char *motorPort[NUM_MOTORS];
+extern uint8                   motorMask[NUM_MOTORS];
 
 // faultPort == 0 means no fault pin
-extern volatile unsigned char *faultPort[NUM_MOTORS]; // mcu port byte
-extern uint8                   faultMask[NUM_MOTORS]; // bit mask
+extern volatile unsigned char *faultPort[NUM_MOTORS];
+extern uint8                   faultMask[NUM_MOTORS];
 
 // limitPort == 0 means no limit switch
-extern volatile unsigned char *limitPort[NUM_MOTORS];   // mcu port byte
-extern uint8                   limitMask[NUM_MOTORS];   // bit mask
+extern volatile unsigned char *limitPort[NUM_MOTORS];
+extern uint8                   limitMask[NUM_MOTORS];
 
-#define setStepLo()        *motorPort[motorIdx] &= ~motorMask[motorIdx]
-#define setStepHi(_motIdx) *motorPort[_motIdx]  |=  motorMask[_motIdx]
+#define setBiStepLo()           *motorPort[motorIdx] &= ~motorMask[motorIdx]
+#define setBiStepHiInt(_motIdx) *motorPort[_motIdx]  |=  motorMask[_motIdx]
+  
+#define setUniPort(_phase) (*mp = (*mp & ~mm) | motPortValue[motorIdx][_phase]);
+#define setUniPortInt(_motIdx, _phase)                                   \
+  (*motorPort[_motIdx] = (*motorPort[_motIdx] & ~motorMask[_motIdx]) |   \
+    motPortValue[_motIdx][_phase]);
 
 struct motorState {
+  bool   i2cCmdBusy;
   uint8  stateByte;
   int16  curPos;
   int16  targetPos;
+  int16  homeTestPos;
   bool   dir;
   bool   targetDir;
-  uint8  ustep;
+  uint8  ustep;  // bipolar only
+  uint8  phase;  // unipolar only
   uint16 speed;
   uint16 targetSpeed;
   int8   stepDist;
@@ -64,7 +72,6 @@ struct motorState {
   uint16 nextStepTicks;
   uint16 lastStepTicks;
   bool   resetAfterSoftStop;
-  bool   i2cCmdBusy;
 } mState[NUM_MOTORS];
 
 #define POS_UNKNOWN_CODE -9999 // not homed since lastmotor off
@@ -92,7 +99,8 @@ void motorInit(void);
 void chkMotor(void);
 bool withinDecellDist(void);
 void softStopCommand(bool reset);
-void haveFault();
+void haveFault();        // bipolar only
+void setStepPhase(void); // unipolar only
 void limitClosed();
 void setStep(void);
 void stopStepping(void);
@@ -101,7 +109,7 @@ void motorOnCmd(void);
 void processMotorCmd(void);
 void clockInterrupt(void);
 uint16 getLastStep(void);
-void setNextStep(uint16 ticks);
+void   setNextStep(uint16 ticks);
 
 #endif	/* MOTOR_H */
 

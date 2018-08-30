@@ -2,6 +2,7 @@
 #ifndef PINS_H
 #define	PINS_H
 
+#ifdef BM
 #define SCL_TRIS  TRISC0
 #define SDA_TRIS  TRISC1
 
@@ -18,12 +19,17 @@
 #define resetTRIS TRISB6
 #define resetLAT  LATB6
 
-#ifdef B1
+#else
 
+#define SCL_TRIS  TRISD0
+#define SDA_TRIS  TRISD1
+#endif /* BM */
+
+#ifdef B1
 #define stepTRIS  TRISC5
 #define stepLAT   LATC5
 #define stepPORT  PORTC
-#define stepBIT   0x20
+#define stepMASK   0x20
 
 #define faultTRIS TRISA5
 #define faultPORT PORTA
@@ -32,10 +38,9 @@
 #define limitTRIS TRISA4
 #define limitPORT PORTA
 #define limitBIT  0x10
+#endif /* B1 */
 
-#else
-
-
+#ifdef B3
 #define stepRTRIS  TRISC5
 #define stepETRIS  TRISC4
 #define stepXTRIS  TRISC3
@@ -73,8 +78,41 @@
 #define limitRBIT   0x20
 #define limitXPORT  PORTA
 #define limitXBIT   0x10
+#endif	/* B3 */
 
-#endif	/* M1 */
+#ifdef U6
+#define motAPORT   PORTA  // tube 1
+#define motBPORT   PORTB  // tube 2
+#define motCPORT   PORTC  // tube 3
+#define motPPORT   PORTD  // paster
+#define motZPORT   PORTA  // camera Z
+#define motFPORT   PORTC  // focus
+
+#define motAOFS    0
+#define motBOFS    0
+#define motCOFS    0
+#define motPOFS    4
+#define motZOFS    4
+#define motFOFS    4
+
+#define limitZTRIS TRISE0
+#define limitZLAT  LATE0
+
+#define led1TRIS   TRISE1
+#define led2TRIS   TRISE2
+#define led3TRIS   TRISD2
+#define led4TRIS   TRISD3
+ 
+#define led1LAT    LATE1
+#define led2LAT    LATE2
+#define led3LAT    LATD2
+#define led4LAT    LATD3
+ 
+#define tp1TRIS    TRISB4
+#define tp1LAT     LATB4
+#define tp2TRIS    TRISB5
+#define tp2LAT     LATB5
+#endif
 
 #endif	/* PINS_H */
 

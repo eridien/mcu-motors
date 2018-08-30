@@ -13,20 +13,107 @@
 uint8  motorIdx;
 struct motorState      *ms;
 struct motorSettings   *sv;
-volatile unsigned char *mp; // motor port (like &PORTA)
-uint8                   mm; // motor mask (0xf0 or 0x0f or step bit)
+volatile unsigned char *mp; // current motor port (like &PORTA)
+uint8                   mm; // current motor mask (0xf0 or 0x0f or step bit)
 
-volatile unsigned char *motorPort[NUM_MOTORS];  // mcu port byte
-uint8                   motorMask[NUM_MOTORS];  // bit mask
+volatile unsigned char *motorPort[NUM_MOTORS];
+uint8                   motorMask[NUM_MOTORS];
 
-volatile unsigned char *faultPort[NUM_MOTORS]; // mcu port byte
-uint8                   faultMask[NUM_MOTORS]; // bit mask
+volatile unsigned char *faultPort[NUM_MOTORS];
+uint8                   faultMask[NUM_MOTORS];
 
-volatile unsigned char *limitPort[NUM_MOTORS];   // mcu port byte
-uint8                   limitMask[NUM_MOTORS];   // bit mask
+volatile unsigned char *limitPort[NUM_MOTORS];
+uint8                   limitMask[NUM_MOTORS];
+
+#ifdef B1
+  stepTRIS  = 0;
+  faultTRIS = 1;  // zero means motor fault
+  limitTRIS = 1;  // zero means at limit switch
+
+  motorPort[0]  = &stepPORT;
+  motorMask[0]  =  stepMASK;
+  
+  faultPort[0]  = &faultPORT;
+  faultMask[0]  =  faultBIT;
+  
+  limitPort[0]  = &limitPORT;
+  limitMask[0]  =  limitBIT;
+#endif /*B1 */
+  
+#ifdef B3
+  stepRTRIS  = 0;
+  stepRLAT   = 1;   // step idle is high
+  stepETRIS  = 0;
+  stepELAT   = 1;   // step idle is high
+  stepXTRIS  = 0;
+  stepXLAT   = 1;   // step idle is high
+
+  faultRTRIS = 1;  // zero means motor fault
+  faultETRIS = 1;  // zero means motor fault
+  faultXTRIS = 1;  // zero means motor fault 
+  
+  limitRTRIS = 1;  // zero means at limit switch
+  limitXTRIS = 1;  // zero means at limit switch
+
+  motorPort[0]  = &stepRPORT;
+  motorPort[1]  = &stepEPORT;
+  motorPort[2]  = &stepXPORT;
+  motorMask[0]  =  stepRBIT;
+  motorMask[1]  =  stepEBIT;
+  motorMask[2]  =  stepXBIT;
+  
+  faultPort[0] = &faultRPORT;
+  faultPort[1] = &faultEPORT;
+  faultPort[2] = &faultXPORT;
+  faultMask[0] =  faultRBIT;
+  faultMask[1] =  faultEBIT;
+  faultMask[2] =  faultXBIT;
+  
+  limitPort[0]   = &limitRPORT;
+  limitPort[2]   = &limitXPORT;
+  limitMask[0]   =  limitRBIT;
+  limitMask[2]   =  limitXBIT;
+#endif /* B3 */
+
+#ifdef U6
+  
+volatile unsigned char *motorPort[NUM_MOTORS] = {
+  &motAPORT, // tube 1
+  &motBPORT, // tube 2
+  &motCPORT, // tube 3
+  &motPPORT, // paster
+  &motZPORT, // camera height
+  &motFPORT, // focus
+};
+
+uint8 motorMask[NUM_MOTORS] = {
+  0x0f << motAOFS,
+  0x0f << motBOFS,
+  0x0f << motCOFS,
+  0x0f << motPOFS,
+  0x0f << motZOFS,
+  0x0f << motFOFS,
+};
+
+// -------- phases ----------
+// Color        Bl Pi Ye Or  (red is +5))
+//              {1, 1, 0, 0},
+//              {0, 1, 1, 0},
+//              {0, 0, 1, 1},
+//              {1, 0, 0, 1}
+uint8 motPortValue[NUM_MOTORS][4] = { // motor, phase
+  {0x0c << motAOFS, 0x06 << motAOFS, 0x03 << motAOFS, 0x09 << motAOFS},
+  {0x0c << motBOFS, 0x06 << motBOFS, 0x03 << motBOFS, 0x09 << motBOFS},
+  {0x0c << motCOFS, 0x06 << motCOFS, 0x03 << motCOFS, 0x09 << motCOFS},
+  {0x0c << motPOFS, 0x06 << motPOFS, 0x03 << motPOFS, 0x09 << motPOFS},
+  {0x0c << motZOFS, 0x06 << motZOFS, 0x03 << motZOFS, 0x09 << motZOFS},
+  {0x0c << motFOFS, 0x06 << motFOFS, 0x03 << motFOFS, 0x09 << motFOFS},
+};
+#endif /* U6 */
 
 // default startup values
 // must match settingsStruct
+#ifdef BM
 uint16 settingsInit[NUM_SETTING_WORDS] = {
    6400,  // max ms->speed: 80 mm/sec
       2,    // min ms->speed: 2 steps/sec (else sw blows up)
@@ -37,6 +124,20 @@ uint16 settingsInit[NUM_SETTING_WORDS] = {
    320    // home offset distance: 4 mm
    0,     // homePos
 };
+
+#else
+
+uint16 settingsInit[NUM_SETTING_WORDS] = {
+   500,    // max ms->speed: steps/sec
+    50,    // min ms->speed, else sw blows up
+   100,    // no-accelleration ms->speed limit
+   100,    // accelleration rate: 1 step/sec/sec
+   400,    // homing ms->speed
+    50,    // homing back-up ms->speed
+    50,    // home offset distance: 1 mm
+     0,    // homePos
+};
+#endif /* BM */
 
 // estimated decell distance by ms->speed
 // wild guess for now
@@ -105,55 +206,6 @@ void motorInit() {
   resetLAT  = 0;  // start with reset on
   resetTRIS = 0;
 
-#ifdef B1
-  stepTRIS  = 0;
-  faultTRIS = 1;  // zero means motor fault
-  limitTRIS = 1;  // zero means at limit switch
-
-  motorPort[0]  = &stepPORT;
-  motorMask[0]  =  stepBIT;
-  
-  faultPort[0] = &faultPORT;
-  faultMask[0] =  faultBIT;
-  
-  limitPort[0]   = &limitPORT;
-  limitMask[0]   =  limitBIT;
-#else
-  stepRTRIS  = 0;
-  stepRLAT   = 1;   // step idle is high
-  stepETRIS  = 0;
-  stepELAT   = 1;   // step idle is high
-  stepXTRIS  = 0;
-  stepXLAT   = 1;   // step idle is high
-
-  faultRTRIS = 1;  // zero means motor fault
-  faultETRIS = 1;  // zero means motor fault
-  faultXTRIS = 1;  // zero means motor fault 
-  
-  limitRTRIS = 1;  // zero means at limit switch
-  limitXTRIS = 1;  // zero means at limit switch
-
-  motorPort[0]  = &stepRPORT;
-  motorPort[1]  = &stepEPORT;
-  motorPort[2]  = &stepXPORT;
-  motorMask[0]  =  stepRBIT;
-  motorMask[1]  =  stepEBIT;
-  motorMask[2]  =  stepXBIT;
-  
-  faultPort[0] = &faultRPORT;
-  faultPort[1] = &faultEPORT;
-  faultPort[2] = &faultXPORT;
-  faultMask[0] =  faultRBIT;
-  faultMask[1] =  faultEBIT;
-  faultMask[2] =  faultXBIT;
-  
-  limitPort[0]   = &limitRPORT;
-  limitPort[2]   = &limitXPORT;
-  limitMask[0]   =  limitRBIT;
-  limitMask[2]   =  limitXBIT;
-#endif
-}
-
 void setMotorSettings() {
   for(uint8 i = 0; i < sizeof(mSet[motorIdx]) / 
                        sizeof(mSet[motorIdx].reg[0]); i++) {
@@ -207,7 +259,7 @@ void setStep() {
   if(stepTicks == 0) stepTicks = 1;
   setNextStep(getLastStep() + stepTicks);
   ms->stepped = false;
-  setStepLo();
+  setBiStepLo();
   ms->stepPending = true;
 }
 
@@ -340,7 +392,7 @@ void clockInterrupt(void) {
       ms2LAT = ((p->ustep & 0x02) ? 1 : 0);
       ms3LAT = ((p->ustep & 0x04) ? 1 : 0);
       dirLAT =   p->dir           ? 1 : 0;
-      setStepHi(motIdx);
+      setBiStepHiInt(motIdx);
       p->stepPending = false;
       p->lastStepTicks = timeTicks;
       p->stepped = true;

@@ -85,14 +85,14 @@ void i2cInterrupt(void) {
     // received start bit, prepare for packet
     i2cRecvBytesPtr = 1; // skip over length byte
     i2cSendBytesPtr = 0;
-    WCOL = 0;                   // clear WCOL
+    WCOL1 = 0;                   // clear WCOL
     volatile int x = SSP1BUF;   // clear SSPOV
     inPacket = true;
   }
   else if(SSP1STATbits.P) { 
     // received stop bit, on read tell loop that data is available
     inPacket = false;
-    if (WCOL || SSPOV) {
+    if (WCOL1 || SSPOV1) {
       setErrorInt(motIdxInPacket, I2C_OVERFLOW_ERROR);
     }
     else {
@@ -133,6 +133,6 @@ void i2cInterrupt(void) {
       }
     }
   }
-  CKP = 1; // end stretch
+  CKP1 = 1; // end stretch
   volatile int z = SSP1BUF;  // clear BF  
 }
