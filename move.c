@@ -52,7 +52,7 @@ void moveCommand(int16 pos) {
   else if(ms->curPos != ms->targetPos) {
     ms->dir = (ms->targetPos >= ms->curPos);
     // start moving
-    setBusyState(BUSY_MOVING);
+    setStateBit(BUSY_BIT, true);
     ms->targetSpeed = sv->maxSpeed;
     chkMoving();
   }

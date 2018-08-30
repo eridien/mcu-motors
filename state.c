@@ -14,14 +14,6 @@ void setCurState(uint8 newState) {
   GIE = 1;
 }
 
-uint8 getBusyState(void) {
-  return (ms->stateByte & 0x0c);
-}
-
-void setBusyState(uint8 busyState) {
-  setCurState((ms->stateByte & 0xf3) | busyState);
-}
-
 void setStateBit(uint8 mask, uint8 set){
   setCurState((ms->stateByte & ~mask) | (set ? mask : 0));
 }

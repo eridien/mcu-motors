@@ -10,11 +10,13 @@
 //   keep pos accurate in recvbytes
 //   chg speed to steps/sec (8x for bipolar)  
 //   chg max ustep to 1/8
+//   homingState?
+//   fix accell calc to use actual seconds
 
-#define BM  // bipolar motor
-#define B1  // one bipolar motor
+//#define BM  // bipolar motor
+//#define B1  // one bipolar motor
 //#define B3  // three bipolar motors
-//#define U6  // six unipolar motors
+#define U6  // six unipolar motors
 
 typedef signed char int8;
 typedef unsigned char uint8;

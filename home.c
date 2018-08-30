@@ -52,7 +52,7 @@ void homeCommand() {
   setStateBit(MOTOR_ON_BIT, 1);
   resetLAT = 1;
   homingState = homeStarting;
-  setBusyState(BUSY_HOMING);
+  setStateBit(BUSY_BIT, true);
 }
 #else
 void homeCommand() {

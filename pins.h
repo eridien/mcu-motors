@@ -10,13 +10,12 @@
 #define ms1TRIS   TRISC2
 #define ms2TRIS   TRISB4
 #define ms3TRIS   TRISB5
+#define resetTRIS TRISB6
 
 #define dirLAT    LATA2
 #define ms1LAT    LATC2
 #define ms2LAT    LATB4
 #define ms3LAT    LATB5
-
-#define resetTRIS TRISB6
 #define resetLAT  LATB6
 
 #else
@@ -29,15 +28,15 @@
 #define stepTRIS  TRISC5
 #define stepLAT   LATC5
 #define stepPORT  PORTC
-#define stepMASK   0x20
+#define stepMASK  0x20
 
 #define faultTRIS TRISA5
 #define faultPORT PORTA
-#define faultBIT  0x80
+#define faultMASK  0x80
 
 #define limitTRIS TRISA4
 #define limitPORT PORTA
-#define limitBIT  0x10
+#define limitMASK  0x10
 #endif /* B1 */
 
 #ifdef B3
@@ -96,7 +95,8 @@
 #define motFOFS    4
 
 #define limitZTRIS TRISE0
-#define limitZLAT  LATE0
+#define limitZPORT PORTE
+#define limitZBIT  0x01
 
 #define led1TRIS   TRISE1
 #define led2TRIS   TRISE2

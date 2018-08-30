@@ -55,8 +55,8 @@ void main(void) {
   while(true) {
     // motorIdx, mp, mm, ms, and sv are globals
     for(motorIdx=0; motorIdx < NUM_MOTORS; motorIdx++) {
-      mp = motorPort[motorIdx]; // (&PORT)
-      mm = motorMask[motorIdx]; // 0xf0 or 0x0f or step bit
+      mp = stepPort[motorIdx]; // (&PORT)
+      mm = stepMask[motorIdx]; // 0xf0 or 0x0f or step bit
       ms = &mState[motorIdx];
       sv = &(mSet[motorIdx].val);
       checkI2c();

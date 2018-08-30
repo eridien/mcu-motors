@@ -62,9 +62,7 @@ void setI2cCkSumInt(uint8 motIdx) {
 }
 
 void checkI2c() {
-  if(haveError() && 
-      ((ms->stateByte & 0x0c) == (BUSY_MOVING << 2) || 
-      ((ms->stateByte & 0x0c) == (BUSY_HOMING << 2)))) {
+  if(haveError() && (ms->stateByte & BUSY_BIT)) {
     // have error and motor moving, stop and reset
     softStopCommand(true);
   }

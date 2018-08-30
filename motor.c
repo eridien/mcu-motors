@@ -1,10 +1,10 @@
 
 #include <xc.h>
 #include "types.h"
+#include "pins.h"
 #include "motor.h"
 #include "i2c.h"
 #include "state.h"
-#include "pins.h"
 #include "clock.h"
 #include "home.h"
 #include "move.h"
@@ -16,68 +16,33 @@ struct motorSettings   *sv;
 volatile unsigned char *mp; // current motor port (like &PORTA)
 uint8                   mm; // current motor mask (0xf0 or 0x0f or step bit)
 
-volatile unsigned char *motorPort[NUM_MOTORS];
-uint8                   motorMask[NUM_MOTORS];
-
-volatile unsigned char *faultPort[NUM_MOTORS];
-uint8                   faultMask[NUM_MOTORS];
-
-volatile unsigned char *limitPort[NUM_MOTORS];
-uint8                   limitMask[NUM_MOTORS];
-
 #ifdef B1
-  stepTRIS  = 0;
-  faultTRIS = 1;  // zero means motor fault
-  limitTRIS = 1;  // zero means at limit switch
+volatile unsigned char *stepPort[NUM_MOTORS]  = {&stepPORT};
+uint8                   stepMask[NUM_MOTORS]  = { stepMASK};
 
-  motorPort[0]  = &stepPORT;
-  motorMask[0]  =  stepMASK;
+volatile unsigned char *faultPort[NUM_MOTORS] = {&faultPORT};
+uint8                   faultMask[NUM_MOTORS] = { faultMASK};
   
-  faultPort[0]  = &faultPORT;
-  faultMask[0]  =  faultBIT;
-  
-  limitPort[0]  = &limitPORT;
-  limitMask[0]  =  limitBIT;
+volatile unsigned char *limitPort[NUM_MOTORS] = {&limitPORT};
+uint8                   limitMask[NUM_MOTORS] = { limitMASK};
 #endif /*B1 */
   
 #ifdef B3
-  stepRTRIS  = 0;
-  stepRLAT   = 1;   // step idle is high
-  stepETRIS  = 0;
-  stepELAT   = 1;   // step idle is high
-  stepXTRIS  = 0;
-  stepXLAT   = 1;   // step idle is high
+volatile unsigned char 
+     *stepPort[NUM_MOTORS] = {&stepRPORT, &stepEPORT, &stepXPORT};
+uint8 stepMask[NUM_MOTORS] = { stepRBIT,   stepEBIT,   stepXBIT};
 
-  faultRTRIS = 1;  // zero means motor fault
-  faultETRIS = 1;  // zero means motor fault
-  faultXTRIS = 1;  // zero means motor fault 
-  
-  limitRTRIS = 1;  // zero means at limit switch
-  limitXTRIS = 1;  // zero means at limit switch
+volatile unsigned char 
+     *faultPort[NUM_MOTORS] = {&faultRPORT, &faultEPORT, &faultXPORT};
+uint8 faultMask[NUM_MOTORS] = { faultRBIT,   faultEBIT,   faultXBIT};
 
-  motorPort[0]  = &stepRPORT;
-  motorPort[1]  = &stepEPORT;
-  motorPort[2]  = &stepXPORT;
-  motorMask[0]  =  stepRBIT;
-  motorMask[1]  =  stepEBIT;
-  motorMask[2]  =  stepXBIT;
-  
-  faultPort[0] = &faultRPORT;
-  faultPort[1] = &faultEPORT;
-  faultPort[2] = &faultXPORT;
-  faultMask[0] =  faultRBIT;
-  faultMask[1] =  faultEBIT;
-  faultMask[2] =  faultXBIT;
-  
-  limitPort[0]   = &limitRPORT;
-  limitPort[2]   = &limitXPORT;
-  limitMask[0]   =  limitRBIT;
-  limitMask[2]   =  limitXBIT;
+volatile unsigned char 
+     *limitPort[NUM_MOTORS] = {&limitRPORT, 0, &limitXPORT};
+uint8 limitMask[NUM_MOTORS] = { limitRBIT,  0,  limitXBIT};
 #endif /* B3 */
 
 #ifdef U6
-  
-volatile unsigned char *motorPort[NUM_MOTORS] = {
+volatile unsigned char *stepPort[NUM_MOTORS] = {
   &motAPORT, // tube 1
   &motBPORT, // tube 2
   &motCPORT, // tube 3
@@ -86,7 +51,7 @@ volatile unsigned char *motorPort[NUM_MOTORS] = {
   &motFPORT, // focus
 };
 
-uint8 motorMask[NUM_MOTORS] = {
+uint8 stepMask[NUM_MOTORS] = {
   0x0f << motAOFS,
   0x0f << motBOFS,
   0x0f << motCOFS,
@@ -95,13 +60,21 @@ uint8 motorMask[NUM_MOTORS] = {
   0x0f << motFOFS,
 };
 
+volatile unsigned char 
+     *faultPort[NUM_MOTORS] = {0,0,0,0,0,0};
+uint8 faultMask[NUM_MOTORS] = {0,0,0,0,0,0};
+
+volatile unsigned char 
+     *limitPort[NUM_MOTORS] = {0,0,0,0, &limitZPORT, 0};
+uint8 limitMask[NUM_MOTORS] = {0,0,0,0, &limitZBIT,  0};
+
 // -------- phases ----------
 // Color        Bl Pi Ye Or  (red is +5))
 //              {1, 1, 0, 0},
 //              {0, 1, 1, 0},
 //              {0, 0, 1, 1},
 //              {1, 0, 0, 1}
-uint8 motPortValue[NUM_MOTORS][4] = { // motor, phase
+uint8 motPhaseValue[NUM_MOTORS][4] = { // motor, phase
   {0x0c << motAOFS, 0x06 << motAOFS, 0x03 << motAOFS, 0x09 << motAOFS},
   {0x0c << motBOFS, 0x06 << motBOFS, 0x03 << motBOFS, 0x09 << motBOFS},
   {0x0c << motCOFS, 0x06 << motCOFS, 0x03 << motCOFS, 0x09 << motCOFS},
@@ -115,14 +88,14 @@ uint8 motPortValue[NUM_MOTORS][4] = { // motor, phase
 // must match settingsStruct
 #ifdef BM
 uint16 settingsInit[NUM_SETTING_WORDS] = {
-   6400,  // max ms->speed: 80 mm/sec
-      2,    // min ms->speed: 2 steps/sec (else sw blows up)
-   1600,  // no-accelleration ms->speed limit:  20 mm/sec
-   80,    // accelleration rate: 1 mm/sec/sec
-   1600,  // homing ms->speed: 20 mm/sec
-   80,    // homing back-up ms->speed: 1 mm/sec
-   320    // home offset distance: 4 mm
-   0,     // homePos
+   6400,  // max ms->speed
+      2,  // min ms->speed: 2 steps/sec (else sw blows up)
+    400,  // no-accelleration ms->speed limit
+    100,  // accelleration rate: steps/sec/sec
+    400,  // homing ms->speed
+     80,  // homing back-up speed
+    320,  // home offset distance
+      0,  // homePos (rot motor is 16000)
 };
 
 #else
@@ -138,6 +111,53 @@ uint16 settingsInit[NUM_SETTING_WORDS] = {
      0,    // homePos
 };
 #endif /* BM */
+
+void motorInit() {
+#ifdef B1
+  stepTRIS  = 0;
+  faultTRIS = 1;  // zero means motor fault
+  limitTRIS = 1;  // zero means at limit switch
+#endif
+  
+#ifdef B3
+  stepRTRIS  = 0;
+  stepRLAT   = 1;   // step idle is high
+  stepETRIS  = 0;
+  stepELAT   = 1;   // step idle is high
+  stepXTRIS  = 0;
+  stepXLAT   = 1;   // step idle is high
+
+  faultRTRIS = 1;  // zero means motor fault
+  faultETRIS = 1;  // zero means motor fault
+  faultXTRIS = 1;  // zero means motor fault 
+  
+  limitRTRIS = 1;  // zero means at limit switch
+  limitXTRIS = 1;  // zero means at limit switch
+#endif /* B3 */
+
+  for(uint8 motIdx=0; motIdx < NUM_MOTORS; motIdx++) {
+    struct motorState *p = &mState[motIdx];
+    p->curPos          = POS_UNKNOWN_CODE;  // 1/80 mm
+    p->dir             = 1;  // 1 => forward
+    p->ustep           = 1;  // 1/2 step per pulse
+    p->targetPos       = 1;  // 1/80 mm
+    p->speed           = 0;  // 1/80 mm/sec
+    p->targetSpeed     = 0;  // 1/80 mm/sec
+    p->stepDist        = 0;  // signed distance each step pulse in 1/80 mm
+    
+    for(uint8 i = 0; i < NUM_SETTING_WORDS; i++) {
+       mSet[motIdx].reg[i] = settingsInit[i];
+    }
+  }
+
+  dirTRIS   = 0;
+  ms1TRIS   = 0;
+  ms2TRIS   = 0;
+  ms3TRIS   = 0;
+  resetLAT  = 0;  // start with reset on
+  resetTRIS = 0;
+}
+
 
 // estimated decell distance by ms->speed
 // wild guess for now
@@ -175,36 +195,13 @@ void haveFault() {
   return false;
 }
 
-void limitClosed() {
+bool limitClosed() {
   extern volatile unsigned char *p = limitPort[motorIdx];
   if(p != NULL) {
     return !(*p & limitMask[motorIdx]);
   }
   return false;
 }
-
-void motorInit() {
-  for(uint8 motIdx=0; motIdx < NUM_MOTORS; motIdx++) {
-    struct motorState *p = &mState[motIdx];
-    p->curPos          = POS_UNKNOWN_CODE;  // 1/80 mm
-    p->dir             = 1;  // 1 => forward
-    p->ustep           = 1;  // 1/2 step per pulse
-    p->targetPos       = 1;  // 1/80 mm
-    p->speed           = 0;  // 1/80 mm/sec
-    p->targetSpeed     = 0;  // 1/80 mm/sec
-    p->stepDist        = 0;  // signed distance each step pulse in 1/80 mm
-    
-    for(uint8 i = 0; i < NUM_SETTING_WORDS; i++) {
-       mSet[motIdx].reg[i] = settingsInit[i];
-    }
-  }
-
-  dirTRIS   = 0;
-  ms1TRIS   = 0;
-  ms2TRIS   = 0;
-  ms3TRIS   = 0;
-  resetLAT  = 0;  // start with reset on
-  resetTRIS = 0;
 
 void setMotorSettings() {
   for(uint8 i = 0; i < sizeof(mSet[motorIdx]) / 

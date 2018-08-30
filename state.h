@@ -38,8 +38,6 @@
 
 void  setCurState(uint8 newState);
 void  setStateBit(uint8 mask, uint8 set);
-uint8 getBusyState(void);
-void  setBusyState(uint8 busyVal);
 void  setError(uint8 err);
 void  setErrorInt(uint8 motorIdx, uint8 err);
 
