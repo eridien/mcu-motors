@@ -6,7 +6,7 @@
 #include "motor.h"
 
 void chkMoving(void);
-void moveCommand(int16 pos);
+void moveCommand(void);
 bool underAccellLimit(void);
 
 #endif	/* MOVE_H */

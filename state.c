@@ -21,8 +21,9 @@ void setError(uint8 err) {
     for(uint8 motIdx = 0; motIdx < NUM_MOTORS; motIdx++) {
       mState[motIdx].stateByte = ERROR_BIT;
     }
-    ms->stateByte = err | ERROR_BIT;
-    resetAllMotors();
+    ms->stateByte = (err | ERROR_BIT);
+    // reset all motors
+    resetMotor(true);
   }
 }
 

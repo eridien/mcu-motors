@@ -8,67 +8,82 @@
 
 void chkMoving() {
   // in the process of stepping
-  if(limitClosed()) {
+  if(ms->stepPending || ms->stepped) return;
+  
+  if(ms->curPos < 0 || ms->curPos >= sv->maxPos) {
     setError(MOTOR_LIMIT_ERROR);
-    
-  }
-  if(ms->stepPending) return;
-  if((ms->curPos == ms->targetPos) && underAccellLimit()) {
-    stopStepping();
     return;
   }
+  ms->targetDir = (ms->targetPos >= ms->curPos); 
   
-  ms->targetDir = (ms->targetPos >= ms->curPos);
-  bool decellerate = false;
+  bool accelerate = false;
+  bool decelerate = false;
   
-  if(ms->dir != ms->targetDir)
-  
-  // check ms->speed/acceleration
-  if((!underAccellLimit() ) {
-    int16 distRemaining = (ms->targetPos - ms->curPos);
-    ms->targetDir = 1;
-    if(distRemaining < 0) {
-      ms->targetDir = !ms->targetDir;
-      return false;
+  if(underAccellLimit()) {
+    if(ms->curPos == ms->targetPos) {
+      stopStepping();
+      return;
     }
-    for(uint8 i = 0; i < sizeof(decellTable)/2; i++) {
-      if(ms->speed >= decellTable[i][0] &&
-         distRemaining <= decellTable[i][1]) {
-        return true;
+    if(ms->curDir != ms->targetDir) {
+      ms->curDir = ms->targetDir;
+    }
+    else if(ms->curSpeed < ms->targetSpeed) {
+      accelerate = true;
+    }
+    else if (ms->curSpeed > ms->targetSpeed) {
+      decelerate = true;
+    }
+  }
+  else {
+    if(ms->curDir != ms->targetDir) {
+      decelerate = true;
+    }
+    else {
+      int16 distRemaining = (ms->targetPos - ms->curPos);
+      if(distRemaining < 0) {
+        distRemaining = -distRemaining;
+      }
+      for(uint8 i = 0; i < sizeof(decellTable)/4; i++) {
+        if(ms->curSpeed >= decellTable[i][0] &&
+           distRemaining <= decellTable[i][1]) {
+          decelerate = true;
+          break;
+        }
+      }
+      if(!decelerate) {
+        if(ms->curSpeed > ms->targetSpeed) {
+          decelerate = true;
+        }
+        else if(ms->curSpeed < ms->targetSpeed) {
+          accelerate = true;
+        }
       }
     }
-    // decellerate
-    ms->speed -= sv->accellerationRate;
-  else if(ms->targetSpeed > ms->speed) {
-    // accelerate
-    ms->speed += sv->accellerationRate;
   }
-  if(ms->speed > sv->maxSpeed) ms->speed = sv->maxSpeed;
-  if(ms->speed < sv->minSpeed) ms->speed = sv->minSpeed;
-
-  // check direction
-  if(ms->dir != ms->targetDir && underAccellLimit()) {
-    // slow enough, change ms->dir
-    ms->dir = ms->targetDir;
+  if(decelerate && ms->curSpeed > sv->accellerationRate) {
+    ms->curSpeed -= sv->accellerationRate;
+  }
+  else if (accelerate) {
+    ms->curSpeed += sv->accellerationRate;
+    if(ms->curSpeed > sv->maxSpeed) ms->curSpeed = sv->maxSpeed;
   }
   setStep();
 }
 
-void moveCommand(int16 pos) {
-  if(ms->curPos == POS_UNKNOWN_CODE) {
+void moveCommand() {
+  if((ms->stateByte & HOMED_BIT) == 0) {
     setError(NOT_HOMED_ERROR);
     return;
   }
   ms->homing   = false;
   ms->moving   = true;
   ms->stopping = false;
-  ms->targetPos = pos;
   if(!underAccellLimit()) {
     // already moving fast, keep going same way
     chkMoving();
   }
   else if(ms->curPos != ms->targetPos) {
-    ms->dir = (ms->targetPos >= ms->curPos);
+    ms->curDir = (ms->targetPos >= ms->curPos);
     // start moving
     setStateBit(BUSY_BIT, true);
     ms->targetSpeed = sv->maxSpeed;

@@ -89,7 +89,8 @@ uint8 motPhaseValue[NUM_MOTORS][4] = { // motor, phase
 #ifdef BM
 // assumes 1/40 mm per step
 uint16 settingsInit[NUM_SETTING_WORDS] = {
-  2400,    // max ms->speed: steps/sec (60 mm/sec)
+  2400,    // max speed
+ 16000,    // max pos is 400 mm
   1200,    // no-accelleration ms->speed limit (30 mm/sec)
   2000,    // accelleration rate step/sec/sec  (50 mm/sec/sec)
   1200,    // homing speed (30 mm/sec)
@@ -103,6 +104,7 @@ uint16 settingsInit[NUM_SETTING_WORDS] = {
 // assumes 1/50 mm per step
 uint16 settingsInit[NUM_SETTING_WORDS] = {
    600,    // max speed: steps/sec (12 mm/sec )
+  5000,    // max pos is 100 mm
    300,    // no-accelleration ms->speed limit (6 mm/sec)
    200,    // accelleration rate step/sec/sec  (4 mm/sec/sec)
    300,    // homing speed (6 mm/sec)
@@ -147,9 +149,8 @@ void motorInit() {
   for(uint8 motIdx=0; motIdx < NUM_MOTORS; motIdx++) {
     struct motorState *p = &mState[motIdx];
     p->stateByte   = 0;    // no err, not busy, motor off, and not homed
-    p->curPos      = POS_UNKNOWN_CODE;
     p->phase       = 0;    // cur step phase (unipolar only)
-    p->i2cCmdBusy  = false;
+    p->haveCommand  = false;
     p->stepPending = false;
     p->stepped     = false;
     for(uint8 i = 0; i < NUM_SETTING_WORDS; i++) {
@@ -213,7 +214,7 @@ void stopStepping() {
   setStateBit(BUSY_BIT, false);
 }
 
-void resetAllMotors() {
+void resetMotor(bool all) {
   // all bi motors share reset line
 #ifdef BM
   resetLAT = 0; 
@@ -221,6 +222,7 @@ void resetAllMotors() {
   uint8 savedMotorIdx = motorIdx;
   // set all global motor vars just like event loop
   for(motorIdx=0; motorIdx < NUM_MOTORS; motorIdx++) {
+    if(!all && motorIdx != savedMotorIdx) continue;
     mp = stepPort[motorIdx]; // (&PORT)
     mm = stepMask[motorIdx]; // 0xf0 or 0x0f or step bit
     ms = &mState[motorIdx];
@@ -229,7 +231,6 @@ void resetAllMotors() {
     clrUniPort();
 #endif
     stopStepping();
-    ms->curPos = POS_UNKNOWN_CODE;
     setStateBit(MOTOR_ON_BIT, 0);
     setStateBit(HOMED_BIT, 0);
   }
@@ -242,7 +243,7 @@ void resetAllMotors() {
 }
 
 bool underAccellLimit() {
-  return (ms->speed <= sv->noAccelSpeedLimit);
+  return (ms->curSpeed <= sv->noAccelSpeedLimit);
 }
 
 // curUStep, only 1/2 -> 1/8 (1..3) is allowed 
@@ -256,7 +257,7 @@ void setStep() {
   // set ustep
   while(true) {
     // approximate pulsesPerSec
-    uint16 pulsesPerSec = ms->speed >> (MAX_USTEP - ms->ustep);
+    uint16 pulsesPerSec = ms->curSpeed >> (MAX_USTEP - ms->ustep);
     if(ms->ustep < MAX_USTEP && pulsesPerSec < 500) {
       ms->ustep++;
     }
@@ -277,46 +278,47 @@ void setStep() {
 
 #else
   // check step timing
-  uint16 stepTicks = 50000 / ms->speed; // 20 usecs/tick
+  uint16 stepTicks = 50000 / ms->curSpeed; // 20 usecs/tick
   if(stepTicks == 0) stepTicks = 1;
   setNextStep(getLastStep() + stepTicks);
   ms->stepped = false;
-  ms->phase += ((ms->dir ? 1 : -1) & 0x03);
+  ms->phase += ((ms->curDir ? 1 : -1) & 0x03);
   ms->stepPending = true;
 #endif /* BM */
 }
 
 void chkStopping() {
   // in the process of stepping
-  if(ms->stepPending) return;
+  if(ms->stepPending || ms->stepped) return;
   
-  if(limitClosed() ) {
+  if(ms->curPos < 0 || ms->curPos >= sv->maxPos) {
     setError(MOTOR_LIMIT_ERROR);
     return;
   }
-  
   // check ms->speed/acceleration
   if(!underAccellLimit()) {
     // decellerate
-    ms->speed -= sv->accellerationRate;
+    ms->curSpeed -= sv->accellerationRate;
   }
   else {
     stopStepping();
-    if(ms->resetAfterSoftStop) resetMotor();
+    if(ms->resetAfterSoftStop) {
+      // reset only this motor
+      resetMotor(false);
+    }
     return;
   }
-
   setStep();
 }
 
-// from main loop
+// from event loop
 void chkMotor() {
   if(haveFault()) {
     setError(MOTOR_FAULT_ERROR);
     return;
   }
   if(ms->stepped) {
-    if(ms->dir) {
+    if(ms->curDir) {
       ms->curPos += uStepFactor[ms->ustep];
     }
     else {
@@ -325,9 +327,6 @@ void chkMotor() {
     ms->stepped = false;
   }
   if(ms->moving) {
-    if(limitClosed()) {
-      setError(MOTOR_LIMIT_ERROR);
-    }
     if(!haveError()) {
       chkMoving();
     }
@@ -366,32 +365,27 @@ bool lenIs(uint8 expected) {
   }
   return true;
 }
-  
-/*
-//   0001 0100  hard stop (immediate reset)
-//   0001 0101  motor on (hold place, reset off)
-//   0001 0110  set curpos to home pos value setting (fake homing)
-*/
 
 // from i2c
 void processMotorCmd() {
-  volatile uint8 *rb = ((volatile uint8 *) i2cRecvBytes[motorIdx]);
+  volatile uint8 *rb = ((volatile uint8 *) &i2cRecvBytes[motorIdx]);
   numBytesRecvd   = rb[0];
   uint8 firstByte = rb[1];
   
   if((firstByte & 0x80) == 0x80) {
     if(lenIs(2)) {
-      // simple goto pos command, 15-bits in 1/80 mm/sec
-      moveCommand(((int16) (firstByte & 0x7f) << 8) | rb[2]);
+      // simple goto pos command
+      ms->targetSpeed = sv->maxSpeed;
+      ms->targetPos   = ((int16) (firstByte & 0x7f) << 8) | rb[2];
+      moveCommand();
     }
   }
   // speed-move command
   else if((firstByte & 0xc0) == 0x40) {
     if(lenIs(3)) {
-      // set max ms->speed reg encoded as 10 mm/sec, 150 max
-      sv->maxSpeed = (uint16) (firstByte & 0x3f) << 8;
-      // followed by goto pos command
-      moveCommand(((int16) rb[2] << 8) | rb[3]);
+      ms->targetSpeed = (uint16) (firstByte & 0x3f) << 8;
+      ms->targetPos   = ((int16) rb[2] << 8) | rb[3];
+      moveCommand();
     }
   }
   else if(firstByte == 0x1f) {
@@ -400,13 +394,13 @@ void processMotorCmd() {
   else if((firstByte & 0xf0) == 0x10) {
     if(lenIs(1)) {
       switch(firstByte & 0x0f) {
-        case 0: homeCommand();          break; // start homing
-        case 1: nextStateTestPos = 1;   break; // next read pos is test pos
-        case 2: softStopCommand(false); break; // stop,no reset
-        case 3: softStopCommand(true);  break; // stop with reset
-        case 4: resetMotor();           break; // hard stop (immediate reset)
-        case 5: motorOnCmd();           break; // reset off
-        case 6: ms->curPos = ms->homeTestPos; break;  // set curpos to home pos
+        case 0: homeCommand();                 break; // start homing
+        case 1: ms->nextStateTestPos = true;   break; // next read pos is test pos
+        case 2: softStopCommand(false);        break; // stop,no reset
+        case 3: softStopCommand(true);         break; // stop with reset
+        case 4: resetMotor(false);             break; // hard stop (immediate reset)
+        case 5: motorOnCmd();                  break; // reset off
+        case 6: ms->curPos = sv->homePos;      break;  // set curpos to setting
         default: lenIs(255); // invalid cmd sets CMD_DATA_ERROR
       }
     }
@@ -414,6 +408,7 @@ void processMotorCmd() {
   else lenIs(255); // invalid cmd sets CMD_DATA_ERROR
 }
 
+// lastStepTicks used in interrupts
 uint16 getLastStep(void) {
   bool tempGIE = GIE;
   GIE = 0;
@@ -422,6 +417,7 @@ uint16 getLastStep(void) {
   return temp;
 }
 
+// nextStepTicks used in interrupts
 void setNextStep(uint16 ticks) {
   bool tempGIE = GIE;
   GIE = 0;
@@ -443,7 +439,7 @@ void clockInterrupt(void) {
       ms1LAT = ((p->ustep & 0x01) ? 1 : 0);
       ms2LAT = ((p->ustep & 0x02) ? 1 : 0);
       ms3LAT = ((p->ustep & 0x04) ? 1 : 0);
-      dirLAT =   p->dir           ? 1 : 0;
+      dirLAT =   p->curDir        ? 1 : 0;
       setBiStepHiInt(motIdx);
 #else
       setUniPortInt(motIdx, ms->phase); 

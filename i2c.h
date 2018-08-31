@@ -39,6 +39,7 @@
 //   0001 0110  set curpos to home pos value setting (fake homing)
 //   0001 0111  set regs, 16-bit values
 //      max speed
+//      max pos (min pos is always zero))
 //      no-accelleration speed limit (and start speed)
 //      accelleration rate
 //      homing speed

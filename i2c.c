@@ -60,13 +60,13 @@ void i2cInit() {
 
 void setSendBytesInt(uint8 motIdx) {
   struct motorState *p = &mState[motIdx];
-  if(!nextStateTestPos) {
+  if(!ms->nextStateTestPos) {
     i2cSendBytes[0] = (p->stateByte | MCU_VERSION);
     i2cSendBytes[1] =  p->curPos >> 8;
     i2cSendBytes[2] =  p->curPos & 0x00ff;
   }
   else {
-    nextStateTestPos = false;
+    ms->nextStateTestPos = false;
     i2cSendBytes[0]  = (TEST_POS_STATE | MCU_VERSION);
     i2cSendBytes[1]  = p->homeTestPos >> 8;
     i2cSendBytes[2]  = p->homeTestPos & 0x00ff;
@@ -96,7 +96,7 @@ void i2cInterrupt(void) {
       if(!SSP1STATbits.RW) {
         // total length of recv is stored in first byte
         i2cRecvBytes[motIdxInPacket][0] = i2cRecvBytesPtr-1;
-        mState[motIdxInPacket].i2cCmdBusy = true;
+        mState[motIdxInPacket].haveCommand = true;
       } else {
         // master just read status,  clear any error
         setErrorInt(motIdxInPacket, CLEAR_ERROR);
@@ -116,8 +116,8 @@ void i2cInterrupt(void) {
     }
     else {
       if(!SSP1STATbits.RW) {
-        if(mState[motIdxInPacket].i2cCmdBusy) {
-          // oops, last recv not handled yet by main loop
+        if(mState[motIdxInPacket].haveCommand) {
+          // last command for this motor not handled yet by event loop
           setErrorInt(motIdxInPacket, CMD_NOT_DONE_ERROR);
         } else {
           // received byte (i2c write to slave)

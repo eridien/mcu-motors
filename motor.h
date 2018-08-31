@@ -61,28 +61,28 @@ struct motorState {
   bool   homing;
   uint8  homingState;
   bool   stopping;
-  bool   stepPending;
-  bool   stepped;
   int16  curPos;
-  int16  homeTestPos;
+  uint16 curSpeed;
+  bool   curDir;
   int16  targetPos;
-  bool   dir;
+  uint16 targetSpeed;
   bool   targetDir;
   uint8  ustep;  // bipolar only
   uint8  phase;  // unipolar only
-  uint16 speed;
-  uint16 targetSpeed;
+  bool   stepPending;
+  bool   stepped;
   uint16 nextStepTicks;
   uint16 lastStepTicks;
-  bool   i2cCmdBusy;
+  bool   haveCommand;
   bool   resetAfterSoftStop;
+  bool   nextStateTestPos;
+  int16  homeTestPos;
 } mState[NUM_MOTORS];
 
-#define POS_UNKNOWN_CODE -9999 // not homed since lastmotor off
-
-// constants loadable from command
+// constants loadable from command (all must be 16 bits))
 struct motorSettings {
   uint16 maxSpeed;
+  uint16 maxPos;
   uint16 noAccelSpeedLimit;
   uint16 accellerationRate;
   uint16 homingSpeed;
@@ -91,7 +91,7 @@ struct motorSettings {
   uint16 homePos;  // value to set cur pos after homing
 };
 
-#define NUM_SETTING_WORDS 7
+#define NUM_SETTING_WORDS 8
 
 union settingsUnion{
   uint16 reg[NUM_SETTING_WORDS];
@@ -105,7 +105,7 @@ void haveFault();        // bipolar only
 bool limitClosed(void);
 void setStep(void);
 void stopStepping(void);
-void resetMotor(void);
+void resetMotor(bool all);
 void motorOnCmd(void);
 void processMotorCmd(void);
 void clockInterrupt(void);

@@ -13,7 +13,7 @@ void chkHoming() {
   if(limitClosed()) {
     // home switch is closed
     ms->targetDir = 1;
-    ms->speed     = sv->homingBackUpSpeed;
+    ms->curSpeed     = sv->homingBackUpSpeed;
     ms->homingState   = homingSwitch;
   }
   else {
@@ -31,14 +31,14 @@ void chkHoming() {
     }
   }
   // set homing ms->speed
-  int16 speedDiff = (ms->dir ? 1 : -1) * sv->accellerationRate;
-  if(ms->speed > sv->homingSpeed) {
+  int16 speedDiff = (ms->curDir ? 1 : -1) * sv->accellerationRate;
+  if(ms->curSpeed > sv->homingSpeed) {
     // decellerate
-    ms->speed -= speedDiff;
+    ms->curSpeed -= speedDiff;
   }
   else if(ms->homingState == homeStarting) {
-    ms->speed = sv->homingSpeed;
-    ms->dir = 0;
+    ms->curSpeed = sv->homingSpeed;
+    ms->curDir = 0;
     ms->homingState = homingIn;
   }
   setStep();

@@ -36,7 +36,6 @@
 
 #define haveError() (ms->stateByte & ERROR_BIT)
 
-extern          bool nextStateTestPos;
 extern volatile bool errorIntMot;
 extern volatile bool errorIntCode;
 

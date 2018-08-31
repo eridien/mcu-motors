@@ -64,9 +64,9 @@ void main(void) {
         setError(errorIntCode);
         errorIntCode = 0;
       }
-      if(ms->i2cCmdBusy) {
+      if(ms->haveCommand) {
         processMotorCmd();
-        ms->i2cCmdBusy = false;
+        ms->haveCommand = false;
       }
       chkMotor();
     }
