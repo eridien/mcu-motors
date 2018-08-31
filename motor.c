@@ -213,17 +213,11 @@ void stopStepping() {
   setStateBit(BUSY_BIT, false);
 }
 
-void resetUniMotor() {
-  stopStepping();
-  ms->curPos = POS_UNKNOWN_CODE;
-  setStateBit(MOTOR_ON_BIT, 0);
-  setStateBit(HOMED_BIT, 0);
-  clrUniPort();
-}
-
-void resetAllBiMotors() {
+void resetAllMotors() {
   // all bi motors share reset line
+#ifdef BM
   resetLAT = 0; 
+#endif
   uint8 savedMotorIdx = motorIdx;
   // set all global motor vars just like event loop
   for(motorIdx=0; motorIdx < NUM_MOTORS; motorIdx++) {
@@ -231,6 +225,9 @@ void resetAllBiMotors() {
     mm = stepMask[motorIdx]; // 0xf0 or 0x0f or step bit
     ms = &mState[motorIdx];
     sv = &(mSet[motorIdx].val);
+#ifndef BM
+    clrUniPort();
+#endif
     stopStepping();
     ms->curPos = POS_UNKNOWN_CODE;
     setStateBit(MOTOR_ON_BIT, 0);

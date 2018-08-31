@@ -43,16 +43,20 @@ void i2cInit() {
     SSP1IE = 1;                        // Enable ints
 }
 
-void updateSendBytesInt(uint8 motIdx) {
+void setSendBytesInt(uint8 motIdx) {
   struct motorState *p = &mState[motIdx];
-  p->stateByte    = ((p->stateByte & 0xef) | MCU_VERSION);
-  i2cSendBytes[0] = p->stateByte;
-  i2cSendBytes[1] = p->curPos >> 8;
-  i2cSendBytes[2] = p->curPos & 0x00ff;
-  i2cSendBytes[3] = p->homeTestPos >> 8;
-  i2cSendBytes[4] = p->homeTestPos & 0x00ff;
-  i2cSendBytes[5] = i2cSendBytes[0] + i2cSendBytes[1] + 
-                    i2cSendBytes[2] + i2cSendBytes[3] + i2cSendBytes[4];
+  if(!nextStateTestPos) {
+    i2cSendBytes[0] = (p->stateByte | MCU_VERSION);
+    i2cSendBytes[1] =  p->curPos >> 8;
+    i2cSendBytes[2] =  p->curPos & 0x00ff;
+  }
+  else {
+    nextStateTestPos = false;
+    i2cSendBytes[0]  = (TEST_POS_STATE | MCU_VERSION);
+    i2cSendBytes[1]  = p->homeTestPos >> 8;
+    i2cSendBytes[2]  = p->homeTestPos & 0x00ff;
+  }
+  i2cSendBytes[3] = i2cSendBytes[0] + i2cSendBytes[1] + i2cSendBytes[2];
 }
 
 volatile uint8 motIdxInPacket;
@@ -90,7 +94,7 @@ void i2cInterrupt(void) {
       motIdxInPacket = (SSP1BUF & 0x0e) >> 1;
       if(SSP1STATbits.RW) {
         // prepare all send data
-        updateSendBytesInt(motIdxInPacket);
+        setSendBytesInt(motIdxInPacket);
         // send packet (i2c read from slave), load buffer for first byte
         SSP1BUF = i2cSendBytes[i2cSendBytesPtr++]; // allways byte 0
       }

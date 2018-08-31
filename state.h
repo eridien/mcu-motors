@@ -5,7 +5,6 @@
 #include "types.h"
 #include "motor.h"
 
-
 #define MCU_VERSION 0
 
 // todo
@@ -34,9 +33,11 @@
 //      z: at home
 //   aaaa aaaa  current position, top 8 bits of signed 16-bit word
 //   aaaa aaaa  followed by bottom 8 bits
-//   hhhh hhhh  home test position val, top 8 bits of signed 16-bit word
-//   shhh hhhh  home test position val, bottom 8 bits
-//   cccc cccc  8-bit cksum, sum of first 5 bytes
+//   cccc cccc  8-bit cksum, sum of first 3 bytes
+
+// when returning test pos instead of cur pos
+// state byte will have this magic value which can't happen normally
+#define TEST_POS_STATE      0x01
 
 // Error codes 
 #define MOTOR_FAULT_ERROR   0x10
@@ -56,6 +57,7 @@
 
 #define haveError() (ms->stateByte & ERROR_BIT)
 
+extern          bool nextStateTestPos;
 extern volatile bool errorIntMot;
 extern volatile bool errorIntCode;
 
