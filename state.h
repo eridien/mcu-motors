@@ -9,28 +9,10 @@
 
 // todo
 //   set homing dir for rotation motor
-//   status returns home pos after homing test
-//   stop all motors on error
-//   keep pos accurate in recvbytes
-//   homingState?
+//   keep pos accurate in sendbytes
 //   fix accell calc to use actual seconds
-//   decellTable should take accelleration into account
-//   curpos and test pos int protect on write
-//   update command decoding
-
-//////////  COMM DOC  /////////////
-
-// stateBytes
-//   veee bboz  state byte
-//      v: version (1-bit)
-//    eee: error code (see above)
-//      e: error bit
-//      b: busy state
-//      o: motor on (not in reset)
-//      z: at home
-//   aaaa aaaa  current position, top 8 bits of signed 16-bit word
-//   aaaa aaaa  followed by bottom 8 bits
-//   cccc cccc  8-bit cksum, sum of first 3 bytes
+//   decellTable should be set when accell set
+//   chg unexpected limit sw to 0 and sv->maxPos
 
 // when returning test pos instead of cur pos
 // state byte will have this magic value which can't happen normally

@@ -359,42 +359,59 @@ void motorOnCmd() {
 
 uint8 numBytesRecvd;
 
-bool lenErr(uint8 expected) {
+bool lenIs(uint8 expected) {
   if(expected != numBytesRecvd) {
     setError(CMD_DATA_ERROR);
-    return true;
+    return false;
   }
-  return false;
+  return true;
 }
   
+/*
+//   0001 0100  hard stop (immediate reset)
+//   0001 0101  motor on (hold place, reset off)
+//   0001 0110  set curpos to home pos value setting (fake homing)
+*/
+
 // from i2c
 void processMotorCmd() {
   volatile uint8 *rb = ((volatile uint8 *) i2cRecvBytes[motorIdx]);
   numBytesRecvd   = rb[0];
   uint8 firstByte = rb[1];
   
-  if((firstByte & 0x80) == 0) {
-    if(lenErr(2)) return;
-    // simple goto pos command, 15-bits in 1/80 mm/sec
-    moveCommand(((int16) firstByte << 8) | rb[2]);
+  if((firstByte & 0x80) == 0x80) {
+    if(lenIs(2)) {
+      // simple goto pos command, 15-bits in 1/80 mm/sec
+      moveCommand(((int16) (firstByte & 0x7f) << 8) | rb[2]);
+    }
   }
-  else if((firstByte & 0xfc) == 0x80) {
-    if(lenErr(3)) return;
-    // set max ms->speed reg encoded as 10 mm/sec, 150 max
-    sv->maxSpeed = (firstByte & 0x0f) * 10;
-    // followed by goto pos caommand
-    moveCommand(((int16) rb[2] << 8) | rb[3]);
+  // speed-move command
+  else if((firstByte & 0xc0) == 0x40) {
+    if(lenIs(3)) {
+      // set max ms->speed reg encoded as 10 mm/sec, 150 max
+      sv->maxSpeed = (uint16) (firstByte & 0x3f) << 8;
+      // followed by goto pos command
+      moveCommand(((int16) rb[2] << 8) | rb[3]);
+    }
   }
-  else switch(firstByte & 0xf0) {
-    case 0x90: if(!lenErr(1)) homeCommand();          break; // start homing
-    case 0xa0: if(!lenErr(1)) softStopCommand(false); break; // stop,no reset
-    case 0xb0: if(!lenErr(1)) softStopCommand(true);  break; // stop with reset
-    case 0xc0: if(!lenErr(1)) resetMotor();           break; // hard stop (immediate reset)
-    case 0xd0: if(!lenErr(1)) motorOnCmd();           break; // reset off
-    case 0xf0: if(!lenErr(NUM_SETTING_WORDS)) 
-                 setMotorSettings();                  break; // set all regs
-    default: lenErr(255); // invalid cmd sets CMD_DATA_ERROR
+  else if(firstByte == 0x1f) {
+    if(lenIs(NUM_SETTING_WORDS)) setMotorSettings();
   }
+  else if((firstByte & 0xf0) == 0x10) {
+    if(lenIs(1)) {
+      switch(firstByte & 0x0f) {
+        case 0: homeCommand();          break; // start homing
+        case 1: nextStateTestPos = 1;   break; // next read pos is test pos
+        case 2: softStopCommand(false); break; // stop,no reset
+        case 3: softStopCommand(true);  break; // stop with reset
+        case 4: resetMotor();           break; // hard stop (immediate reset)
+        case 5: motorOnCmd();           break; // reset off
+        case 6: ms->curPos = ms->homeTestPos; break;  // set curpos to home pos
+        default: lenIs(255); // invalid cmd sets CMD_DATA_ERROR
+      }
+    }
+  }
+  else lenIs(255); // invalid cmd sets CMD_DATA_ERROR
 }
 
 uint16 getLastStep(void) {

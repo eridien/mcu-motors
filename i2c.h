@@ -5,12 +5,10 @@
 #include "types.h"
 #include "motor.h"
 
-// move/home commands start immediately even when moving
-// all position and distance is in steps
+// move/home commands start immediately even when already busy
+// all position and distance is in steps (bi: 1/8 ustep, uni: phase)
 // all speed is in steps/sec (except speed-move cmd)
-// minimum system speed is 0.1 mm/sec => 8 1/80 mm
-// all accelleration is in 1/80 mm/sec/sec
-// homing on unit with no limit switch just sets current position to 150 mm
+// homing with no limit switch just sets current position to settings value
 
 // steps are in 1/8 ustep (bipolar) or one phase (unipolar)
 //    for bipolar:
@@ -33,7 +31,7 @@
 //     0aaa aaaa top 7 bits of move addr
 //     aaaa aaaa bottom 8 bits
 //   0001 0000  start homing
-//   0001 0001  next status read position is end position of homing (test pos)
+//   0001 0001  next read position is end position of homing (test pos)
 //   0001 0010  soft stop, deccelerates, no reset
 //   0001 0011  soft stop, deccelerates first, then reset
 //   0001 0100  hard stop (immediate reset)
@@ -60,14 +58,14 @@
 // state bytes
 //   vccc eboz  state byte
 //      v: version (1-bit)
-//    ccc: error code (see above)
+//    ccc: error code (see above) (only set on motor causing error)
 //      e: error bit
 //      b: busy state
 //      o: motor on (not in reset)
 //      z: at home
 //   aaaa aaaa  current position, top 8 bits (might be result of cmd 0x11)
 //   aaaa aaaa  followed by bottom 8 bits
-//   cccc cccc  8-bit cksum, sum of first 5 bytes
+//   cccc cccc  8-bit cksum, sum of first 3 bytes
 
 
 #define NUM_RECV_BYTES NUM_SETTING_WORDS*2 + 4 // + len word and opcodes
