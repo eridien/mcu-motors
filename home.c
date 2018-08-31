@@ -6,8 +6,6 @@
 #include "home.h"
 #include "motor.h"
 
-uint8 homingState = homingIdle;
-
 void chkHoming() {
   // in the process of stepping
   if(ms->stepPending || ms->stepped) return;
@@ -16,16 +14,16 @@ void chkHoming() {
     // home switch is closed
     ms->targetDir = 1;
     ms->speed     = sv->homingBackUpSpeed;
-    homingState   = homingSwitch;
+    ms->homingState   = homingSwitch;
   }
   else {
     // home switch is open
-    if(homingState == homingSwitch) {
+    if(ms->homingState == homingSwitch) {
       ms->curPos = 0;
-      homingState = homingOfs;
+      ms->homingState = homingOfs;
     } 
-    else if(homingState == homingOfs && ms->curPos >= sv->homeOfs) {
-      homingState = homingIdle;
+    else if(ms->homingState == homingOfs && ms->curPos >= sv->homeOfs) {
+      ms->homingState = homingIdle;
       setStateBit(HOMED_BIT, 1);
       ms->curPos = sv->homePos;
       stopStepping();
@@ -38,10 +36,10 @@ void chkHoming() {
     // decellerate
     ms->speed -= speedDiff;
   }
-  else if(homingState == homeStarting) {
+  else if(ms->homingState == homeStarting) {
     ms->speed = sv->homingSpeed;
     ms->dir = 0;
-    homingState = homingIn;
+    ms->homingState = homingIn;
   }
   setStep();
 }
@@ -51,21 +49,24 @@ void homeCommand() {
   setStateBit(HOMED_BIT, 0);
   setStateBit(MOTOR_ON_BIT, 1);
   resetLAT = 1;
-  homingState = homeStarting;
+  ms->homingState = homeStarting;
   setStateBit(BUSY_BIT, true);
 }
 #else
 void homeCommand() {
-  if(motorIdx == limitZIDX) {
+  if(limitPort[motorIdx]) {
+    // this motor has limit switch
     setStateBit(HOMED_BIT, 0);
     setStateBit(MOTOR_ON_BIT, 1);
-    homingState = homeStarting;
-    setBusyState(BUSY_HOMING);
+    ms->homing = true;
+    ms->moving = false;
+    ms->stopping = false;
+    ms->homingState = homeStarting;
+    setStateBit(BUSY_BIT, 1);
   }
   else {
-    stopStepping();
     setStateBit(HOMED_BIT, 1);
-    ms->curPos = 0;
+    ms->curPos = sv->homePos;
   }
 }
 #endif

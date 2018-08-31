@@ -59,6 +59,7 @@ struct motorState {
   uint8  stateByte;
   bool   moving;
   bool   homing;
+  uint8  homingState;
   bool   stopping;
   bool   stepPending;
   bool   stepped;
@@ -87,7 +88,7 @@ struct motorSettings {
   uint16 homingSpeed;
   uint16 homingBackUpSpeed;
   uint16 homeOfs;
-  uint16 homePos;
+  uint16 homePos;  // value to set cur pos after homing
 };
 
 #define NUM_SETTING_WORDS 7

@@ -341,16 +341,20 @@ void chkMotor() {
 }
 
 void softStopCommand(bool resetAfter) {
-  setBusyState(BUSY_STOPPING);
+  ms->homing   = false;
+  ms->moving   = false;
+  ms->stopping = true;
+  setStateBit(BUSY_BIT, 1);
   ms->resetAfterSoftStop = resetAfter;
 }
 
 void motorOnCmd() {
-  ms->curPos = POS_UNKNOWN_CODE;
-  setBusyState(NOT_BUSY);
   setStateBit(MOTOR_ON_BIT, 1);
-  setStateBit(HOMED_BIT, 0);
-  resetLAT = 1;
+#ifdef BM
+  resetLAT = 1; 
+#else
+  setUniPort(ms->phase); 
+#endif
 }
 
 uint8 numBytesRecvd;

@@ -59,6 +59,9 @@ void moveCommand(int16 pos) {
     setError(NOT_HOMED_ERROR);
     return;
   }
+  ms->homing   = false;
+  ms->moving   = true;
+  ms->stopping = false;
   ms->targetPos = pos;
   if(!underAccellLimit()) {
     // already moving fast, keep going same way

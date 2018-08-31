@@ -17,9 +17,6 @@
 //   decellTable should take accelleration into account
 //   curpos and test pos int protect on write
 //   update command decoding
-//   check PPS for all pins
-//   check int safety of settings command
-//   rem test pos from status
 
 //////////  COMM DOC  /////////////
 

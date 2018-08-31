@@ -81,8 +81,8 @@ void __interrupt() globalInt() {
     clockInterrupt();
   }
   // i2c interrupts
-  if(SSP1IF) {
-    SSP1IF = 0;
+  if(I2C_SSPIF) {
+    I2C_SSPIF = 0;
     i2cInterrupt();
   }
 }

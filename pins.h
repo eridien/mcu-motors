@@ -3,8 +3,12 @@
 #define	PINS_H
 
 #ifdef BM
-#define SCL_TRIS  TRISC0
-#define SDA_TRIS  TRISC1
+#define I2C_START_BIT SSP1STATbits.S
+#define I2C_STOP_BIT  SSP1STATbits.p
+#define I2C_WCOL      WCOL1
+#define I2C_SSPOV     SSPOV1
+#define I2C_BUF_BYTE  SSP1BUF
+#define I2C_SSPIF     SSP1IF
 
 #define dirTRIS   TRISA2
 #define ms1TRIS   TRISC2
@@ -20,8 +24,12 @@
 
 #else
 
-#define SCL_TRIS  TRISD0
-#define SDA_TRIS  TRISD1
+#define I2C_START_BIT SSP2STATbits.S
+#define I2C_STOP_BIT  SSP2STATbits.p
+#define I2C_WCOL      WCOL2
+#define I2C_SSPOV     SSPOV2
+#define I2C_BUF_BYTE  SSP2BUF
+#define I2C_SSPIF     SSP2IF
 #endif /* BM */
 
 #ifdef B1

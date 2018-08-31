@@ -10,24 +10,19 @@
 #define CLK LATC0
 #define SDA LATC1
 
-volatile uint8 subTime;
-
 volatile uint8 i2cRecvBytes[NUM_MOTORS][NUM_RECV_BYTES + 1];
 volatile uint8 i2cRecvBytesPtr;
 volatile uint8 i2cSendBytes[NUM_SEND_BYTES];
 volatile uint8 i2cSendBytesPtr;
-volatile bool  haveRecvData;
 volatile bool  inPacket;
 
 void i2cInit() {    
-    SCL_TRIS = 1;
-    SDA_TRIS = 1;
-    
+#ifdef BM
     SSP1CLKPPS = 0x10;           // RC0
     SSP1DATPPS = 0x11;           // RC1
     RC0PPS     = 0x15;           // SCL1
     RC1PPS     = 0x16;           // SDA1
-
+    
     SSP1CON1bits.SSPM = 0x0e;          // slave mode, 7-bit, S & P ints enabled 
     SSP1MSK           = I2C_ADDR_MASK; // address mask, check all top 5 bits
     SSP1ADD           = I2C_ADDR;      // slave address (7-bit addr is 8 or 12)
@@ -37,10 +32,30 @@ void i2cInit() {
     SSP1CON3bits.AHEN = 0;             // no clock stretch for addr ack
     SSP1CON3bits.DHEN = 0;             // no clock stretch for data ack
     SSP1CON3bits.BOEN = 1;             // enable buffer overwrite check
-           
+    
     SSP1CON1bits.SSPEN = 1;            // Enable the serial port
     SSP1IF = 0;                        // nothing received yet
     SSP1IE = 1;                        // Enable ints
+#else
+    SSP2CLKPPS = 0x18;           // RD0
+    SSP2DATPPS = 0x19;           // RD1
+    RD0PPS     = 0x17;           // SCL2
+    RD1PPS     = 0x18;           // SDA2  
+    
+    SSP2CON1bits.SSPM = 0x0e;          // slave mode, 7-bit, S & P ints enabled 
+    SSP2MSK           = I2C_ADDR_MASK; // address mask, check all top 5 bits
+    SSP2ADD           = I2C_ADDR;      // slave address (7-bit addr is 8 or 12)
+    SSP2STATbits.SMP  = 0;             // slew-rate enabled
+    SSP2STATbits.CKE  = 1;             // smb voltage levels
+    SSP2CON2bits.SEN  = 1;             // enable clock stretching 
+    SSP2CON3bits.AHEN = 0;             // no clock stretch for addr ack
+    SSP2CON3bits.DHEN = 0;             // no clock stretch for data ack
+    SSP2CON3bits.BOEN = 1;             // enable buffer overwrite check
+    
+    SSP2CON1bits.SSPEN = 1;            // Enable the serial port
+    SSP2IF = 0;                        // nothing received yet
+    SSP2IE = 1;                        // Enable ints
+#endif
 }
 
 void setSendBytesInt(uint8 motIdx) {
@@ -62,19 +77,19 @@ void setSendBytesInt(uint8 motIdx) {
 volatile uint8 motIdxInPacket;
 
 void i2cInterrupt(void) {
-  // SSP1STATbits.S is set during entire packet
-  if(SSP1STATbits.S && !inPacket) { 
+  // SSPxSTATbits.S is set during entire packet
+  if(I2C_START_BIT && !inPacket) { 
     // received start bit, prepare for packet
     i2cRecvBytesPtr = 1; // skip over length byte
     i2cSendBytesPtr = 0;
-    WCOL1 = 0;                   // clear WCOL
-    volatile int x = SSP1BUF;   // clear SSPOV
+    I2C_WCOL = 0;                  // clear WCOL
+    volatile int x = I2C_BUF_BYTE;   // clear SSPOV
     inPacket = true;
   }
-  else if(SSP1STATbits.P) { 
+  else if(I2C_STOP_BIT) { 
     // received stop bit, on read tell loop that data is available
     inPacket = false;
-    if (WCOL1 || SSPOV1) {
+    if (I2C_WCOL || I2C_SSPOV) {
       setErrorInt(motIdxInPacket, I2C_OVERFLOW_ERROR);
     }
     else {
@@ -91,12 +106,12 @@ void i2cInterrupt(void) {
   else {
     if(!SSP1STATbits.DA) { 
       // received addr byte, extract motor number
-      motIdxInPacket = (SSP1BUF & 0x0e) >> 1;
+      motIdxInPacket = (I2C_BUF_BYTE & 0x0e) >> 1;
       if(SSP1STATbits.RW) {
         // prepare all send data
         setSendBytesInt(motIdxInPacket);
         // send packet (i2c read from slave), load buffer for first byte
-        SSP1BUF = i2cSendBytes[i2cSendBytesPtr++]; // allways byte 0
+        I2C_BUF_BYTE = i2cSendBytes[i2cSendBytesPtr++]; // allways byte 0
       }
     }
     else {
@@ -107,15 +122,15 @@ void i2cInterrupt(void) {
         } else {
           // received byte (i2c write to slave)
           if(i2cRecvBytesPtr < NUM_RECV_BYTES + 1) 
-            i2cRecvBytes[motIdxInPacket][i2cRecvBytesPtr++] = SSP1BUF;
+            i2cRecvBytes[motIdxInPacket][i2cRecvBytesPtr++] = I2C_BUF_BYTE;
         }
       }
       else {
         // sent byte (i2c read from slave), load buffer for next send
-        SSP1BUF = i2cSendBytes[i2cSendBytesPtr++];
+        I2C_BUF_BYTE = i2cSendBytes[i2cSendBytesPtr++];
       }
     }
   }
   CKP1 = 1; // end stretch
-  volatile int z = SSP1BUF;  // clear BF  
+  volatile int z = I2C_BUF_BYTE;  // clear BF  
 }
