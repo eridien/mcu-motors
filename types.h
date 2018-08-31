@@ -2,16 +2,6 @@
 #ifndef TYPES_H
 #define	TYPES_H
 
-// todo
-//   set homing dir for rotation motor
-//   status returns home pos after homing test
-//   stop all motors on error
-//   keep pos accurate in recvbytes
-//   homingState?
-//   fix accell calc to use actual seconds
-//   decellTable should take accelleration into account
-//   curpos and test pos int protect on write
-
 typedef signed char int8;
 typedef unsigned char uint8;
 typedef int int16;

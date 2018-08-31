@@ -1,6 +1,7 @@
 
 #include <xc.h>
 #include "types.h"
+#include "state.h"
 #include "pins.h"
 #include "i2c.h"
 #include "state.h"
@@ -44,6 +45,7 @@ void i2cInit() {
 
 void updateSendBytesInt(uint8 motIdx) {
   struct motorState *p = &mState[motIdx];
+  p->stateByte    = ((p->stateByte & 0xef) | MCU_VERSION);
   i2cSendBytes[0] = p->stateByte;
   i2cSendBytes[1] = p->curPos >> 8;
   i2cSendBytes[2] = p->curPos & 0x00ff;
@@ -51,20 +53,6 @@ void updateSendBytesInt(uint8 motIdx) {
   i2cSendBytes[4] = p->homeTestPos & 0x00ff;
   i2cSendBytes[5] = i2cSendBytes[0] + i2cSendBytes[1] + 
                     i2cSendBytes[2] + i2cSendBytes[3] + i2cSendBytes[4];
-}
-
-void checkI2c() {
-  if(haveError() && (ms->stateByte & BUSY_BIT)) {
-    // have error and motor moving, stop and reset
-    softStopCommand(true);
-  }
-  if(ms->i2cCmdBusy) {
-    if(!haveError()) {
-      processMotorCmd();
-    }
-    // don't clear until done with data
-    ms->i2cCmdBusy = false;
-  }
 }
 
 volatile uint8 motIdxInPacket;
@@ -91,8 +79,8 @@ void i2cInterrupt(void) {
         i2cRecvBytes[motIdxInPacket][0] = i2cRecvBytesPtr-1;
         mState[motIdxInPacket].i2cCmdBusy = true;
       } else {
-        // master just read status,  clear error
-        setErrorInt(motIdxInPacket, 0x55); // magic err code means clear
+        // master just read status,  clear any error
+        setErrorInt(motIdxInPacket, CLEAR_ERROR);
       }
     }
   }

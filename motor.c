@@ -397,16 +397,18 @@ void processMotorCmd() {
 }
 
 uint16 getLastStep(void) {
+  bool tempGIE = GIE;
   GIE = 0;
   uint16 temp = ms->lastStepTicks;
-  GIE = 1; 
+  GIE = tempGIE; 
   return temp;
 }
 
 void setNextStep(uint16 ticks) {
+  bool tempGIE = GIE;
   GIE = 0;
   ms->nextStepTicks = ticks;
-  GIE = 1; 
+  GIE = tempGIE; 
 }
 
 void clockInterrupt(void) {

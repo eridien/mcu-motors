@@ -5,6 +5,25 @@
 #include "types.h"
 #include "motor.h"
 
+
+#define MCU_VERSION 0
+
+// todo
+//   set homing dir for rotation motor
+//   status returns home pos after homing test
+//   stop all motors on error
+//   keep pos accurate in recvbytes
+//   homingState?
+//   fix accell calc to use actual seconds
+//   decellTable should take accelleration into account
+//   curpos and test pos int protect on write
+//   update command decoding
+//   check PPS for all pins
+//   check int safety of settings command
+//   rem test pos from status
+
+//////////  COMM DOC  /////////////
+
 // stateBytes
 //   veee bboz  state byte
 //      v: version (1-bit)
@@ -27,6 +46,7 @@
 #define STEP_NOT_DONE_ERROR 0x50
 #define MOTOR_LIMIT_ERROR   0x60
 #define NOT_HOMED_ERROR     0x70
+#define CLEAR_ERROR         0xff // magic code to clear error
 
 // state bits
 #define ERROR_BIT           0x08
@@ -39,7 +59,6 @@
 extern volatile bool errorIntMot;
 extern volatile bool errorIntCode;
 
-void  setCurState(uint8 newState);
 void  setStateBit(uint8 mask, uint8 set);
 void  setError(uint8 err);
 void  setErrorInt(uint8 motorIdx, uint8 err);

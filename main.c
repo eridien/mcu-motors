@@ -64,7 +64,10 @@ void main(void) {
         setError(errorIntCode);
         errorIntCode = 0;
       }
-      checkI2c();
+      if(ms->i2cCmdBusy) {
+        processMotorCmd();
+        ms->i2cCmdBusy = false;
+      }
       chkMotor();
     }
   }
@@ -77,7 +80,7 @@ void __interrupt() globalInt() {
     TMR0IF = 0;
     clockInterrupt();
   }
-  // i2c interrupts usually 25 usecs
+  // i2c interrupts
   if(SSP1IF) {
     SSP1IF = 0;
     i2cInterrupt();

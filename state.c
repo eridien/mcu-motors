@@ -10,9 +10,8 @@ void setStateBit(uint8 mask, uint8 set){
 }
 
 void setError(uint8 err) {
-  // 0x55 means clear error
-  if(err == 0x55) {
-    ms->stateByte = 0;
+  if(err == CLEAR_ERROR) {
+    ms->stateByte = ms->stateByte & 0x07;
   }
   else {
     ms->stateByte = err;
@@ -34,8 +33,8 @@ void setError(uint8 err) {
 volatile bool errorIntMot;
 volatile bool errorIntCode;
 
-// use from interrupt
+// used in interrupt
 void setErrorInt(uint8 motIdx, uint8 err) {
   errorIntMot  = motIdx;
-  errorIntCode = err; // 0x55 means clear
+  errorIntCode = err;
 }

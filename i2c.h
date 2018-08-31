@@ -26,25 +26,27 @@
 //       max step count: 32,000
 //
 // writes ...
+//   (first word of recv buffer is buf len)
 //   1aaa aaaa  goto command, top 7 bits of goto addr
 //      aaaa aaaa followed by bottom 8 bits
-//   01ss ssss (speed-move cmd) set max speed = s*256 steps/sec, move to a
+//   01ss ssss (speed-move cmd) set max speed = s*256 steps/sec and move to addr
 //     0aaa aaaa top 7 bits of move addr
 //     aaaa aaaa bottom 8 bits
-//   0001 0001  start homing
+//   0001 0000  start homing
+//   0001 0001  next status read position is end position of homing (test pos)
 //   0001 0010  soft stop, deccelerates, no reset
 //   0001 0011  soft stop, deccelerates first, then reset
 //   0001 0100  hard stop (immediate reset)
-//   0001 0101  motor on (reset off)
-//   0001 0110  set curpos to home pos value setting
-//   0001 0111  set regs, 16-bit values, set only when idle
+//   0001 0101  motor on (hold place, reset off)
+//   0001 0110  set curpos to home pos value setting (fake homing)
+//   0001 0111  set regs, 16-bit values
 //      max speed
 //      no-accelleration speed limit (and start speed)
 //      accelleration rate
 //      homing speed
 //      homing back-up speed
 //      home offset distance
-//      home pos value
+//      home pos value (set cur pos to this value after homing, usually 0)
 //
 // Error codes 
 //      1: fault
@@ -63,15 +65,13 @@
 //      b: busy state
 //      o: motor on (not in reset)
 //      z: at home
-//   aaaa aaaa  current position, top 8 bits of signed 16-bit word
+//   aaaa aaaa  current position, top 8 bits (might be result of cmd 0x11)
 //   aaaa aaaa  followed by bottom 8 bits
-//   hhhh hhhh  home position test val, top 8 bits of signed 16-bit word
-//   hhhh hhhh  home position test val, bottom 8 bits
 //   cccc cccc  8-bit cksum, sum of first 5 bytes
 
 
-#define NUM_RECV_BYTES NUM_SETTING_WORDS*2+4
-#define NUM_SEND_BYTES   4  //  state, posH, posL, cksum
+#define NUM_RECV_BYTES NUM_SETTING_WORDS*2 + 4 // + len word and opcodes
+#define NUM_SEND_BYTES   6  //  state, posH, posL, testH, testL, cksum
 
 #define I2C_ADDR_MASK 0xf0 // motor idx in d3-d1 (d2-d0 in real addr)
 
@@ -87,13 +87,10 @@
 
 extern volatile uint8 i2cRecvBytes[NUM_MOTORS][NUM_RECV_BYTES + 1];
 extern volatile uint8 i2cRecvBytesPtr;
-extern volatile uint8 i2cSendBytes[NUM_MOTORS][NUM_SEND_BYTES];
+extern volatile uint8 i2cSendBytes[NUM_SEND_BYTES];
 extern volatile uint8 i2cSendBytesPtr;
-extern volatile bool  errorInt;
 
 void i2cInit(void);
-void updateSendBytesInt(uint8 motIdx) {
-void checkI2c(void);
 void i2cInterrupt(void);
 
 #endif	/* I2C_H */
