@@ -8,8 +8,11 @@
 
 void chkMoving() {
   // in the process of stepping
-  if(limitClosed()) setError(MOTOR_LIMIT_ERROR);
-  if(ms->stepPending || haveError()) return;
+  if(limitClosed()) {
+    setError(MOTOR_LIMIT_ERROR);
+    
+  }
+  if(ms->stepPending) return;
   if((ms->curPos == ms->targetPos) && underAccellLimit()) {
     stopStepping();
     return;

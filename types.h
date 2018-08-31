@@ -5,13 +5,12 @@
 // todo
 //   set homing dir for rotation motor
 //   status returns home pos after homing test
-//   new busy and err bits
 //   stop all motors on error
 //   keep pos accurate in recvbytes
-//   chg speed to steps/sec (8x for bipolar)  
-//   chg max ustep to 1/8
 //   homingState?
 //   fix accell calc to use actual seconds
+//   decellTable should take accelleration into account
+//   curpos and test pos int protect on write
 
 typedef signed char int8;
 typedef unsigned char uint8;

@@ -5,25 +5,30 @@
 #include "i2c.h"
 #include "motor.h"
 
-// do not use with interrupts off
-void setCurState(uint8 newState) {
-  // v bit (version is zero)
-  GIE = 0;
-  ms->stateByte = newState;
-  setI2cCkSum();
-  GIE = 1;
-}
-
 void setStateBit(uint8 mask, uint8 set){
-  setCurState((ms->stateByte & ~mask) | (set ? mask : 0));
+  ms->stateByte = (ms->stateByte & ~mask) | (set ? mask : 0);
 }
 
-// do not use from interrupt
 void setError(uint8 err) {
-  setCurState(err);
-  for(uint8 motIdx = 0; motIdx < NUM_MOTORS; motIdx++)
+  // 0x55 means clear error
+  if(err == 0x55) {
+    ms->stateByte = 0;
+  }
+  else {
+    ms->stateByte = err;
+#ifdef BM
+    // an error in one bipolar motor sets error bits in all motors
+    // but error code is only in motor that caused error
+    for(uint8 motIdx = 0; motIdx < NUM_MOTORS; motIdx++) {
+      mState[motIdx].stateByte = (mState[motIdx].stateByte | ERROR_BIT);
+    }
+    resetAllBiMotors();
+#else
+    // an error in a uni motor only affects that motor
     setStateBit(ERROR_BIT, true);
-  resetMotor();
+    resetUniMotor();
+#endif
+  }
 }
 
 volatile bool errorIntMot;
@@ -32,5 +37,5 @@ volatile bool errorIntCode;
 // use from interrupt
 void setErrorInt(uint8 motIdx, uint8 err) {
   errorIntMot  = motIdx;
-  errorIntCode = err;
+  errorIntCode = err; // 0x55 means clear
 }

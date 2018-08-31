@@ -43,6 +43,7 @@ void  setCurState(uint8 newState);
 void  setStateBit(uint8 mask, uint8 set);
 void  setError(uint8 err);
 void  setErrorInt(uint8 motorIdx, uint8 err);
+void  clrErrorInt(uint8 motorIdx);
 
 #endif	/* STATE_H */
 

@@ -90,7 +90,6 @@ uint8 motPhaseValue[NUM_MOTORS][4] = { // motor, phase
 // assumes 1/40 mm per step
 uint16 settingsInit[NUM_SETTING_WORDS] = {
   2400,    // max ms->speed: steps/sec (60 mm/sec)
-     0,    // min ms->speed, (else sw blows up ??)
   1200,    // no-accelleration ms->speed limit (30 mm/sec)
   2000,    // accelleration rate step/sec/sec  (50 mm/sec/sec)
   1200,    // homing speed (30 mm/sec)
@@ -104,7 +103,6 @@ uint16 settingsInit[NUM_SETTING_WORDS] = {
 // assumes 1/50 mm per step
 uint16 settingsInit[NUM_SETTING_WORDS] = {
    600,    // max speed: steps/sec (12 mm/sec )
-     0,    // min speed, (else sw blows up ??)
    300,    // no-accelleration ms->speed limit (6 mm/sec)
    200,    // accelleration rate step/sec/sec  (4 mm/sec/sec)
    300,    // homing speed (6 mm/sec)
@@ -200,8 +198,7 @@ bool limitClosed() {
 }
 
 void setMotorSettings() {
-  for(uint8 i = 0; i < sizeof(mSet[motorIdx]) / 
-                       sizeof(mSet[motorIdx].reg[0]); i++) {
+  for(uint8 i = 0; i < NUM_SETTING_WORDS; i++) {
     mSet[motorIdx].reg[i] = (i2cRecvBytes[motorIdx][2*i + 1] << 8) | 
                              i2cRecvBytes[motorIdx][2*i + 2];
   }
@@ -210,51 +207,86 @@ void setMotorSettings() {
 void stopStepping() {
   ms->stepPending = false;
   ms->stepped     = false;
+  ms->moving      = false;
+  ms->homing      = false;
+  ms->stopping    = false;
   setStateBit(BUSY_BIT, false);
 }
 
-void resetMotor() {
+void resetUniMotor() {
   stopStepping();
   ms->curPos = POS_UNKNOWN_CODE;
   setStateBit(MOTOR_ON_BIT, 0);
   setStateBit(HOMED_BIT, 0);
-  resetLAT = 0;
-  setMotNibble(0);
+  clrUniPort();
+}
+
+void resetAllBiMotors() {
+  // all bi motors share reset line
+  resetLAT = 0; 
+  uint8 savedMotorIdx = motorIdx;
+  // set all global motor vars just like event loop
+  for(motorIdx=0; motorIdx < NUM_MOTORS; motorIdx++) {
+    mp = stepPort[motorIdx]; // (&PORT)
+    mm = stepMask[motorIdx]; // 0xf0 or 0x0f or step bit
+    ms = &mState[motorIdx];
+    sv = &(mSet[motorIdx].val);
+    stopStepping();
+    ms->curPos = POS_UNKNOWN_CODE;
+    setStateBit(MOTOR_ON_BIT, 0);
+    setStateBit(HOMED_BIT, 0);
+  }
+  // restore global motor vars
+  motorIdx = savedMotorIdx;
+  mp = stepPort[motorIdx]; // (&PORT)
+  mm = stepMask[motorIdx]; // 0xf0 or 0x0f or step bit
+  ms = &mState[motorIdx];
+  sv = &(mSet[motorIdx].val);
 }
 
 bool underAccellLimit() {
   return (ms->speed <= sv->noAccelSpeedLimit);
 }
 
-uint16 uStepMask[] = {0x1f, 0x0f, 0x07, 0x03, 0x01};
-uint16 uStepFact[] = {   1,    2,    4,    8,   16};
+// curUStep, only 1/2 -> 1/8 (1..3) is allowed 
+#define MIN_USTEP 1
+#define MAX_USTEP 3
+uint16 uStepPhaseMask[] = {0x07, 0x03, 0x01, 0x00};
+uint16 uStepFactor[]    = {   8,    4,    2,    1};
 
 void setStep() {
-  // check curUStep, only 1/2 -> 1/16 (1..4) is allowed 
+#ifdef BM
+  // set ustep
   while(true) {
-    uint16 pulsesPerSec = ms->speed * uStepFact[ms->ustep];
-    if(ms->ustep < 4 && pulsesPerSec < 500) {
+    // approximate pulsesPerSec
+    uint16 pulsesPerSec = ms->speed >> (MAX_USTEP - ms->ustep);
+    if(ms->ustep < MAX_USTEP && pulsesPerSec < 500) {
       ms->ustep++;
-    } 
-    else if(ms->ustep > 1 && pulsesPerSec > 1500 && 
-           (ms->curPos & uStepMask[ms->ustep]) == 0) {
+    }
+    else if(ms->ustep > MIN_USTEP && pulsesPerSec > 1500 && 
+           (ms->curPos & uStepPhaseMask[ms->ustep]) == 0) {
       ms->ustep--;
     }
     else break;
   }
-  // check step timing
-  uint16 absStepDist =  16 / uStepFact[ms->ustep]; // each step -> 1/80 mm
-  ms->stepDist = (ms->dir ? ms->stepDist : -ms->stepDist);
-  uint16 curTimeTicks = getTimeTicks();
-  // (dunits/sec) / dunits => 1/seconds
-  uint16 invStepSecs = ms->speed / absStepDist;  // 1/sec
-  // (ticks/sec) / (1/secs) -> ticks
-  uint16 stepTicks = 50000 / invStepSecs; // 20 usecs/tick
+  // set step timing
+  uint16 absStepDist = uStepFactor[ms->ustep];
+  uint16 stepTicks = 50000 / absStepDist; // 20 usecs/tick
   if(stepTicks == 0) stepTicks = 1;
   setNextStep(getLastStep() + stepTicks);
   ms->stepped = false;
   setBiStepLo();
   ms->stepPending = true;
+
+#else
+  // check step timing
+  uint16 stepTicks = 50000 / ms->speed; // 20 usecs/tick
+  if(stepTicks == 0) stepTicks = 1;
+  setNextStep(getLastStep() + stepTicks);
+  ms->stepped = false;
+  ms->phase += ((ms->dir ? 1 : -1) & 0x03);
+  ms->stepPending = true;
+#endif /* BM */
 }
 
 void chkStopping() {
@@ -287,11 +319,16 @@ void chkMotor() {
     return;
   }
   if(ms->stepped) {
-    ms->curPos += ms->stepDist;
+    if(ms->dir) {
+      ms->curPos += uStepFactor[ms->ustep];
+    }
+    else {
+      ms->curPos -= uStepFactor[ms->ustep];
+    }
     ms->stepped = false;
   }
   if(ms->moving) {
-    if(limitClosed() ) {
+    if(limitClosed()) {
       setError(MOTOR_LIMIT_ERROR);
     }
     if(!haveError()) {

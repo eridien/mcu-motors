@@ -92,9 +92,8 @@ extern volatile uint8 i2cSendBytesPtr;
 extern volatile bool  errorInt;
 
 void i2cInit(void);
+void updateSendBytesInt(uint8 motIdx) {
 void checkI2c(void);
-void setI2cCkSum(void);
-void setI2cCkSumInt(uint8 motIdx);
 void i2cInterrupt(void);
 
 #endif	/* I2C_H */

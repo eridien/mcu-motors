@@ -49,6 +49,7 @@ extern uint8                   limitMask[NUM_MOTORS];
 #define setBiStepLo()           *stepPort[motorIdx] &= ~stepMask[motorIdx]
 #define setBiStepHiInt(_motIdx) *stepPort[_motIdx]  |=  stepMask[_motIdx]
   
+#define clrUniPort()       (*mp = (*mp & ~mm));
 #define setUniPort(_phase) (*mp = (*mp & ~mm) | motPhaseValue[motorIdx][_phase]);
 #define setUniPortInt(_motIdx, _phase)                                   \
   (*stepPort[_motIdx] = (*stepPort[_motIdx] & ~stepMask[_motIdx]) |   \
@@ -59,18 +60,17 @@ struct motorState {
   bool   moving;
   bool   homing;
   bool   stopping;
+  bool   stepPending;
+  bool   stepped;
   int16  curPos;
-  int16  targetPos;
   int16  homeTestPos;
+  int16  targetPos;
   bool   dir;
   bool   targetDir;
   uint8  ustep;  // bipolar only
   uint8  phase;  // unipolar only
   uint16 speed;
   uint16 targetSpeed;
-  int8   stepDist;
-  bool   stepPending;
-  bool   stepped;
   uint16 nextStepTicks;
   uint16 lastStepTicks;
   bool   i2cCmdBusy;
@@ -82,7 +82,6 @@ struct motorState {
 // constants loadable from command
 struct motorSettings {
   uint16 maxSpeed;
-  uint16 minSpeed;
   uint16 noAccelSpeedLimit;
   uint16 accellerationRate;
   uint16 homingSpeed;
@@ -91,7 +90,7 @@ struct motorSettings {
   uint16 homePos;
 };
 
-#define NUM_SETTING_WORDS 8
+#define NUM_SETTING_WORDS 7
 
 union settingsUnion{
   uint16 reg[NUM_SETTING_WORDS];
