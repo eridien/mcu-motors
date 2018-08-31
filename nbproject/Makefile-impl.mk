@@ -27,11 +27,11 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 PROJECTNAME=mcu-motors
 
 # Active Configuration
-DEFAULTCONF=B1
+DEFAULTCONF=U6
 CONF=${DEFAULTCONF}
 
 # All Configurations
-ALLCONFS=B1 B3 
+ALLCONFS=B1 B3 U6 
 
 
 # build
@@ -47,6 +47,7 @@ ALLCONFS=B1 B3
 .clobber-impl: .clobber-pre .depcheck-impl
 	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=B1 clean
 	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=B3 clean
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=U6 clean
 
 
 
@@ -54,6 +55,7 @@ ALLCONFS=B1 B3
 .all-impl: .all-pre .depcheck-impl
 	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=B1 build
 	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=B3 build
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=U6 build
 
 
 

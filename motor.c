@@ -87,32 +87,43 @@ uint8 motPhaseValue[NUM_MOTORS][4] = { // motor, phase
 // default startup values
 // must match settingsStruct
 #ifdef BM
+// assumes 1/40 mm per step
 uint16 settingsInit[NUM_SETTING_WORDS] = {
-   6400,  // max ms->speed
-      2,  // min ms->speed: 2 steps/sec (else sw blows up)
-    400,  // no-accelleration ms->speed limit
-    100,  // accelleration rate: steps/sec/sec
-   1600,  // homing ms->speed    (40 mm/sec)
-     80,  // homing back-up speed (2 mm/sec)
-     80,  // home offset distance (2 mm)
-      0,  // homePos (rot motor is 16000)
+  2400,    // max ms->speed: steps/sec (60 mm/sec)
+     0,    // min ms->speed, (else sw blows up ??)
+  1200,    // no-accelleration ms->speed limit (30 mm/sec)
+  2000,    // accelleration rate step/sec/sec  (50 mm/sec/sec)
+  1200,    // homing speed (30 mm/sec)
+    60,    // homing back-up ms->speed (1.5 mm/sec)
+    40,    // home offset distance: 1 mm
+     0,    // home pos value, set cur pos to this after homing
 };
 
 #else
 
+// assumes 1/50 mm per step
 uint16 settingsInit[NUM_SETTING_WORDS] = {
-   500,    // max ms->speed: steps/sec
-    50,    // min ms->speed, else sw blows up
-   100,    // no-accelleration ms->speed limit
-   100,    // accelleration rate: 1 step/sec/sec
-   400,    // homing ms->speed
-    50,    // homing back-up ms->speed
+   600,    // max speed: steps/sec (12 mm/sec )
+     0,    // min speed, (else sw blows up ??)
+   300,    // no-accelleration ms->speed limit (6 mm/sec)
+   200,    // accelleration rate step/sec/sec  (4 mm/sec/sec)
+   300,    // homing speed (6 mm/sec)
+   100,    // homing back-up ms->speed (2 mm/sec)
     50,    // home offset distance: 1 mm
-     0,    // homePos
+     0,    // home pos value, set cur pos to this after homing
 };
 #endif /* BM */
 
 void motorInit() {
+#ifdef BM
+  dirTRIS   = 0;
+  ms1TRIS   = 0;
+  ms2TRIS   = 0;
+  ms3TRIS   = 0;
+  resetLAT  = 0;  // start with reset on
+  resetTRIS = 0;
+#endif
+  
 #ifdef B1
   stepTRIS  = 0;
   faultTRIS = 1;  // zero means motor fault
@@ -137,56 +148,41 @@ void motorInit() {
 
   for(uint8 motIdx=0; motIdx < NUM_MOTORS; motIdx++) {
     struct motorState *p = &mState[motIdx];
-    p->curPos          = POS_UNKNOWN_CODE;  // 1/80 mm
-    p->dir             = 1;  // 1 => forward
-    p->ustep           = 1;  // 1/2 step per pulse
-    p->targetPos       = 1;  // 1/80 mm
-    p->speed           = 0;  // 1/80 mm/sec
-    p->targetSpeed     = 0;  // 1/80 mm/sec
-    p->stepDist        = 0;  // signed distance each step pulse in 1/80 mm
-    
+    p->stateByte   = 0;    // no err, not busy, motor off, and not homed
+    p->curPos      = POS_UNKNOWN_CODE;
+    p->phase       = 0;    // cur step phase (unipolar only)
+    p->i2cCmdBusy  = false;
+    p->stepPending = false;
+    p->stepped     = false;
     for(uint8 i = 0; i < NUM_SETTING_WORDS; i++) {
        mSet[motIdx].reg[i] = settingsInit[i];
     }
   }
-
-  dirTRIS   = 0;
-  ms1TRIS   = 0;
-  ms2TRIS   = 0;
-  ms3TRIS   = 0;
-  resetLAT  = 0;  // start with reset on
-  resetTRIS = 0;
 }
 
-
-// estimated decell distance by ms->speed
+#ifdef BM
+// estimated decell distance by speed
+// these could be calculated
 // wild guess for now
 uint16 decellTable[][2] = {
-  {150*80, 32*80},
-  {100*80, 16*80},
-  {80*80,   8*80},
-  {60*80,   4*80},
-  {40*80,   2*80},
-  {20*80,   1*80}
+  {2000, 160},
+  {1000,  80},
+  { 500,  40},
+  { 250,  20},
+  { 125,  10},
 };
 
-bool withinDecellDist() {
-  int16 distRemaining = (ms->targetPos >= ms->curPos);
-  ms->targetDir = 1;
-  if(distRemaining < 0) {
-    ms->targetDir = 0;
-    distRemaining = -distRemaining;
-  }
-  if(ms->targetDir != ms->dir || limitClosed()) return true;
-  
-  for(uint8 i = 0; i < sizeof(decellTable)/2; i++) {
-    if(ms->speed >= decellTable[i][0] &&
-       distRemaining <= decellTable[i][1]) {
-      return true;
-    }
-  }
-  return false;
-}
+#else
+
+uint16 decellTable[][2] = {
+  {1000,  40},
+  { 500,  20},
+  { 250,  10},
+  { 125,   5},
+};
+
+#endif /* BM */
+
 void haveFault() {
   extern volatile unsigned char *p = faultPort[motorIdx];
   if(p != NULL) {
@@ -262,7 +258,7 @@ void setStep() {
 
 void chkStopping() {
   // in the process of stepping
-  if(ms->stepPending || ms->stepped) return;
+  if(ms->stepPending) return;
   
   if(limitClosed() ) {
     setError(MOTOR_LIMIT_ERROR);
@@ -293,7 +289,7 @@ void chkMotor() {
     ms->curPos += ms->stepDist;
     ms->stepped = false;
   }
-  if(getBusyState() == BUSY_MOVING) {
+  if(ms->moving) {
     if(limitClosed() ) {
       setError(MOTOR_LIMIT_ERROR);
     }
@@ -301,10 +297,10 @@ void chkMotor() {
       chkMoving();
     }
   }
-  else if(getBusyState() == BUSY_HOMING && !haveError()) {
+  else if(ms->homing && !haveError()) {
     chkHoming();
   }
-  else if(getBusyState() == BUSY_STOPPING) {
+  else if(ms->stopping) {
     chkStopping();
   }
 }
@@ -385,11 +381,15 @@ void clockInterrupt(void) {
         setErrorInt(motIdx, STEP_NOT_DONE_ERROR);
         return;
       }
+#ifdef BM
       ms1LAT = ((p->ustep & 0x01) ? 1 : 0);
       ms2LAT = ((p->ustep & 0x02) ? 1 : 0);
       ms3LAT = ((p->ustep & 0x04) ? 1 : 0);
       dirLAT =   p->dir           ? 1 : 0;
       setBiStepHiInt(motIdx);
+#else
+      setUniPortInt(motIdx, ms->phase); 
+#endif
       p->stepPending = false;
       p->lastStepTicks = timeTicks;
       p->stepped = true;

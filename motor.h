@@ -55,8 +55,10 @@ extern uint8                   limitMask[NUM_MOTORS];
     motPhaseValue[_motIdx][_phase]);
 
 struct motorState {
-  bool   i2cCmdBusy;
   uint8  stateByte;
+  bool   moving;
+  bool   homing;
+  bool   stopping;
   int16  curPos;
   int16  targetPos;
   int16  homeTestPos;
@@ -71,6 +73,7 @@ struct motorState {
   bool   stepped;
   uint16 nextStepTicks;
   uint16 lastStepTicks;
+  bool   i2cCmdBusy;
   bool   resetAfterSoftStop;
 } mState[NUM_MOTORS];
 
@@ -97,10 +100,8 @@ union settingsUnion{
 
 void motorInit(void);
 void chkMotor(void);
-bool withinDecellDist(void);
 void softStopCommand(bool reset);
 void haveFault();        // bipolar only
-void setStepPhase(void); // unipolar only
 bool limitClosed(void);
 void setStep(void);
 void stopStepping(void);

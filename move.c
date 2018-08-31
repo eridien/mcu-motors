@@ -8,20 +8,32 @@
 
 void chkMoving() {
   // in the process of stepping
-
   if(limitClosed()) setError(MOTOR_LIMIT_ERROR);
-  
-  if(ms->stepPending || ms->stepped || haveError()) return;
-  
+  if(ms->stepPending || haveError()) return;
   if((ms->curPos == ms->targetPos) && underAccellLimit()) {
     stopStepping();
     return;
   }
   
   ms->targetDir = (ms->targetPos >= ms->curPos);
-
+  bool decellerate = false;
+  
+  if(ms->dir != ms->targetDir)
+  
   // check ms->speed/acceleration
-  if((!underAccellLimit() && withinDecellDist()) || (ms->dir != ms->targetDir))
+  if((!underAccellLimit() ) {
+    int16 distRemaining = (ms->targetPos - ms->curPos);
+    ms->targetDir = 1;
+    if(distRemaining < 0) {
+      ms->targetDir = !ms->targetDir;
+      return false;
+    }
+    for(uint8 i = 0; i < sizeof(decellTable)/2; i++) {
+      if(ms->speed >= decellTable[i][0] &&
+         distRemaining <= decellTable[i][1]) {
+        return true;
+      }
+    }
     // decellerate
     ms->speed -= sv->accellerationRate;
   else if(ms->targetSpeed > ms->speed) {

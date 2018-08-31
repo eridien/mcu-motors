@@ -13,11 +13,6 @@
 //   homingState?
 //   fix accell calc to use actual seconds
 
-//#define BM  // bipolar motor
-//#define B1  // one bipolar motor
-//#define B3  // three bipolar motors
-#define U6  // six unipolar motors
-
 typedef signed char int8;
 typedef unsigned char uint8;
 typedef int int16;
