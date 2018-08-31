@@ -5,8 +5,6 @@
 #include "types.h"
 #include "motor.h"
 
-#define haveError() (ms->stateByte & 0x70)
-
 // stateBytes
 //   veee bboz  state byte
 //      v: version (1-bit)
@@ -35,6 +33,11 @@
 #define BUSY_BIT            0x04
 #define MOTOR_ON_BIT        0x02
 #define HOMED_BIT           0x01
+
+#define haveError() (ms->stateByte & ERROR_BIT)
+
+extern volatile bool errorIntMot;
+extern volatile bool errorIntCode;
 
 void  setCurState(uint8 newState);
 void  setStateBit(uint8 mask, uint8 set);

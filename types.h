@@ -27,10 +27,3 @@ typedef char bool;
 #define false 0
 
 #endif	/* TYPES_H */
-
-/*
- * interrupt functions that require motIdx
- * 
- * setErrorInt
- * setI2cSendBytesInt
- */

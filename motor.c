@@ -210,7 +210,7 @@ void setMotorSettings() {
 void stopStepping() {
   ms->stepPending = false;
   ms->stepped     = false;
-  setBusyState(NOT_BUSY);
+  setStateBit(BUSY_BIT, false);
 }
 
 void resetMotor() {
@@ -219,6 +219,7 @@ void resetMotor() {
   setStateBit(MOTOR_ON_BIT, 0);
   setStateBit(HOMED_BIT, 0);
   resetLAT = 0;
+  setMotNibble(0);
 }
 
 bool underAccellLimit() {

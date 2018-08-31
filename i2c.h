@@ -89,6 +89,7 @@ extern volatile uint8 i2cRecvBytes[NUM_MOTORS][NUM_RECV_BYTES + 1];
 extern volatile uint8 i2cRecvBytesPtr;
 extern volatile uint8 i2cSendBytes[NUM_MOTORS][NUM_SEND_BYTES];
 extern volatile uint8 i2cSendBytesPtr;
+extern volatile bool  errorInt;
 
 void i2cInit(void);
 void checkI2c(void);

@@ -59,6 +59,11 @@ void main(void) {
       mm = stepMask[motorIdx]; // 0xf0 or 0x0f or step bit
       ms = &mState[motorIdx];
       sv = &(mSet[motorIdx].val);
+      if(errorIntCode && errorIntMot == motorIdx) {
+        // error during interrupt
+        setError(errorIntCode);
+        errorIntCode = 0;
+      }
       checkI2c();
       chkMotor();
     }

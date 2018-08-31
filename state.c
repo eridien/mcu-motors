@@ -21,11 +21,16 @@ void setStateBit(uint8 mask, uint8 set){
 // do not use from interrupt
 void setError(uint8 err) {
   setCurState(err);
+  for(uint8 motIdx = 0; motIdx < NUM_MOTORS; motIdx++)
+    setStateBit(ERROR_BIT, true);
   resetMotor();
 }
 
+volatile bool errorIntMot;
+volatile bool errorIntCode;
+
 // use from interrupt
 void setErrorInt(uint8 motIdx, uint8 err) {
-  mState[motIdx].stateByte = ((mState[motIdx].stateByte & 0x8f) | err);
-  setI2cCkSumInt(motIdx);
+  errorIntMot  = motIdx;
+  errorIntCode = err;
 }
