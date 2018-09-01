@@ -91,8 +91,8 @@ uint8 motPhaseValue[NUM_MOTORS][4] = { // motor, phase
 uint16 settingsInit[NUM_SETTING_WORDS] = {
   2400,    // max speed
  16000,    // max pos is 400 mm
-  1200,    // no-accelleration ms->speed limit (30 mm/sec)
-  2000,    // accelleration rate step/sec/sec  (50 mm/sec/sec)
+  1200,    // no-acceleration ms->speed limit (30 mm/sec)
+ 16000,    // acceleration rate steps/sec/sec  (50 mm/sec/sec)
   1200,    // homing speed (30 mm/sec)
     60,    // homing back-up ms->speed (1.5 mm/sec)
     40,    // home offset distance: 1 mm
@@ -105,8 +105,8 @@ uint16 settingsInit[NUM_SETTING_WORDS] = {
 uint16 settingsInit[NUM_SETTING_WORDS] = {
    600,    // max speed: steps/sec (12 mm/sec )
   5000,    // max pos is 100 mm
-   300,    // no-accelleration ms->speed limit (6 mm/sec)
-   200,    // accelleration rate step/sec/sec  (4 mm/sec/sec)
+   300,    // no-acceleration ms->speed limit (6 mm/sec)
+  5000,    // acceleration rate steps/sec/sec  (4 mm/sec/sec)
    300,    // homing speed (6 mm/sec)
    100,    // homing back-up ms->speed (2 mm/sec)
     50,    // home offset distance: 1 mm
@@ -156,31 +156,9 @@ void motorInit() {
     for(uint8 i = 0; i < NUM_SETTING_WORDS; i++) {
        mSet[motIdx].reg[i] = settingsInit[i];
     }
+    calcDecelTable(motIdx);
   }
 }
-
-#ifdef BM
-// estimated decell distance by speed
-// these could be calculated
-// wild guess for now
-uint16 decellTable[][2] = {
-  {2000, 160},
-  {1000,  80},
-  { 500,  40},
-  { 250,  20},
-  { 125,  10},
-};
-
-#else
-
-uint16 decellTable[][2] = {
-  {1000,  40},
-  { 500,  20},
-  { 250,  10},
-  { 125,   5},
-};
-
-#endif /* BM */
 
 void haveFault() {
   extern volatile unsigned char *p = faultPort[motorIdx];
@@ -203,6 +181,7 @@ void setMotorSettings() {
     mSet[motorIdx].reg[i] = (i2cRecvBytes[motorIdx][2*i + 1] << 8) | 
                              i2cRecvBytes[motorIdx][2*i + 2];
   }
+  calcDecelTable(motorIdx);
 }
 
 void stopStepping() {
@@ -241,12 +220,12 @@ void resetMotor(bool all) {
   sv = &(mSet[motorIdx].val);
 }
 
-bool underAccellLimit() {
+bool underAccelLimit() {
   return (ms->curSpeed <= sv->noAccelSpeedLimit);
 }
 
 void chkStopping() {
-  if(underAccellLimit()) {
+  if(underAccelLimit()) {
     stopStepping();
     if(ms->resetAfterSoftStop) {
       // reset only this motor

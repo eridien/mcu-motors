@@ -8,7 +8,7 @@
 #define MCU_VERSION 0
 
 // todo
-//   decellTable should be set when accell set
+//   chk using real seconds on accel calc
 
 // when returning test pos instead of cur pos
 // state byte will have this magic value which can't happen normally

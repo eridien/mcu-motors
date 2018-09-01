@@ -7,6 +7,34 @@
 #include "motor.h"
 #include "clock.h"
 
+#define DECEL_TABLE_SIZE 5
+// for 40 steps/mm this is 200 mm/sec, 150 mm/sec, ...
+int16 decelTableSpeeds[DECEL_TABLE_SIZE] = {8000, 6000, 4000, 2500, 2000};
+
+// distance before target pos that deceleration should start
+// indexed on speed from decelTableSpeeds above
+// calculates distance based on that speed and acceleration setting
+uint16 decelDist[NUM_MOTORS][DECEL_TABLE_SIZE];
+
+// this is gonna be SSLLOOWW
+void calcDecelTable(uint8 motIdx) {
+  uint16 accel = mSet[motIdx].val.acceleration;
+  for(uint8 i = 0; i < DECEL_TABLE_SIZE; i++) {
+    uint16 speed = decelTableSpeeds[i];
+    uint16 tgtSpeed = mSet[motIdx].val.noAccelSpeedLimit;
+    // each loop simulates one step of deceleration
+    uint16 dist = 0;
+    for(; speed > tgtSpeed; dist++) {
+      // accel/step = accel/sec * sec/step
+      uint16 deltaSpeed = (accel / speed);
+      if(deltaSpeed == 0) deltaSpeed = 1;
+      if(deltaSpeed > speed) break;
+      speed -= deltaSpeed;
+    }
+    decelDist[motIdx][i] = dist;
+  }
+}
+
 void setStep() {
 #ifdef BM
   // adjust ustep
@@ -49,7 +77,7 @@ void calcMotion() {
   bool accelerate = false;
   bool decelerate = false;
   
-  if(underAccellLimit()) {
+  if(underAccelLimit()) {
     if(!ms->homing && !ms->stopping && ms->curPos == ms->targetPos) {
       // finished normal move
       stopStepping();
@@ -75,9 +103,9 @@ void calcMotion() {
         if(distRemaining < 0) {
           distRemaining = -distRemaining;
         }
-        for(uint8 i = 0; i < sizeof(decellTable)/4; i++) {
-          if(ms->curSpeed >= decellTable[i][0] &&
-             distRemaining <= decellTable[i][1]) {
+        for(uint8 i = 0; i < sizeof(decelDist)/4; i++) {
+          if(ms->curSpeed >= decelDist[i][0] &&
+             distRemaining <= decelDist[i][1]) {
             decelerate = true;
             break;
           }
@@ -93,11 +121,11 @@ void calcMotion() {
       }
     }
   }
-  if(decelerate && ms->curSpeed > sv->accellerationRate) {
-    ms->curSpeed -= sv->accellerationRate;
+  if(decelerate && ms->curSpeed > sv->acceleration) {
+    ms->curSpeed -= sv->acceleration;
   }
   else if (accelerate) {
-    ms->curSpeed += sv->accellerationRate;
+    ms->curSpeed += sv->acceleration;
     if(ms->curSpeed > sv->maxSpeed) 
        ms->curSpeed = sv->maxSpeed;
   }

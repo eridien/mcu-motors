@@ -46,9 +46,13 @@ extern uint8                   faultMask[NUM_MOTORS];
 extern volatile unsigned char *limitPort[NUM_MOTORS];
 extern uint8                   limitMask[NUM_MOTORS];
 
+#define DECEL_TABLE_SIZE 5
+extern uint16 decelDist[DECEL_TABLE_SIZE][2];
+
 #define setBiStepLo()           *stepPort[motorIdx] &= ~stepMask[motorIdx]
 #define setBiStepHiInt(_motIdx) *stepPort[_motIdx]  |=  stepMask[_motIdx]
   
+
 #define clrUniPort()       (*mp = (*mp & ~mm));
 #define setUniPort(_phase) (*mp = (*mp & ~mm) | motPhaseValue[motorIdx][_phase]);
 #define setUniPortInt(_motIdx, _phase)                                   \
@@ -84,7 +88,7 @@ struct motorSettings {
   uint16 maxSpeed;
   uint16 maxPos;
   uint16 noAccelSpeedLimit;
-  uint16 accellerationRate;
+  uint16 acceleration;
   uint16 homingSpeed;
   uint16 homingBackUpSpeed;
   uint16 homeOfs;

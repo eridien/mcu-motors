@@ -40,8 +40,8 @@
 //   0001 0111  set regs, 16-bit values
 //      max speed
 //      max pos (min pos is always zero))
-//      no-accelleration speed limit (and start speed)
-//      accelleration rate
+//      no-acceleration speed limit (and start speed)
+//      acceleration rate
 //      homing speed
 //      homing back-up speed
 //      home offset distance
