@@ -25,7 +25,7 @@
 #else
 
 #define I2C_START_BIT SSP2STATbits.S
-#define I2C_STOP_BIT  SSP2STATbits.p
+#define I2C_STOP_BIT  SSP2STATbits.P
 #define I2C_WCOL      WCOL2
 #define I2C_SSPOV     SSPOV2
 #define I2C_BUF_BYTE  SSP2BUF
@@ -102,7 +102,6 @@
 #define motZOFS    4
 #define motFOFS    4
 
-#define limitZTRIS TRISE0
 #define limitZPORT PORTE
 #define limitZBIT  0x01
 

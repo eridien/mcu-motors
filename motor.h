@@ -46,9 +46,6 @@ extern uint8                   faultMask[NUM_MOTORS];
 extern volatile unsigned char *limitPort[NUM_MOTORS];
 extern uint8                   limitMask[NUM_MOTORS];
 
-#define DECEL_TABLE_SIZE 5
-extern uint16 decelDist[DECEL_TABLE_SIZE][2];
-
 #define setBiStepLo()           *stepPort[motorIdx] &= ~stepMask[motorIdx]
 #define setBiStepHiInt(_motIdx) *stepPort[_motIdx]  |=  stepMask[_motIdx]
   
@@ -106,7 +103,7 @@ union settingsUnion{
 void motorInit(void);
 void chkMotor(void);
 void softStopCommand(bool reset);
-void haveFault();        // bipolar only
+bool haveFault(void);        // bipolar only
 bool limitClosed(void);
 void stopStepping(void);
 void resetMotor(bool all);

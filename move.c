@@ -25,7 +25,7 @@ void calcDecelTable(uint8 motIdx) {
     // each loop simulates one step of deceleration
     uint16 dist = 0;
     for(; speed > tgtSpeed; dist++) {
-      // accel/step = accel/sec * sec/step
+      // accel/step = accel/sec / steps/sec
       uint16 deltaSpeed = (accel / speed);
       if(deltaSpeed == 0) deltaSpeed = 1;
       if(deltaSpeed > speed) break;
@@ -34,6 +34,11 @@ void calcDecelTable(uint8 motIdx) {
     decelDist[motIdx][i] = dist;
   }
 }
+
+bool underAccelLimit() {
+  return (ms->curSpeed <= sv->noAccelSpeedLimit);
+}
+
 
 void setStep() {
 #ifdef BM
@@ -122,7 +127,7 @@ void calcMotion() {
     }
   }
   if(decelerate) {
-    // accel/step = accel/sec * sec/step
+    // accel/step = accel/sec / steps/sec
     uint16 deltaSpeed = (sv->acceleration / ms->curSpeed);
     if(deltaSpeed == 0) deltaSpeed = 1;
     if(deltaSpeed < ms->curSpeed) {
@@ -130,7 +135,7 @@ void calcMotion() {
     }
   }
   else if (accelerate) {
-    // accel/step = accel/sec * sec/step
+    // accel/step = accel/sec / steps/sec
     uint16 deltaSpeed = (sv->acceleration / ms->curSpeed);
     if(deltaSpeed == 0) deltaSpeed = 1;
     ms->curSpeed += deltaSpeed;

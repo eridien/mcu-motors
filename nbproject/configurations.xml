@@ -39,7 +39,7 @@
     <conf name="B1" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC16F15375</targetDevice>
+        <targetDevice>PIC16F15345</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit3PlatformTool</platformTool>
