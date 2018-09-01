@@ -121,13 +121,22 @@ void calcMotion() {
       }
     }
   }
-  if(decelerate && ms->curSpeed > sv->acceleration) {
-    ms->curSpeed -= sv->acceleration;
+  if(decelerate) {
+    // accel/step = accel/sec * sec/step
+    uint16 deltaSpeed = (sv->acceleration / ms->curSpeed);
+    if(deltaSpeed == 0) deltaSpeed = 1;
+    if(deltaSpeed < ms->curSpeed) {
+      ms->curSpeed -= deltaSpeed;
+    }
   }
   else if (accelerate) {
-    ms->curSpeed += sv->acceleration;
-    if(ms->curSpeed > sv->maxSpeed) 
-       ms->curSpeed = sv->maxSpeed;
+    // accel/step = accel/sec * sec/step
+    uint16 deltaSpeed = (sv->acceleration / ms->curSpeed);
+    if(deltaSpeed == 0) deltaSpeed = 1;
+    ms->curSpeed += deltaSpeed;
+    if(ms->curSpeed > sv->maxSpeed) {
+      ms->curSpeed = sv->maxSpeed;
+    }
   }
   setStep();
 }

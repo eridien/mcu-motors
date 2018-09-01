@@ -7,9 +7,6 @@
 
 #define MCU_VERSION 0
 
-// todo
-//   chk using real seconds on accel calc
-
 // when returning test pos instead of cur pos
 // state byte will have this magic value which can't happen normally
 #define TEST_POS_STATE      0x04
