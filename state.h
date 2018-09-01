@@ -8,13 +8,11 @@
 #define MCU_VERSION 0
 
 // todo
-//   set homing dir for rotation motor
-//   keep pos accurate in sendbytes
 //   decellTable should be set when accell set
 
 // when returning test pos instead of cur pos
 // state byte will have this magic value which can't happen normally
-#define TEST_POS_STATE      0x01
+#define TEST_POS_STATE      0x04
 
 // Error codes 
 #define MOTOR_FAULT_ERROR   0x10
@@ -32,7 +30,7 @@
 #define MOTOR_ON_BIT        0x02
 #define HOMED_BIT           0x01
 
-#define haveError() (errorIntCode || ms->stateByte & ERROR_BIT)
+#define haveError() (errorIntCode || (ms->stateByte & ERROR_BIT))
 
 extern volatile bool errorIntMot;
 extern volatile bool errorIntCode;

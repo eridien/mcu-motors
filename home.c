@@ -16,6 +16,13 @@ void chkHoming() {
       
     case goingHome:
       if(limitClosed() != ms->homeReversed) {
+        // just passed switch
+        if(ms->homeReversed) {
+          // now home in the normal direction
+          ms->homeReversed = false;
+          ms->homingState = homeStarting;
+          break;
+        }
         ms->targetDir   = !ms->homeReversed;
         ms->targetSpeed =  sv->homingBackUpSpeed;
         ms->homingState =  homeReversing;
@@ -24,6 +31,7 @@ void chkHoming() {
       
     case homeReversing:
       if(limitClosed() == ms->homeReversed) {
+        // just passed switch in other direction
         ms->homeTestPos = ms->curPos;
         ms->curPos = 0;
         ms->homingState = homingToOfs;
@@ -45,8 +53,7 @@ void chkHoming() {
 #ifdef BM
 void homeCommand() {
   setStateBit(HOMED_BIT, 0);
-  setStateBit(MOTOR_ON_BIT, 1);
-  resetLAT = 1;
+  motorOn();
   ms->homingState = goingHome;
   setStateBit(BUSY_BIT, true);
 }

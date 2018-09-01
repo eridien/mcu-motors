@@ -4,7 +4,7 @@
 
 #ifdef BM
 #define I2C_START_BIT SSP1STATbits.S
-#define I2C_STOP_BIT  SSP1STATbits.p
+#define I2C_STOP_BIT  SSP1STATbits.P
 #define I2C_WCOL      WCOL1
 #define I2C_SSPOV     SSPOV1
 #define I2C_BUF_BYTE  SSP1BUF

@@ -5,6 +5,45 @@
 #include "move.h"
 #include "state.h"
 #include "motor.h"
+#include "clock.h"
+
+void setStep() {
+#ifdef BM
+  // adjust ustep
+  while(true) {
+    // approximate pulsesPerSec
+    uint16 pulsesPerSec = ms->curSpeed >> (MAX_USTEP - ms->ustep);
+    if(ms->ustep < MAX_USTEP && pulsesPerSec < 500) {
+      ms->ustep++;
+    }
+    // note that you can only reduce ustep when the phase is correct
+    else if(ms->ustep > MIN_USTEP && pulsesPerSec > 1500 && 
+           (ms->curPos & uStepPhaseMask[ms->ustep]) == 0) {
+      ms->ustep--;
+    }
+    else break;
+  }
+  // set step timing
+  uint16 clkTicks;
+  switch (ms->ustep) {
+    case 1: clkTicks = (CLK_TICKS_PER_SEC / 4) / ms->curSpeed;
+    case 2: clkTicks = (CLK_TICKS_PER_SEC / 2) / ms->curSpeed;
+    case 3: clkTicks = (CLK_TICKS_PER_SEC / 1) / ms->curSpeed;
+  }
+  setNextStep(getLastStep() + clkTicks);
+  ms->stepped = false;
+  setBiStepLo();
+  ms->stepPending = true;
+
+#else
+  // check step timing
+  uint16 clkTicks = CLK_TICKS_PER_SEC / ms->curSpeed; // 20 usecs/tick
+  setNextStep(getLastStep() + clkTicks);
+  ms->stepped = false;
+  ms->phase += ((ms->curDir ? 1 : -1) & 0x03);
+  ms->stepPending = true;
+#endif /* BM */
+}
 
 void calcMotion() {
   bool accelerate = false;

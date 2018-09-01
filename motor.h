@@ -104,7 +104,6 @@ void chkMotor(void);
 void softStopCommand(bool reset);
 void haveFault();        // bipolar only
 bool limitClosed(void);
-void setStep(void);
 void stopStepping(void);
 void resetMotor(bool all);
 void motorOn(void);
