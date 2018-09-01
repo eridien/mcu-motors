@@ -17,106 +17,6 @@ struct motorSettings   *sv;
 volatile unsigned char *mp; // current motor port (like &PORTA)
 uint8                   mm; // current motor mask (0xf0 or 0x0f or step bit)
 
-#ifdef B1
-volatile unsigned char *stepPort[NUM_MOTORS]  = {&stepPORT};
-uint8                   stepMask[NUM_MOTORS]  = { stepMASK};
-
-volatile unsigned char *faultPort[NUM_MOTORS] = {&faultPORT};
-uint8                   faultMask[NUM_MOTORS] = { faultMASK};
-  
-volatile unsigned char *limitPort[NUM_MOTORS] = {&limitPORT};
-uint8                   limitMask[NUM_MOTORS] = { limitMASK};
-#endif /*B1 */
-  
-#ifdef B3
-volatile unsigned char 
-     *stepPort[NUM_MOTORS] = {&stepRPORT, &stepEPORT, &stepXPORT};
-uint8 stepMask[NUM_MOTORS] = { stepRBIT,   stepEBIT,   stepXBIT};
-
-volatile unsigned char 
-     *faultPort[NUM_MOTORS] = {&faultRPORT, &faultEPORT, &faultXPORT};
-uint8 faultMask[NUM_MOTORS] = { faultRBIT,   faultEBIT,   faultXBIT};
-
-volatile unsigned char 
-     *limitPort[NUM_MOTORS] = {&limitRPORT, 0, &limitXPORT};
-uint8 limitMask[NUM_MOTORS] = { limitRBIT,  0,  limitXBIT};
-#endif /* B3 */
-
-#ifdef U6
-volatile unsigned char *stepPort[NUM_MOTORS] = {
-  &motAPORT, // tube 1
-  &motBPORT, // tube 2
-  &motCPORT, // tube 3
-  &motPPORT, // paster
-  &motZPORT, // camera height
-  &motFPORT, // focus
-};
-
-uint8 stepMask[NUM_MOTORS] = {
-  0x0f << motAOFS,
-  0x0f << motBOFS,
-  0x0f << motCOFS,
-  0x0f << motPOFS,
-  0x0f << motZOFS,
-  0x0f << motFOFS,
-};
-
-volatile unsigned char 
-     *faultPort[NUM_MOTORS] = {0,0,0,0,0,0};
-uint8 faultMask[NUM_MOTORS] = {0,0,0,0,0,0};
-
-volatile unsigned char 
-     *limitPort[NUM_MOTORS] = {0,0,0,0, &limitZPORT, 0};
-uint8 limitMask[NUM_MOTORS] = {0,0,0,0,  limitZBIT,  0};
-
-// -------- phases ----------
-// Color        Bl Pi Ye Or  (red is +5))
-//              {1, 1, 0, 0},
-//              {0, 1, 1, 0},
-//              {0, 0, 1, 1},
-//              {1, 0, 0, 1}
-uint8 motPhaseValue[NUM_MOTORS][4] = { // motor, phase
-  {0x0c << motAOFS, 0x06 << motAOFS, 0x03 << motAOFS, 0x09 << motAOFS},
-  {0x0c << motBOFS, 0x06 << motBOFS, 0x03 << motBOFS, 0x09 << motBOFS},
-  {0x0c << motCOFS, 0x06 << motCOFS, 0x03 << motCOFS, 0x09 << motCOFS},
-  {0x0c << motPOFS, 0x06 << motPOFS, 0x03 << motPOFS, 0x09 << motPOFS},
-  {0x0c << motZOFS, 0x06 << motZOFS, 0x03 << motZOFS, 0x09 << motZOFS},
-  {0x0c << motFOFS, 0x06 << motFOFS, 0x03 << motFOFS, 0x09 << motFOFS},
-};
-#endif /* U6 */
-
-// default startup values
-// must match settingsStruct
-#ifdef BM
-// assumes 1/40 mm per step
-// same for all motors
-uint16 settingsInit[NUM_SETTING_WORDS] = {
-  2400,    // max speed
- 16000,    // max pos is 400 mm
-  1200,    // no-acceleration ms->speed limit (30 mm/sec)
- 40000,    // acceleration rate steps/sec/sec  (1000 mm/sec/sec)
-  1200,    // homing speed (30 mm/sec)
-    60,    // homing back-up ms->speed (1.5 mm/sec)
-    40,    // home offset distance: 1 mm
-     0,    // home pos value, set cur pos to this after homing
-};
-
-#else
-
-// assumes 1/50 mm per step
-// same for all motors
-uint16 settingsInit[NUM_SETTING_WORDS] = {
-   600,    // max speed: steps/sec (12 mm/sec )
-  5000,    // max pos is 100 mm
-   300,    // no-acceleration ms->speed limit (6 mm/sec)
- 25000,    // acceleration rate steps/sec/sec  (500 mm/sec/sec)
-   300,    // homing speed (6 mm/sec)
-   100,    // homing back-up ms->speed (2 mm/sec)
-    50,    // home offset distance: 1 mm
-     0,    // home pos value, set cur pos to this after homing
-};
-#endif /* BM */
-
 void motorInit() {
 #ifdef BM
   dirTRIS   = 0;
@@ -156,6 +56,7 @@ void motorInit() {
     p->haveCommand  = false;
     p->stepPending = false;
     p->stepped     = false;
+    p->curSpeed    = 0;
     for(uint8 i = 0; i < NUM_SETTING_WORDS; i++) {
        mSet[motIdx].reg[i] = settingsInit[i];
     }
