@@ -6,6 +6,20 @@
 #include "motor.h"
 
 // move/home commands start immediately even when already busy
+// steps are in 1/8 step (bipolar) or one phase (unipolar)
+//    for bipolar:
+//       steps/rev:        1600
+//       dist/rev:           40 mm
+//       max distance:      800 mm
+//       max step count: 32,000
+//
+//    for unipolar:
+//       steps/rev:        2048
+//       dist/rev:           40 mm
+//       max distance:      625 mm
+//       max step count: 32,000
+
+// move/home commands start immediately even when already busy
 // all position and distance is in steps (bi: 1/8 ustep, uni: phase)
 // all speed is in steps/sec (except speed-move cmd)
 // homing with no limit switch just sets current position to settings value
@@ -44,35 +58,37 @@
 //
 //   -- 17 byte settings command --
 //   0001 0111  load settings, 16-bit values
-//      max speed
-//      max pos (min pos is always zero))
-//      no-acceleration speed limit (and start speed)
-//      acceleration rate
+//      max speed   (and simple move cmd speed) 
+//      max pos     (min pos is always zero))
+//      no-acceleration speed limit (and start speed when stopped)
+//      acceleration rate (steps/sec/sec)
 //      homing speed
 //      homing back-up speed
 //      home offset distance
 //      home pos value (set cur pos to this value after homing, usually 0)
 //
+// -- 4-byte state response --
+// error code and bit cleared on status read, only on motor being read
 // Error codes 
 //      1: fault
 //      2: i2c buffer overflow
 //      3: i2c cksum error
 //      4: command not done
-//      5: unexpected limit switch
+//      5: move out-of-bounds
 //      6: move cmd when not homed
 //      7: bad command data (first byte invalid or length wrong)
 //
-// state bytes
-//   vccc eboz  state byte
+// state response bytes
+//   1) vccc eboz  state byte
 //      v: version (1-bit)
-//    ccc: error code (see above) (only set on motor causing error)
-//      e: error bit
+//    ccc: error code (see above) (only set on specific motor causing error)
+//      e: error bit              (set on all motors when any error in mcu)
 //      b: busy state
 //      o: motor on (not in reset)
 //      z: at home
-//   aaaa aaaa  current position, top 8 bits (might be result of cmd 0x11)
-//   aaaa aaaa  followed by bottom 8 bits
-//   cccc cccc  8-bit cksum, sum of first 3 bytes
+//   2) aaaa aaaa  current position, top 8 bits (might be result of cmd 0x11)
+//   3) aaaa aaaa  followed by bottom 8 bits
+//   4) cccc cccc  8-bit cksum, sum of first 3 bytes
 
 
 #define NUM_RECV_BYTES NUM_SETTING_WORDS*2 + 3 // + len word and opcode
