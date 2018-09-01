@@ -104,6 +104,7 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
     60,    // homing back-up ms->speed (1.5 mm/sec)
     40,    // home offset distance: 1 mm
      0,    // home pos value, set cur pos to this after homing
+     0,    // use limit sw for home direction
 };
 
 #else
@@ -119,6 +120,7 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
    100,    // homing back-up ms->speed (2 mm/sec)
     50,    // home offset distance: 1 mm
      0,    // home pos value, set cur pos to this after homing
+     0,    // use limit sw for home direction
 };
 #endif /* BM */
 

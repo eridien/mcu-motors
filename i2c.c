@@ -10,7 +10,7 @@
 #define CLK LATC0
 #define SDA LATC1
 
-volatile uint8 i2cRecvBytes[NUM_MOTORS][NUM_RECV_BYTES + 1];
+volatile uint8 i2cRecvBytes[NUM_MOTORS][RECV_BUF_SIZE+1]; // added len byte
 volatile uint8 i2cRecvBytesPtr;
 volatile uint8 i2cSendBytes[NUM_SEND_BYTES];
 volatile uint8 i2cSendBytesPtr;
@@ -58,6 +58,7 @@ void i2cInit() {
 #endif
 }
 
+// all words are big-endian
 void setSendBytesInt(uint8 motIdx) {
   struct motorState *p = &mState[motIdx];
   if(!ms->nextStateTestPos) {
@@ -121,7 +122,7 @@ void i2cInterrupt(void) {
           setErrorInt(motIdxInPacket, CMD_NOT_DONE_ERROR);
         } else {
           // received byte (i2c write to slave)
-          if(i2cRecvBytesPtr < NUM_RECV_BYTES + 1) 
+          if(i2cRecvBytesPtr < RECV_BUF_SIZE + 1) 
             i2cRecvBytes[motIdxInPacket][i2cRecvBytesPtr++] = I2C_BUF_BYTE;
         }
       }

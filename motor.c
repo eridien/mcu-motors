@@ -80,10 +80,11 @@ bool limitClosed() {
   return false;
 }
 
+// setting words are big endian
 void setMotorSettings() {
   for(uint8 i = 0; i < NUM_SETTING_WORDS; i++) {
-    mSet[motorIdx].reg[i] = (i2cRecvBytes[motorIdx][2*i + 1] << 8) | 
-                             i2cRecvBytes[motorIdx][2*i + 2];
+    mSet[motorIdx].reg[i] = (i2cRecvBytes[motorIdx][2*i + 2] << 8) | 
+                             i2cRecvBytes[motorIdx][2*i + 3];
   }
   calcDecelTable(motorIdx);
 }
@@ -165,7 +166,7 @@ void processMotorCmd() {
     }
   }
   else if(firstByte == 0x1f) {
-    if(lenIs(NUM_SETTING_WORDS)) setMotorSettings();
+    if(lenIs(1+NUM_SETTING_WORDS*2)) setMotorSettings();
   }
   else if((firstByte & 0xf0) == 0x10) {
     if(lenIs(1)) {
@@ -175,7 +176,7 @@ void processMotorCmd() {
         case 2: softStopCommand(false);        break; // stop,no reset
         case 3: softStopCommand(true);         break; // stop with reset
         case 4: resetMotor(false);             break; // hard stop (immediate reset)
-        case 5: motorOn();                  break; // reset off
+        case 5: motorOn();                     break; // reset off
         case 6: ms->curPos = sv->homePos;      break;  // set curpos to setting
         default: lenIs(255); // invalid cmd sets CMD_DATA_ERROR
       }

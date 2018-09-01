@@ -57,7 +57,7 @@
 //   0001 0110  set curpos to home pos value setting (fake homing)
 //
 //   -- 17 byte settings command --
-//   0001 0111  load settings, 16-bit values
+//   0001 1111  load settings, 16-bit values, big endian
 //      max speed   (and simple move cmd speed) 
 //      max pos     (min pos is always zero))
 //      no-acceleration speed limit (and start speed when stopped)
@@ -70,13 +70,13 @@
 // -- 4-byte state response --
 // error code and bit cleared on status read, only on motor being read
 // Error codes 
-//      1: fault
-//      2: i2c buffer overflow
-//      3: i2c cksum error
-//      4: command not done
-//      5: move out-of-bounds
-//      6: move cmd when not homed
-//      7: bad command data (first byte invalid or length wrong)
+//   MOTOR_FAULT_ERROR   0x10
+//   I2C_OVERFLOW_ERROR  0x20
+//   CMD_DATA_ERROR      0x30
+//   CMD_NOT_DONE_ERROR  0x40
+//   STEP_NOT_DONE_ERROR 0x50
+//   MOTOR_LIMIT_ERROR   0x60
+//   NOT_HOMED_ERROR     0x70
 //
 // state response bytes
 //   1) vccc eboz  state byte
@@ -91,7 +91,7 @@
 //   4) cccc cccc  8-bit cksum, sum of first 3 bytes
 
 
-#define NUM_RECV_BYTES NUM_SETTING_WORDS*2 + 3 // + len word and opcode
+#define RECV_BUF_SIZE   (NUM_SETTING_WORDS*2 + 1) // + opcode byte
 #define NUM_SEND_BYTES   4  //  state, posH, posL, cksum
 
 #define I2C_ADDR_MASK 0xf0 // motor idx in d3-d1 (d2-d0 in real addr)
@@ -106,7 +106,7 @@
 #define I2C_ADDR      0x30  // real addr:0x18, head mcu (U6) for unipolar motors
 #endif
 
-extern volatile uint8 i2cRecvBytes[NUM_MOTORS][NUM_RECV_BYTES + 1];
+extern volatile uint8 i2cRecvBytes[NUM_MOTORS][RECV_BUF_SIZE + 1];
 extern volatile uint8 i2cRecvBytesPtr;
 extern volatile uint8 i2cSendBytes[NUM_SEND_BYTES];
 extern volatile uint8 i2cSendBytesPtr;

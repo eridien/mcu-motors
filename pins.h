@@ -40,7 +40,7 @@
 
 #define faultTRIS TRISA5
 #define faultPORT PORTA
-#define faultMASK  0x80
+#define faultMASK  0x20
 
 #define limitTRIS TRISA4
 #define limitPORT PORTA
