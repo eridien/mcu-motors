@@ -57,7 +57,6 @@ extern uint8                   limitMask[NUM_MOTORS];
 
 struct motorState {
   uint8  stateByte;
-  bool   moving;
   bool   homing;
   uint8  homingState;
   bool   stopping;
@@ -77,6 +76,7 @@ struct motorState {
   bool   resetAfterSoftStop;
   bool   nextStateTestPos;
   int16  homeTestPos;
+  bool   homeReversed;
 } mState[NUM_MOTORS];
 
 // constants loadable from command (all must be 16 bits))
@@ -88,10 +88,11 @@ struct motorSettings {
   uint16 homingSpeed;
   uint16 homingBackUpSpeed;
   uint16 homeOfs;
-  uint16 homePos;  // value to set cur pos after homing
+  uint16 homePos;   // value to set cur pos after homing
+  uint16 homeToLim; // home dir, 0:rev, 1:fwd if lim closed, 2:rev if lim closed
 };
 
-#define NUM_SETTING_WORDS 8
+#define NUM_SETTING_WORDS 9
 
 union settingsUnion{
   uint16 reg[NUM_SETTING_WORDS];
@@ -106,7 +107,7 @@ bool limitClosed(void);
 void setStep(void);
 void stopStepping(void);
 void resetMotor(bool all);
-void motorOnCmd(void);
+void motorOn(void);
 void processMotorCmd(void);
 void clockInterrupt(void);
 uint16 getLastStep(void);

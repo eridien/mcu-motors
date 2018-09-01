@@ -60,7 +60,7 @@ void main(void) {
       ms = &mState[motorIdx];
       sv = &(mSet[motorIdx].val);
       if(errorIntCode && errorIntMot == motorIdx) {
-        // error during interrupt
+        // error happened during interrupt
         setError(errorIntCode);
         errorIntCode = 0;
       }

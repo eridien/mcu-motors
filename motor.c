@@ -208,7 +208,6 @@ void setMotorSettings() {
 void stopStepping() {
   ms->stepPending = false;
   ms->stepped     = false;
-  ms->moving      = false;
   ms->homing      = false;
   ms->stopping    = false;
   setStateBit(BUSY_BIT, false);
@@ -249,18 +248,19 @@ bool underAccellLimit() {
 // curUStep, only 1/2 -> 1/8 (1..3) is allowed 
 #define MIN_USTEP 1
 #define MAX_USTEP 3
-uint16 uStepPhaseMask[] = {0x07, 0x03, 0x01, 0x00};
-uint16 uStepFactor[]    = {   8,    4,    2,    1};
+const uint16 uStepPhaseMask[] = {0x0f, 0x07, 0x03, 0x01};
+const uint16 uStepDist[]      = {   8,    4,    2,    1};
 
 void setStep() {
 #ifdef BM
-  // set ustep
+  // adjust ustep
   while(true) {
     // approximate pulsesPerSec
     uint16 pulsesPerSec = ms->curSpeed >> (MAX_USTEP - ms->ustep);
     if(ms->ustep < MAX_USTEP && pulsesPerSec < 500) {
       ms->ustep++;
     }
+    // note that you can only reduce ustep when phase correct
     else if(ms->ustep > MIN_USTEP && pulsesPerSec > 1500 && 
            (ms->curPos & uStepPhaseMask[ms->ustep]) == 0) {
       ms->ustep--;
@@ -268,19 +268,21 @@ void setStep() {
     else break;
   }
   // set step timing
-  uint16 absStepDist = uStepFactor[ms->ustep];
-  uint16 stepTicks = 50000 / absStepDist; // 20 usecs/tick
-  if(stepTicks == 0) stepTicks = 1;
-  setNextStep(getLastStep() + stepTicks);
+  uint16 clkTicks;
+  switch (ms->ustep) {
+    case 1: clkTicks = (CLK_TICKS_PER_SEC / 4) / ms->curSpeed;
+    case 2: clkTicks = (CLK_TICKS_PER_SEC / 2) / ms->curSpeed;
+    case 3: clkTicks = (CLK_TICKS_PER_SEC / 1) / ms->curSpeed;
+  }
+  setNextStep(getLastStep() + clkTicks);
   ms->stepped = false;
   setBiStepLo();
   ms->stepPending = true;
 
 #else
   // check step timing
-  uint16 stepTicks = 50000 / ms->curSpeed; // 20 usecs/tick
-  if(stepTicks == 0) stepTicks = 1;
-  setNextStep(getLastStep() + stepTicks);
+  uint16 clkTicks = CLK_TICKS_PER_SEC / ms->curSpeed; // 20 usecs/tick
+  setNextStep(getLastStep() + clkTicks);
   ms->stepped = false;
   ms->phase += ((ms->curDir ? 1 : -1) & 0x03);
   ms->stepPending = true;
@@ -288,19 +290,7 @@ void setStep() {
 }
 
 void chkStopping() {
-  // in the process of stepping
-  if(ms->stepPending || ms->stepped) return;
-  
-  if(ms->curPos < 0 || ms->curPos >= sv->maxPos) {
-    setError(MOTOR_LIMIT_ERROR);
-    return;
-  }
-  // check ms->speed/acceleration
-  if(!underAccellLimit()) {
-    // decellerate
-    ms->curSpeed -= sv->accellerationRate;
-  }
-  else {
+  if(underAccellLimit()) {
     stopStepping();
     if(ms->resetAfterSoftStop) {
       // reset only this motor
@@ -308,7 +298,6 @@ void chkStopping() {
     }
     return;
   }
-  setStep();
 }
 
 // from event loop
@@ -317,37 +306,45 @@ void chkMotor() {
     setError(MOTOR_FAULT_ERROR);
     return;
   }
+  if(ms->curPos < 0 || ms->curPos >= sv->maxPos) {
+    setError(MOTOR_LIMIT_ERROR);
+    return;
+  }
+  if(ms->stepPending) {
+    return;
+  }
   if(ms->stepped) {
     if(ms->curDir) {
-      ms->curPos += uStepFactor[ms->ustep];
+      ms->curPos += uStepDist[ms->ustep];
     }
     else {
-      ms->curPos -= uStepFactor[ms->ustep];
+      ms->curPos -= uStepDist[ms->ustep];
     }
     ms->stepped = false;
   }
-  if(ms->moving) {
-    if(!haveError()) {
-      chkMoving();
-    }
-  }
-  else if(ms->homing && !haveError()) {
-    chkHoming();
-  }
-  else if(ms->stopping) {
+  if(ms->stopping) {
     chkStopping();
+  }
+  if (!haveError()) {
+    if(ms->homing) {
+      chkHoming();
+    }
+    if(ms->stateByte & BUSY_BIT) {
+      calcMotion();
+    }
   }
 }
 
 void softStopCommand(bool resetAfter) {
-  ms->homing   = false;
-  ms->moving   = false;
-  ms->stopping = true;
-  setStateBit(BUSY_BIT, 1);
+  ms->homing             = false;
+  ms->targetDir          = ms->curDir;
+  ms->targetSpeed        = 0;
+  ms->stopping           = true;
   ms->resetAfterSoftStop = resetAfter;
+  setStateBit(BUSY_BIT, 1);
 }
 
-void motorOnCmd() {
+void motorOn() {
   setStateBit(MOTOR_ON_BIT, 1);
 #ifdef BM
   resetLAT = 1; 
@@ -399,7 +396,7 @@ void processMotorCmd() {
         case 2: softStopCommand(false);        break; // stop,no reset
         case 3: softStopCommand(true);         break; // stop with reset
         case 4: resetMotor(false);             break; // hard stop (immediate reset)
-        case 5: motorOnCmd();                  break; // reset off
+        case 5: motorOn();                  break; // reset off
         case 6: ms->curPos = sv->homePos;      break;  // set curpos to setting
         default: lenIs(255); // invalid cmd sets CMD_DATA_ERROR
       }
@@ -431,7 +428,7 @@ void clockInterrupt(void) {
     struct motorState *p = &mState[motIdx];
     if(p->stepPending && p->nextStepTicks == timeTicks) {
       if(p->stepped) {
-        // oops, last motor step not handled yet
+        // last motor step not handled yet
         setErrorInt(motIdx, STEP_NOT_DONE_ERROR);
         return;
       }

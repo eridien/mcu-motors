@@ -6,21 +6,13 @@
 #include "state.h"
 #include "motor.h"
 
-void chkMoving() {
-  // in the process of stepping
-  if(ms->stepPending || ms->stepped) return;
-  
-  if(ms->curPos < 0 || ms->curPos >= sv->maxPos) {
-    setError(MOTOR_LIMIT_ERROR);
-    return;
-  }
-  ms->targetDir = (ms->targetPos >= ms->curPos); 
-  
+void calcMotion() {
   bool accelerate = false;
   bool decelerate = false;
   
   if(underAccellLimit()) {
-    if(ms->curPos == ms->targetPos) {
+    if(!ms->homing && !ms->stopping && ms->curPos == ms->targetPos) {
+      // finished normal move
       stopStepping();
       return;
     }
@@ -39,15 +31,17 @@ void chkMoving() {
       decelerate = true;
     }
     else {
-      int16 distRemaining = (ms->targetPos - ms->curPos);
-      if(distRemaining < 0) {
-        distRemaining = -distRemaining;
-      }
-      for(uint8 i = 0; i < sizeof(decellTable)/4; i++) {
-        if(ms->curSpeed >= decellTable[i][0] &&
-           distRemaining <= decellTable[i][1]) {
-          decelerate = true;
-          break;
+      if(!ms->homing && !ms->stopping) {
+        int16 distRemaining = (ms->targetPos - ms->curPos);
+        if(distRemaining < 0) {
+          distRemaining = -distRemaining;
+        }
+        for(uint8 i = 0; i < sizeof(decellTable)/4; i++) {
+          if(ms->curSpeed >= decellTable[i][0] &&
+             distRemaining <= decellTable[i][1]) {
+            decelerate = true;
+            break;
+          }
         }
       }
       if(!decelerate) {
@@ -65,7 +59,8 @@ void chkMoving() {
   }
   else if (accelerate) {
     ms->curSpeed += sv->accellerationRate;
-    if(ms->curSpeed > sv->maxSpeed) ms->curSpeed = sv->maxSpeed;
+    if(ms->curSpeed > sv->maxSpeed) 
+       ms->curSpeed = sv->maxSpeed;
   }
   setStep();
 }
@@ -75,24 +70,11 @@ void moveCommand() {
     setError(NOT_HOMED_ERROR);
     return;
   }
-  ms->homing   = false;
-  ms->moving   = true;
-  ms->stopping = false;
-  if(!underAccellLimit()) {
-    // already moving fast, keep going same way
-    chkMoving();
-  }
-  else if(ms->curPos != ms->targetPos) {
-    ms->curDir = (ms->targetPos >= ms->curPos);
-    // start moving
-    setStateBit(BUSY_BIT, true);
-    ms->targetSpeed = sv->maxSpeed;
-    chkMoving();
-  }
-  else {
-    // already at target
-    stopStepping();
-  }
+  ms->homing      = false;
+  ms->stopping    = false;
+  ms->targetDir   = (ms->targetPos >= ms->curPos);   
+  setStateBit(BUSY_BIT, true);
+  calcMotion();
 }
 
 

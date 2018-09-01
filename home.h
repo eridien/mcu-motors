@@ -5,12 +5,10 @@
 #include "types.h"
 #include "motor.h"
 
-#define homingIdle   0
-#define homeStarting 1
-#define homingIn     2
-#define homingSwitch 3
-#define homingOut    4
-#define homingOfs    5
+#define homeStarting  0
+#define goingHome     1
+#define homeReversing 2
+#define homingToOfs   3
 
 void chkHoming(void);
 void homeCommand(void);

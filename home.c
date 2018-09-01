@@ -7,41 +7,39 @@
 #include "motor.h"
 
 void chkHoming() {
-  // in the process of stepping
-  if(ms->stepPending || ms->stepped) return;
-  
-  if(limitClosed()) {
-    // home switch is closed
-    ms->targetDir = 1;
-    ms->curSpeed     = sv->homingBackUpSpeed;
-    ms->homingState   = homingSwitch;
+  switch(ms->homingState) {
+    case homeStarting:
+      ms->targetSpeed = sv->homingSpeed;
+      ms->targetDir   = ms->homeReversed;
+      ms->homingState =  goingHome;
+      break;
+      
+    case goingHome:
+      if(limitClosed() != ms->homeReversed) {
+        ms->targetDir   = !ms->homeReversed;
+        ms->targetSpeed =  sv->homingBackUpSpeed;
+        ms->homingState =  homeReversing;
+      }
+      break;
+      
+    case homeReversing:
+      if(limitClosed() == ms->homeReversed) {
+        ms->homeTestPos = ms->curPos;
+        ms->curPos = 0;
+        ms->homingState = homingToOfs;
+       }
+      break;
+    
+    case homingToOfs: 
+      if(ms->curPos >= sv->homeOfs) {
+        ms->homing = false;
+        setStateBit(HOMED_BIT, 1);
+        ms->curPos = sv->homePos;
+        stopStepping();
+        return;
+      }
+      break;
   }
-  else {
-    // home switch is open
-    if(ms->homingState == homingSwitch) {
-      ms->curPos = 0;
-      ms->homingState = homingOfs;
-    } 
-    else if(ms->homingState == homingOfs && ms->curPos >= sv->homeOfs) {
-      ms->homingState = homingIdle;
-      setStateBit(HOMED_BIT, 1);
-      ms->curPos = sv->homePos;
-      stopStepping();
-      return;
-    }
-  }
-  // set homing ms->speed
-  int16 speedDiff = (ms->curDir ? 1 : -1) * sv->accellerationRate;
-  if(ms->curSpeed > sv->homingSpeed) {
-    // decellerate
-    ms->curSpeed -= speedDiff;
-  }
-  else if(ms->homingState == homeStarting) {
-    ms->curSpeed = sv->homingSpeed;
-    ms->curDir = 0;
-    ms->homingState = homingIn;
-  }
-  setStep();
 }
 
 #ifdef BM
@@ -49,7 +47,7 @@ void homeCommand() {
   setStateBit(HOMED_BIT, 0);
   setStateBit(MOTOR_ON_BIT, 1);
   resetLAT = 1;
-  ms->homingState = homeStarting;
+  ms->homingState = goingHome;
   setStateBit(BUSY_BIT, true);
 }
 #else
@@ -57,12 +55,13 @@ void homeCommand() {
   if(limitPort[motorIdx]) {
     // this motor has limit switch
     setStateBit(HOMED_BIT, 0);
-    setStateBit(MOTOR_ON_BIT, 1);
-    ms->homing = true;
-    ms->moving = false;
-    ms->stopping = false;
-    ms->homingState = homeStarting;
+    motorOn();
+    ms->homeReversed = (sv->homeToLim && (sv->homeToLim - 1) == limitClosed());
+    ms->homing       = true;
+    ms->stopping     = false;
+    ms->homingState  = goingHome;
     setStateBit(BUSY_BIT, 1);
+    chkHoming();
   }
   else {
     setStateBit(HOMED_BIT, 1);

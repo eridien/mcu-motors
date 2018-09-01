@@ -10,9 +10,7 @@
 // todo
 //   set homing dir for rotation motor
 //   keep pos accurate in sendbytes
-//   fix accell calc to use actual seconds
 //   decellTable should be set when accell set
-//   chg unexpected limit sw to 0 and sv->maxPos
 
 // when returning test pos instead of cur pos
 // state byte will have this magic value which can't happen normally
@@ -34,7 +32,7 @@
 #define MOTOR_ON_BIT        0x02
 #define HOMED_BIT           0x01
 
-#define haveError() (ms->stateByte & ERROR_BIT)
+#define haveError() (errorIntCode || ms->stateByte & ERROR_BIT)
 
 extern volatile bool errorIntMot;
 extern volatile bool errorIntCode;

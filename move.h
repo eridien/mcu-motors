@@ -5,7 +5,7 @@
 #include "types.h"
 #include "motor.h"
 
-void chkMoving(void);
+void calcMotion(void);
 void moveCommand(void);
 bool underAccellLimit(void);
 
