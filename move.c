@@ -6,6 +6,7 @@
 #include "state.h"
 #include "motor.h"
 #include "clock.h"
+#include "stop.h"
 
 #define DECEL_TABLE_SIZE 5
 // for 40 steps/mm this is 200 mm/sec, 150 mm/sec, ...
@@ -34,11 +35,6 @@ void calcDecelTable(uint8 motIdx) {
     decelDist[motIdx][i] = dist;
   }
 }
-
-bool underAccelLimit() {
-  return (ms->curSpeed <= sv->noAccelSpeedLimit);
-}
-
 
 void setStep() {
 #ifdef BM
@@ -150,6 +146,9 @@ void moveCommand() {
   if((ms->stateByte & HOMED_BIT) == 0) {
     setError(NOT_HOMED_ERROR);
     return;
+  }
+  if(ms->curSpeed == 0) {
+    ms->targetSpeed = sv->noAccelSpeedLimit;
   }
   ms->homing      = false;
   ms->stopping    = false;

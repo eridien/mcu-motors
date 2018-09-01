@@ -11,10 +11,11 @@
 const uint16 uStepPhaseMask[] = {0x0f, 0x07, 0x03, 0x01};
 const uint16 uStepDist[]      = {   8,    4,    2,    1};
 
+#define underAccelLimit() (ms->curSpeed <= sv->noAccelSpeedLimit)
+
 void calcDecelTable(uint8 motIdx);
 void calcMotion(void);
 void moveCommand(void);
-bool underAccelLimit(void);
 
 #endif	/* MOVE_H */
 

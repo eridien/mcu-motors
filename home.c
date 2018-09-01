@@ -5,6 +5,7 @@
 #include "state.h"
 #include "home.h"
 #include "motor.h"
+#include "stop.h"
 
 void chkHoming() {
   switch(ms->homingState) {

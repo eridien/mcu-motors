@@ -4,6 +4,7 @@
 #include "state.h"
 #include "i2c.h"
 #include "motor.h"
+#include "stop.h"
 
 bool nextStateTestPos;
 

@@ -25,11 +25,15 @@
 //
 // writes ...
 //   (first word of recv buffer is buf len)
+//
+//   -- move ommands --
 //   1aaa aaaa  goto command, top 7 bits of goto addr
 //      aaaa aaaa followed by bottom 8 bits
 //   01ss ssss (speed-move cmd) set max speed = s*256 steps/sec and move to addr
 //     0aaa aaaa top 7 bits of move addr
 //     aaaa aaaa bottom 8 bits
+//
+//   -- one-byte commands --
 //   0001 0000  start homing
 //   0001 0001  next read position is end position of homing (test pos)
 //   0001 0010  soft stop, deccelerates, no reset
@@ -37,7 +41,9 @@
 //   0001 0100  hard stop (immediate reset)
 //   0001 0101  motor on (hold place, reset off)
 //   0001 0110  set curpos to home pos value setting (fake homing)
-//   0001 0111  set regs, 16-bit values
+//
+//   -- 17 byte settings command --
+//   0001 0111  load settings, 16-bit values
 //      max speed
 //      max pos (min pos is always zero))
 //      no-acceleration speed limit (and start speed)
@@ -69,19 +75,19 @@
 //   cccc cccc  8-bit cksum, sum of first 3 bytes
 
 
-#define NUM_RECV_BYTES NUM_SETTING_WORDS*2 + 4 // + len word and opcodes
-#define NUM_SEND_BYTES   6  //  state, posH, posL, testH, testL, cksum
+#define NUM_RECV_BYTES NUM_SETTING_WORDS*2 + 3 // + len word and opcode
+#define NUM_SEND_BYTES   4  //  state, posH, posL, cksum
 
 #define I2C_ADDR_MASK 0xf0 // motor idx in d3-d1 (d2-d0 in real addr)
 
 #ifdef B1
-#define I2C_ADDR      0x10  // real addr:0x08, ext box mcu, motor is always 0
+#define I2C_ADDR      0x10  // real addr:0x08, ext box mcu (B1), motor always 0
 #endif
 #ifdef B3
-#define I2C_ADDR      0x20  // real addr:0x10, head mcu for bipolar motors
+#define I2C_ADDR      0x20  // real addr:0x10, head mcu (B3)for bipolar motors
 #endif
 #ifdef U6
-#define I2C_ADDR      0x30  // real addr:0x18, head mcu for unipolar motors
+#define I2C_ADDR      0x30  // real addr:0x18, head mcu (U6) for unipolar motors
 #endif
 
 extern volatile uint8 i2cRecvBytes[NUM_MOTORS][NUM_RECV_BYTES + 1];

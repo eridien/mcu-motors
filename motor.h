@@ -102,11 +102,8 @@ union settingsUnion{
 
 void motorInit(void);
 void chkMotor(void);
-void softStopCommand(bool reset);
 bool haveFault(void);        // bipolar only
 bool limitClosed(void);
-void stopStepping(void);
-void resetMotor(bool all);
 void motorOn(void);
 void processMotorCmd(void);
 void clockInterrupt(void);
