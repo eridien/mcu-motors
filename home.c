@@ -60,6 +60,7 @@ void homeCommand() {
     ms->lastStepTicks = timeTicks;
     ms->curSpeed = sv->homingSpeed;
     GIE=1;
+    setDacToSpeed();
   }
   setStateBit(BUSY_BIT, 1);
   setStateBit(HOMED_BIT, 0);
@@ -83,6 +84,7 @@ void homeCommand() {
       ms->lastStepTicks = timeTicks;
       GIE=1;
       ms->curSpeed = sv->noAccelSpeedLimit;
+      setDacToSpeed();
     }
     setStateBit(BUSY_BIT, 1);
     chkHoming();

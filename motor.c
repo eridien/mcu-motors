@@ -57,6 +57,7 @@ void motorInit() {
     p->stepPending = false;
     p->stepped     = false;
     p->curSpeed    = 0;
+    setDacToSpeed();
     for(uint8 i = 0; i < NUM_SETTING_WORDS; i++) {
        mSet[motIdx].reg[i] = settingsInit[i];
     }

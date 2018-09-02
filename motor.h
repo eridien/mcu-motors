@@ -66,6 +66,9 @@ union settingsUnion{
   struct motorSettings val;
 } mSet[NUM_MOTORS];
 
+// debug
+#define setDacToSpeed() DAC1R0 = (ms->curSpeed >> 8);
+
 // default startup values
 // must match settingsStruct
 #ifdef BM
@@ -76,7 +79,7 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
  16000,    // max pos is 400 mm
   1200,    // no-acceleration ms->speed limit (30 mm/sec)
  40000,    // acceleration rate steps/sec/sec  (1000 mm/sec/sec)
- 20000,    // homing speed (500 mm/sec)
+  8000,    // homing speed (200 mm/sec)
     60,    // homing back-up ms->speed (1.5 mm/sec)
     40,    // home offset distance: 1 mm
      0,    // home pos value, set cur pos to this after homing

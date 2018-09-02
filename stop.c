@@ -2,9 +2,10 @@
 #include <xc.h>
 #include "pins.h"
 #include "state.h"
+#include "stop.h"
 #include "motor.h"
 #include "move.h"
-#include "stop.h"
+#include "clock.h"
 
 void stopStepping() {
   ms->stepPending = false;
@@ -12,6 +13,7 @@ void stopStepping() {
   ms->homing      = false;
   ms->stopping    = false;
   ms->curSpeed    = sv->noAccelSpeedLimit;
+  setDacToSpeed();
   setStateBit(BUSY_BIT, 0);
 }
 
@@ -53,9 +55,10 @@ void softStopCommand(bool resetAfter) {
     ms->lastStepTicks = timeTicks;
     GIE=1;
     ms->curSpeed = sv->noAccelSpeedLimit;
+    setDacToSpeed();
   }
   setStateBit(BUSY_BIT, 1);
-  ms->stopping           = true;
+  ms->stopping = true;
 }
 
 void chkStopping() {
