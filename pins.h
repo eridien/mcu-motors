@@ -45,6 +45,14 @@
 #define limitTRIS TRISA4
 #define limitPORT PORTA
 #define limitMASK  0x10
+
+#define debug1TRIS TRISC4
+#define debug2TRIS TRISC3
+#define debug3TRIS TRISC6
+
+#define dbg1       LATC4
+#define dbg2       LATC3
+#define dbg3       LATC6
 #endif /* B1 */
 
 #ifdef B3

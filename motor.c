@@ -53,7 +53,7 @@ void motorInit() {
     struct motorState *p = &mState[motIdx];
     p->stateByte   = 0;    // no err, not busy, motor off, and not homed
     p->phase       = 0;    // cur step phase (unipolar only)
-    p->haveCommand  = false;
+    p->haveCommand = false;
     p->stepPending = false;
     p->stepped     = false;
     p->curSpeed    = 0;
@@ -186,24 +186,9 @@ void processMotorCmd() {
   else lenIs(255); // invalid cmd sets CMD_DATA_ERROR
 }
 
-// lastStepTicks used in interrupts
-uint16 getLastStepTicks(void) {
-  bool tempGIE = GIE;
-  GIE = 0;
-  uint16 temp = ms->lastStepTicks;
-  GIE = tempGIE; 
-  return temp;
-}
-
-// nextStepTicks used in interrupts
-void setNextStepTicks(uint16 ticks) {
-  bool tempGIE = GIE;
-  GIE = 0;
-  ms->nextStepTicks = ticks;
-  GIE = tempGIE; 
-}
-
 void clockInterrupt(void) {
+    dbg3=1;
+
   timeTicks++;
   for(int motIdx = 0; motIdx < NUM_MOTORS; motIdx++) {
     struct motorState *p = &mState[motIdx];
@@ -219,6 +204,8 @@ void clockInterrupt(void) {
       ms3LAT = ((p->ustep & 0x04) ? 1 : 0);
       dirLAT =   p->curDir        ? 1 : 0;
       setBiStepHiInt(motIdx);
+        dbg1 = 1;
+
 #else
       setUniPortInt(motIdx, ms->phase); 
 #endif
@@ -227,4 +214,5 @@ void clockInterrupt(void) {
       p->stepped = true;
     }
   }
+      dbg3=0;
 }

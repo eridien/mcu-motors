@@ -17,7 +17,6 @@ int16 decelTableSpeeds[DECEL_TABLE_SIZE] = {8000, 6000, 4000, 2500, 2000};
 // calculates distance based on that speed and acceleration setting
 uint16 decelDist[NUM_MOTORS][DECEL_TABLE_SIZE];
 
-// this is gonna be SSLLOOWW
 void calcDecelTable(uint8 motIdx) {
   uint16 accel = mSet[motIdx].val.acceleration;
   for(uint8 i = 0; i < DECEL_TABLE_SIZE; i++) {
@@ -46,23 +45,30 @@ void setStep() {
       ms->ustep++;
     }
     // note that you can only reduce ustep when the phase is correct
-    else if(ms->ustep > MIN_USTEP && pulsesPerSec > 1500 && 
+    else if(ms->ustep > MIN_USTEP && pulsesPerSec > 1000 && 
            (ms->curPos & uStepPhaseMask[ms->ustep]) == 0) {
       ms->ustep--;
     }
     else break;
   }
+  dbg2=1;
   // set step timing
   uint16 clkTicks;
   switch (ms->ustep) {
-    case 1: clkTicks = (CLK_TICKS_PER_SEC / 4) / ms->curSpeed;
-    case 2: clkTicks = (CLK_TICKS_PER_SEC / 2) / ms->curSpeed;
-    case 3: clkTicks = (CLK_TICKS_PER_SEC / 1) / ms->curSpeed;
+    case 1: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 2); break;
+    case 2: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 1); break;
+    case 3: clkTicks = CLK_TICKS_PER_SEC /  ms->curSpeed      ; break;
   }
-  uint16 lastTicks = getLastStepTicks();
-  setNextStepTicks(lastTicks + clkTicks);
+  dbg2=0;
+  GIE = 0;
+  ms->nextStepTicks = ms->lastStepTicks + clkTicks;
+  GIE = 1;
+    
   ms->stepped = false;
   setBiStepLo();
+    
+  dbg1 = 0;
+  
   ms->stepPending = true;
 
 #else
@@ -73,6 +79,7 @@ void setStep() {
   ms->phase += ((ms->curDir ? 1 : -1) & 0x03);
   ms->stepPending = true;
 #endif /* BM */
+
 }
 
 void checkMotor() {
@@ -142,7 +149,7 @@ void checkMotor() {
     if(ms->curSpeed > ms->targetSpeed) {
       ms->curSpeed = ms->targetSpeed;
     }
-  }
+  }    
   setStep();
 }
 
@@ -159,7 +166,6 @@ void moveCommand() {
   ms->targetDir   = (ms->targetPos >= ms->curPos);   
   ms->ustep       = MAX_USTEP;
   setStateBit(BUSY_BIT, true);
-  checkMotor();
 }
 
 

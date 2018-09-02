@@ -44,6 +44,11 @@ void main(void) {
 #ifndef BM
   ANSELD = 0;
 #endif
+  
+  debug1TRIS = 0;
+  debug2TRIS = 0;
+  debug3TRIS = 0;
+  
   i2cInit();
   clkInit();
   motorInit();
