@@ -7,6 +7,7 @@
 #include "motor.h"
 #include "stop.h"
 #include "move.h"
+#include "clock.h"
 
 void chkHoming() {
   switch(ms->homingState) {
@@ -15,7 +16,7 @@ void chkHoming() {
       ms->targetDir   = ms->homeReversed;
       ms->homingState =  goingHome;
       break;
-      
+
     case goingHome:
       if(limitClosed() != ms->homeReversed) {
         // just passed switch
@@ -54,7 +55,13 @@ void chkHoming() {
 
 #ifdef BM
 void homeCommand() {
-  setStateBit(BUSY_BIT, true);
+  if((ms->stateByte & BUSY_BIT) == 0) {
+    GIE=0;
+    ms->lastStepTicks = timeTicks;
+    ms->curSpeed = sv->homingSpeed;
+    GIE=1;
+  }
+  setStateBit(BUSY_BIT, 1);
   setStateBit(HOMED_BIT, 0);
   motorOn();
   ms->homing = true;
@@ -71,6 +78,12 @@ void homeCommand() {
     ms->homing       = true;
     ms->stopping     = false;
     ms->homingState  = goingHome;
+    if((ms->stateByte & BUSY_BIT) == 0) {
+      GIE=0;
+      ms->lastStepTicks = timeTicks;
+      GIE=1;
+      ms->curSpeed = sv->noAccelSpeedLimit;
+    }
     setStateBit(BUSY_BIT, 1);
     chkHoming();
   }

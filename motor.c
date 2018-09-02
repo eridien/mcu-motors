@@ -107,14 +107,14 @@ void checkAll() {
     }
     ms->stepped = false;
   }
-  if (!haveError()) {
+  if((ms->stateByte & BUSY_BIT) && !haveError()) {
     if(ms->homing) {
       chkHoming();
     }
     else if(ms->stopping) {
       chkStopping();
     }
-    else if(ms->stateByte & BUSY_BIT) {
+    else {
       // normal moving
       if(ms->curPos < 0 || ms->curPos >= sv->maxPos) {
         setError(MOTOR_LIMIT_ERROR);

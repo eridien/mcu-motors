@@ -165,7 +165,12 @@ void moveCommand() {
   ms->stopping    = false;
   ms->targetDir   = (ms->targetPos >= ms->curPos);   
   ms->ustep       = MAX_USTEP;
-  setStateBit(BUSY_BIT, true);
+  if((ms->stateByte & BUSY_BIT) == 0) {
+    GIE=0;
+    ms->lastStepTicks = timeTicks;
+    GIE=1;
+  }
+  setStateBit(BUSY_BIT, 1);
 }
 
 
