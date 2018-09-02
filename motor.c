@@ -90,13 +90,9 @@ void setMotorSettings() {
 }
 
 // from event loop
-void chkMotor() {
+void checkAll() {
   if(haveFault()) {
     setError(MOTOR_FAULT_ERROR);
-    return;
-  }
-  if(ms->curPos < 0 || ms->curPos >= sv->maxPos) {
-    setError(MOTOR_LIMIT_ERROR);
     return;
   }
   if(ms->stepPending) {
@@ -115,12 +111,17 @@ void chkMotor() {
     if(ms->homing) {
       chkHoming();
     }
-    if(ms->stopping) {
+    else if(ms->stopping) {
       chkStopping();
     }
-    if(ms->stateByte & BUSY_BIT) {
-      calcMotion();
+    else if(ms->stateByte & BUSY_BIT) {
+      // normal moving
+      if(ms->curPos < 0 || ms->curPos >= sv->maxPos) {
+        setError(MOTOR_LIMIT_ERROR);
+        return;
+      }
     }
+    checkMotor();
   }
 }
 
@@ -186,7 +187,7 @@ void processMotorCmd() {
 }
 
 // lastStepTicks used in interrupts
-uint16 getLastStep(void) {
+uint16 getLastStepTicks(void) {
   bool tempGIE = GIE;
   GIE = 0;
   uint16 temp = ms->lastStepTicks;
@@ -195,7 +196,7 @@ uint16 getLastStep(void) {
 }
 
 // nextStepTicks used in interrupts
-void setNextStep(uint16 ticks) {
+void setNextStepTicks(uint16 ticks) {
   bool tempGIE = GIE;
   GIE = 0;
   ms->nextStepTicks = ticks;

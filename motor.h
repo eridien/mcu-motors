@@ -46,30 +46,6 @@ extern uint8                   mm; // motor mask (0xf0 or 0x0f or step bit)
   (*stepPort[_motIdx] = (*stepPort[_motIdx] & ~stepMask[_motIdx]) |   \
     motPhaseValue[_motIdx][_phase]);
 
-struct motorState {
-  uint8  stateByte;
-  bool   homing;
-  uint8  homingState;
-  bool   stopping;
-  int16  curPos;
-  uint16 curSpeed;
-  bool   curDir;
-  int16  targetPos;
-  uint16 targetSpeed;
-  bool   targetDir;
-  uint8  ustep;  // bipolar only
-  uint8  phase;  // unipolar only
-  bool   stepPending;
-  bool   stepped;
-  uint16 nextStepTicks;
-  uint16 lastStepTicks;
-  bool   haveCommand;
-  bool   resetAfterSoftStop;
-  bool   nextStateTestPos;
-  int16  homeTestPos;
-  bool   homeReversed;
-} mState[NUM_MOTORS];
-
 // constants loadable from command (all must be 16 bits))
 struct motorSettings {
   uint16 maxSpeed;
@@ -194,14 +170,14 @@ uint8 motPhaseValue[NUM_MOTORS][4] = { // motor, phase
 
 
 void motorInit(void);
-void chkMotor(void);
+void checkAll(void);
 bool haveFault(void);        // bipolar only
 bool limitClosed(void);
 void motorOn(void);
 void processMotorCmd(void);
 void clockInterrupt(void);
-uint16 getLastStep(void);
-void   setNextStep(uint16 ticks);
+uint16 getLastStepTicks(void);
+void   setNextStepTicks(uint16 ticks);
 
 #endif	/* MOTOR_H */
 

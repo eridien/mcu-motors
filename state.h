@@ -27,6 +27,31 @@
 #define MOTOR_ON_BIT        0x02
 #define HOMED_BIT           0x01
 
+struct motorState {
+  uint8  stateByte;
+  bool   homing;
+  uint8  homingState;
+  bool   stopping;
+  int16  curPos;
+  uint16 curSpeed;
+  bool   curDir;
+  int16  targetPos;
+  uint16 targetSpeed;
+  bool   targetDir;
+  uint8  ustep;  // bipolar only
+  uint8  phase;  // unipolar only
+  bool   stepPending;
+  bool   stepped;
+  uint16 nextStepTicks;
+  uint16 lastStepTicks;
+  bool   haveCommand;
+  bool   resetAfterSoftStop;
+  bool   nextStateTestPos;
+  int16  homeTestPos;
+  bool   homeReversed;
+} mState[NUM_MOTORS];
+
+
 #define haveError() (errorIntCode || (ms->stateByte & ERROR_BIT))
 
 extern volatile bool errorIntMot;

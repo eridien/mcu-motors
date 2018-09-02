@@ -68,7 +68,7 @@ void main(void) {
         processMotorCmd();
         ms->haveCommand = false;
       }
-      chkMotor();
+      checkAll();
     }
   }
 }

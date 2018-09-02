@@ -14,7 +14,7 @@ const uint16 uStepDist[]      = {   8,    4,    2,    1};
 #define underAccelLimit() (ms->curSpeed <= sv->noAccelSpeedLimit)
 
 void calcDecelTable(uint8 motIdx);
-void calcMotion(void);
+void checkMotor(void);
 void moveCommand(void);
 
 #endif	/* MOVE_H */

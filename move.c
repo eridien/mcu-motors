@@ -59,7 +59,8 @@ void setStep() {
     case 2: clkTicks = (CLK_TICKS_PER_SEC / 2) / ms->curSpeed;
     case 3: clkTicks = (CLK_TICKS_PER_SEC / 1) / ms->curSpeed;
   }
-  setNextStep(getLastStep() + clkTicks);
+  uint16 lastTicks = getLastStepTicks();
+  setNextStepTicks(lastTicks + clkTicks);
   ms->stepped = false;
   setBiStepLo();
   ms->stepPending = true;
@@ -67,14 +68,14 @@ void setStep() {
 #else
   // check step timing
   uint16 clkTicks = CLK_TICKS_PER_SEC / ms->curSpeed; // 20 usecs/tick
-  setNextStep(getLastStep() + clkTicks);
+  setNextStepTicks(getLastStepTicks() + clkTicks);
   ms->stepped = false;
   ms->phase += ((ms->curDir ? 1 : -1) & 0x03);
   ms->stepPending = true;
 #endif /* BM */
 }
 
-void calcMotion() {
+void checkMotor() {
   bool accelerate = false;
   bool decelerate = false;
   
@@ -129,14 +130,17 @@ void calcMotion() {
     if(deltaSpeed < ms->curSpeed) {
       ms->curSpeed -= deltaSpeed;
     }
+    if(ms->curSpeed < ms->targetSpeed) {
+      ms->curSpeed = ms->targetSpeed;
+    }
   }
   else if (accelerate) {
     // accel/step = accel/sec / steps/sec
     uint16 deltaSpeed = (sv->acceleration / ms->curSpeed);
     if(deltaSpeed == 0) deltaSpeed = 1;
     ms->curSpeed += deltaSpeed;
-    if(ms->curSpeed > sv->maxSpeed) {
-      ms->curSpeed = sv->maxSpeed;
+    if(ms->curSpeed > ms->targetSpeed) {
+      ms->curSpeed = ms->targetSpeed;
     }
   }
   setStep();
@@ -153,8 +157,9 @@ void moveCommand() {
   ms->homing      = false;
   ms->stopping    = false;
   ms->targetDir   = (ms->targetPos >= ms->curPos);   
+  ms->ustep       = MAX_USTEP;
   setStateBit(BUSY_BIT, true);
-  calcMotion();
+  checkMotor();
 }
 
 

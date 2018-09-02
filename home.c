@@ -6,6 +6,7 @@
 #include "home.h"
 #include "motor.h"
 #include "stop.h"
+#include "move.h"
 
 void chkHoming() {
   switch(ms->homingState) {
@@ -53,10 +54,12 @@ void chkHoming() {
 
 #ifdef BM
 void homeCommand() {
+  setStateBit(BUSY_BIT, true);
   setStateBit(HOMED_BIT, 0);
   motorOn();
-  ms->homingState = goingHome;
-  setStateBit(BUSY_BIT, true);
+  ms->homing = true;
+  ms->homingState = homeStarting;
+  ms->ustep = MAX_USTEP;
 }
 #else
 void homeCommand() {
