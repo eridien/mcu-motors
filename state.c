@@ -15,6 +15,8 @@ void setStateBit(uint8 mask, uint8 set){
 void setError(uint8 err) {
   if(err == CLEAR_ERROR) {
     ms->stateByte = ms->stateByte & 0x07;
+    I2C_WCOL = 0;                    // clear WCOL
+    volatile int x = I2C_BUF_BYTE;   // clear SSPOV
   }
   else {
     // an error in one motor sets error bits in all motors

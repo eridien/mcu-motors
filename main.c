@@ -45,15 +45,21 @@ void main(void) {
   ANSELD = 0;
 #endif
   
-  debug1TRIS    = 0;
-  debug2TRIS    = 0;
-  debug3TRIS    = 0;
+//  debug1TRIS    = 0;
+//  debug2TRIS    = 0;
+//  debug3TRIS    = 0;
+//  debug4TRIS    = 0;
   
-  DAC1PSS0      = 0; // DAC top ref is VDD
-  DAC1NSS       = 0; // DAC bot ref is GND
-  DAC1OE1       = 1; // enable DAC 1 pin
-  DAC1R0        = 0; // DAC input value
-  DAC1EN        = 1; // turn DAC on
+// show speed on DAC output pin A0 (ICP Data)
+// always leave enabled, doesn't hurt anything
+// remove pickit debugger to see output
+// see setDacToSpeed() to use
+  DAC1PSS0      = 0;  // DAC top ref is VDD
+  DAC1NSS       = 0;  // DAC bot ref is GND
+  DAC1OE1       = 1;  // enable DAC 1 pin
+  DAC1OE2       = 1;  // enable DAC 2 pin
+  DAC1CON1      = 0;  // DAC input value
+  DAC1EN        = 1;  // turn DAC on
           
   i2cInit();
   clkInit();

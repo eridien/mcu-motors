@@ -56,9 +56,10 @@ void chkHoming() {
 #ifdef BM
 void homeCommand() {
   if((ms->stateByte & BUSY_BIT) == 0) {
+    // motor is not already running -- init speed
     GIE=0;
     ms->lastStepTicks = timeTicks;
-    ms->curSpeed = sv->homingSpeed;
+    ms->curSpeed = sv->noAccelSpeedLimit;
     GIE=1;
     setDacToSpeed();
   }

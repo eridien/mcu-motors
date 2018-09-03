@@ -58,7 +58,6 @@ void setStep() {
     case 2: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 1); break;
     case 3: clkTicks = CLK_TICKS_PER_SEC /  ms->curSpeed      ; break;
   }
-  dbg2=1;
   GIE = 0;
   ms->nextStepTicks = ms->lastStepTicks + clkTicks;
   GIE = 1;
@@ -66,9 +65,6 @@ void setStep() {
   ms->stepped = false;
   setBiStepLo();
     
-  dbg2=0;
-  dbg1 = 0;
-  
   ms->stepPending = true;
 
 #else
@@ -135,11 +131,9 @@ void checkMotor() {
     if(deltaSpeed == 0) deltaSpeed = 1;
     if(deltaSpeed < ms->curSpeed) {
       ms->curSpeed -= deltaSpeed;
-      setDacToSpeed();
     }
     if(ms->curSpeed < ms->targetSpeed) {
       ms->curSpeed = ms->targetSpeed;
-      setDacToSpeed();
     }
   }
   else if (accelerate) {
@@ -147,12 +141,11 @@ void checkMotor() {
     uint16 deltaSpeed = (sv->acceleration / ms->curSpeed);
     if(deltaSpeed == 0) deltaSpeed = 1;
     ms->curSpeed += deltaSpeed;
-    setDacToSpeed();
     if(ms->curSpeed > ms->targetSpeed) {
       ms->curSpeed = ms->targetSpeed;
-      setDacToSpeed();
     }
-  }    
+  } 
+  setDacToSpeed();
   setStep();
 }
 

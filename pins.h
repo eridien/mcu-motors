@@ -42,17 +42,20 @@
 #define faultPORT PORTA
 #define faultMASK  0x20
 
-#define limitTRIS TRISA4
+#define limitTRIS TRISA4 
 #define limitPORT PORTA
-#define limitMASK  0x10
+#define limitMASK 0x10
 
-#define debug1TRIS   TRISC4
-#define debug2TRIS   TRISC3
-#define debug3TRIS   TRISC6
+//#define debug1TRIS   TRISC4
+//#define debug2TRIS   TRISC3
+//#define debug3TRIS   TRISC6
+//#define debug4TRIS   TRISA4
+//
+//#define dbg1         LATC4 // test point TP1
+//#define dbg2         LATC3 // test point TP2
+//#define dbg3         LATC6 // test point TP3
+//#define dbg4         LATA4  // lim y switch
 
-#define dbg1         LATC4
-#define dbg2         LATC3
-#define dbg3         LATC6
 #endif /* B1 */
 
 #ifdef B3

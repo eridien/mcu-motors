@@ -30,7 +30,7 @@ void motorInit() {
 #ifdef B1
   stepTRIS  = 0;
   faultTRIS = 1;  // zero means motor fault
-  limitTRIS = 1;  // zero means at limit switch
+  limitTRIS = 1;  // zero means at limit switch  // may be used by dbg4
 #endif
   
 #ifdef B3
@@ -73,7 +73,7 @@ bool haveFault() {
   return false;
 }
 
-bool limitClosed() {
+bool limitClosed() {  // comment out when limit sw used by dbg4
   volatile unsigned char *p = limitPort[motorIdx];
   if(p != NULL) {
     return !(*p & limitMask[motorIdx]);
@@ -188,8 +188,6 @@ void processMotorCmd() {
 }
 
 void clockInterrupt(void) {
-    dbg3=1;
-
   timeTicks++;
   for(int motIdx = 0; motIdx < NUM_MOTORS; motIdx++) {
     struct motorState *p = &mState[motIdx];
@@ -205,7 +203,6 @@ void clockInterrupt(void) {
       ms3LAT = ((p->ustep & 0x04) ? 1 : 0);
       dirLAT =   p->curDir        ? 1 : 0;
       setBiStepHiInt(motIdx);
-        dbg1 = 1;
 
 #else
       setUniPortInt(motIdx, ms->phase); 
@@ -215,5 +212,4 @@ void clockInterrupt(void) {
       p->stepped = true;
     }
   }
-      dbg3=0;
 }

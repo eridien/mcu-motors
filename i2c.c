@@ -29,8 +29,8 @@ void i2cInit() {
     SSP1STATbits.SMP  = 0;             // slew-rate enabled
     SSP1STATbits.CKE  = 1;             // smb voltage levels
     SSP1CON2bits.SEN  = 1;             // enable clock stretching 
-    SSP1CON3bits.AHEN = 0;             // no clock stretch for addr ack
-    SSP1CON3bits.DHEN = 0;             // no clock stretch for data ack
+    SSP1CON3bits.AHEN = 0;             // no clock stretch before addr ack
+    SSP1CON3bits.DHEN = 0;             // no clock stretch before data ack
     SSP1CON3bits.BOEN = 1;             // enable buffer overwrite check
     
     SSP1CON1bits.SSPEN = 1;            // Enable the serial port
@@ -48,8 +48,8 @@ void i2cInit() {
     SSP2STATbits.SMP  = 0;             // slew-rate enabled
     SSP2STATbits.CKE  = 1;             // smb voltage levels
     SSP2CON2bits.SEN  = 1;             // enable clock stretching 
-    SSP2CON3bits.AHEN = 0;             // no clock stretch for addr ack
-    SSP2CON3bits.DHEN = 0;             // no clock stretch for data ack
+    SSP2CON3bits.AHEN = 0;             // no clock stretch before addr ack
+    SSP2CON3bits.DHEN = 0;             // no clock stretch before data ack
     SSP2CON3bits.BOEN = 1;             // enable buffer overwrite check
     
     SSP2CON1bits.SSPEN = 1;            // Enable the serial port
@@ -83,12 +83,12 @@ void i2cInterrupt(void) {
     // received start bit, prepare for packet
     i2cRecvBytesPtr = 1; // skip over length byte
     i2cSendBytesPtr = 0;
-    I2C_WCOL = 0;                  // clear WCOL
+    I2C_WCOL = 0;                    // clear WCOL
     volatile int x = I2C_BUF_BYTE;   // clear SSPOV
     inPacket = true;
   }
   else if(I2C_STOP_BIT) { 
-    // received stop bit, on read tell loop that data is available
+    // received stop bit
     inPacket = false;
     if (I2C_WCOL || I2C_SSPOV) {
       setErrorInt(motIdxInPacket, I2C_OVERFLOW_ERROR);
@@ -97,6 +97,7 @@ void i2cInterrupt(void) {
       if(!SSP1STATbits.RW) {
         // total length of recv is stored in first byte
         i2cRecvBytes[motIdxInPacket][0] = i2cRecvBytesPtr-1;
+        // tell event loop that data is available
         mState[motIdxInPacket].haveCommand = true;
       } else {
         // master just read status,  clear any error
@@ -112,7 +113,7 @@ void i2cInterrupt(void) {
         // prepare all send data
         setSendBytesInt(motIdxInPacket);
         // send packet (i2c read from slave), load buffer for first byte
-        I2C_BUF_BYTE = i2cSendBytes[i2cSendBytesPtr++]; // allways byte 0
+        I2C_BUF_BYTE = i2cSendBytes[i2cSendBytesPtr++]; // always byte 0
       }
     }
     else {
@@ -132,6 +133,7 @@ void i2cInterrupt(void) {
       }
     }
   }
-  CKP1 = 1; // end stretch
-  volatile int z = I2C_BUF_BYTE;  // clear BF  
+  // end stretch after ack
+  // and start stretch after stop bit so next start will stretch
+  CKP1 = !I2C_STOP_BIT; 
 }

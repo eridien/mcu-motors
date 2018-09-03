@@ -66,8 +66,8 @@ union settingsUnion{
   struct motorSettings val;
 } mSet[NUM_MOTORS];
 
-// debug
-#define setDacToSpeed() DAC1R0 = (ms->curSpeed >> 8);
+// show speed on DAC output pin A0 (ICP Data)
+#define setDacToSpeed() DAC1CON1 = (ms->curSpeed >> 8);
 
 // default startup values
 // must match settingsStruct
