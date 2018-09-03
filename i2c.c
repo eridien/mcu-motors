@@ -32,6 +32,7 @@ void i2cInit() {
     SSP1CON3bits.AHEN = 0;             // no clock stretch before addr ack
     SSP1CON3bits.DHEN = 0;             // no clock stretch before data ack
     SSP1CON3bits.BOEN = 1;             // enable buffer overwrite check
+    CKP1 = 0;                          // stretch clk of first start bit
     
     SSP1CON1bits.SSPEN = 1;            // Enable the serial port
     SSP1IF = 0;                        // nothing received yet
@@ -51,7 +52,8 @@ void i2cInit() {
     SSP2CON3bits.AHEN = 0;             // no clock stretch before addr ack
     SSP2CON3bits.DHEN = 0;             // no clock stretch before data ack
     SSP2CON3bits.BOEN = 1;             // enable buffer overwrite check
-    
+    CKP1 = 0;                          // stretch clk of first start bit
+
     SSP2CON1bits.SSPEN = 1;            // Enable the serial port
     SSP2IF = 0;                        // nothing received yet
     SSP2IE = 1;                        // Enable ints

@@ -6,20 +6,6 @@
 #include "motor.h"
 
 // move/home commands start immediately even when already busy
-// steps are in 1/8 step (bipolar) or one phase (unipolar)
-//    for bipolar:
-//       steps/rev:        1600
-//       dist/rev:           40 mm
-//       max distance:      800 mm
-//       max step count: 32,000
-//
-//    for unipolar:
-//       steps/rev:        2048
-//       dist/rev:           40 mm
-//       max distance:      625 mm
-//       max step count: 32,000
-
-// move/home commands start immediately even when already busy
 // all position and distance is in steps (bi: 1/8 ustep, uni: phase)
 // all speed is in steps/sec (except speed-move cmd)
 // homing with no limit switch just sets current position to settings value

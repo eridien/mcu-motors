@@ -54,7 +54,7 @@
 //#define dbg1         LATC4 // test point TP1
 //#define dbg2         LATC3 // test point TP2
 //#define dbg3         LATC6 // test point TP3
-//#define dbg4         LATA4  // lim y switch
+//#define dbg4         LATA4 // usually lim y switch
 
 #endif /* B1 */
 
