@@ -64,7 +64,7 @@ void setStep() {
     
   ms->stepped = false;
   setBiStepLo();
-    
+  
   ms->stepPending = true;
 
 #else
@@ -88,41 +88,46 @@ void checkMotor() {
       return;
     }
     if(ms->curDir != ms->targetDir) {
+      // going slow enough to just flip direction
       ms->curDir = ms->targetDir;
-    }
-    else if(ms->curSpeed < ms->targetSpeed) {
-      accelerate = true;
-    }
-    else if (ms->curSpeed > ms->targetSpeed) {
-      decelerate = true;
     }
   }
   else {
     if(ms->curDir != ms->targetDir) {
+      // we need to chg dir but we are going too fast
       decelerate = true;
     }
     else {
       if(!ms->homing && !ms->stopping) {
         int16 distRemaining = (ms->targetPos - ms->curPos);
-        if(distRemaining < 0) {
-          distRemaining = -distRemaining;
+        bool distRemPos = (distRemaining >= 0);
+        if(distRemPos != ms->targetDir) {
+          // past target, go back
+          ms->targetDir = !ms->curDir;
+          decelerate = true;
         }
-        for(uint8 i = 0; i < sizeof(decelDist)/4; i++) {
-          if(ms->curSpeed >= decelDist[i][0] &&
-             distRemaining <= decelDist[i][1]) {
-            decelerate = true;
-            break;
+        else {
+          if(!distRemPos) {
+            distRemaining = -distRemaining;
+          }
+          // check distance to target t0 see if we need to slow down
+          for(uint8 i = 0; i < DECEL_TABLE_SIZE; i++) {
+            if(ms->curSpeed >= decelTableSpeeds[i] &&
+               distRemaining <= decelDist[motorIdx][i]) {
+              decelerate = true;
+              break;
+            }
           }
         }
       }
-      if(!decelerate) {
-        if(ms->curSpeed > ms->targetSpeed) {
-          decelerate = true;
-        }
-        else if(ms->curSpeed < ms->targetSpeed) {
-          accelerate = true;
-        }
-      }
+    }
+  }
+  if(!decelerate && !accelerate) {
+    if(ms->curSpeed > ms->targetSpeed) {
+      decelerate = true;
+    }
+    else if(ms->curSpeed < ms->targetSpeed) {
+      accelerate = true;
     }
   }
   if(decelerate) {
@@ -132,18 +137,12 @@ void checkMotor() {
     if(deltaSpeed < ms->curSpeed) {
       ms->curSpeed -= deltaSpeed;
     }
-    if(ms->curSpeed < ms->targetSpeed) {
-      ms->curSpeed = ms->targetSpeed;
-    }
   }
   else if (accelerate) {
     // accel/step = accel/sec / steps/sec
     uint16 deltaSpeed = (sv->acceleration / ms->curSpeed);
     if(deltaSpeed == 0) deltaSpeed = 1;
     ms->curSpeed += deltaSpeed;
-    if(ms->curSpeed > ms->targetSpeed) {
-      ms->curSpeed = ms->targetSpeed;
-    }
   } 
   setDacToSpeed();
   setStep();

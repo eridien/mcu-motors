@@ -115,7 +115,9 @@ void i2cInterrupt(void) {
         // prepare all send data
         setSendBytesInt(motIdxInPacket);
         // send packet (i2c read from slave), load buffer for first byte
+        dbg1 = 1;
         I2C_BUF_BYTE = i2cSendBytes[i2cSendBytesPtr++]; // always byte 0
+        dbg1 = 0;
       }
     }
     else {
@@ -131,11 +133,13 @@ void i2cInterrupt(void) {
       }
       else {
         // sent byte (i2c read from slave), load buffer for next send
+        dbg1 = 1;
         I2C_BUF_BYTE = i2cSendBytes[i2cSendBytesPtr++];
+        dbg1 = 0;
       }
     }
   }
-  // end stretch after ack
-  // and start stretch after stop bit so next start will stretch
+  // in packet: set ckp to end stretch after ack
+  // stop bit:  clr ckp so next start bit will stretch
   CKP1 = !I2C_STOP_BIT; 
 }

@@ -173,13 +173,13 @@ void processMotorCmd() {
   else if((firstByte & 0xf0) == 0x10) {
     if(lenIs(1)) {
       switch(firstByte & 0x0f) {
-        case 0: homeCommand();                 break; // start homing
+        case 0: homeCommand(true);             break; // start homing
         case 1: ms->nextStateTestPos = true;   break; // next read pos is test pos
         case 2: softStopCommand(false);        break; // stop,no reset
         case 3: softStopCommand(true);         break; // stop with reset
         case 4: resetMotor(false);             break; // hard stop (immediate reset)
         case 5: motorOn();                     break; // reset off
-        case 6: ms->curPos = sv->homePos;      break;  // set curpos to setting
+        case 6: homeCommand(false);            break;  // set curpos to setting
         default: lenIs(255); // invalid cmd sets CMD_DATA_ERROR
       }
     }

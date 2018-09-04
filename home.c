@@ -53,47 +53,26 @@ void chkHoming() {
   }
 }
 
-#ifdef BM
-void homeCommand() {
+void homeCommand(bool start) {
   if((ms->stateByte & BUSY_BIT) == 0) {
-    // motor is not already running -- init speed
+    // not moving -- init speed
     GIE=0;
     ms->lastStepTicks = timeTicks;
     ms->curSpeed = sv->noAccelSpeedLimit;
     GIE=1;
     setDacToSpeed();
   }
-  setStateBit(BUSY_BIT, 1);
-  setStateBit(HOMED_BIT, 0);
   motorOn();
-  ms->homing = true;
-  ms->homingState = homeStarting;
-  ms->ustep = MAX_USTEP;
-}
-#else
-void homeCommand() {
-  if(limitPort[motorIdx]) {
-    // this motor has limit switch
+  if(start && limitPort[motorIdx]) {
+    ms->homing = true;
+    ms->homingState = homeStarting;
+    ms->ustep = MAX_USTEP;
+    setStateBit(BUSY_BIT,  1);
     setStateBit(HOMED_BIT, 0);
-    motorOn();
-    ms->homeReversed = (sv->homeToLim && (sv->homeToLim - 1) == limitClosed());
-    ms->homing       = true;
-    ms->stopping     = false;
-    ms->homingState  = goingHome;
-    if((ms->stateByte & BUSY_BIT) == 0) {
-      GIE=0;
-      ms->lastStepTicks = timeTicks;
-      GIE=1;
-      ms->curSpeed = sv->noAccelSpeedLimit;
-      setDacToSpeed();
-    }
-    setStateBit(BUSY_BIT, 1);
-    chkHoming();
   }
   else {
-    setStateBit(HOMED_BIT, 1);
     ms->curPos = sv->homePos;
+    setStateBit(BUSY_BIT,  0);
+    setStateBit(HOMED_BIT, 1);
   }
 }
-#endif
-

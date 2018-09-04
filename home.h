@@ -11,7 +11,7 @@
 #define homingToOfs   3
 
 void chkHoming(void);
-void homeCommand(void);
+void homeCommand(bool start);
 
 
 #endif	/* HOME_H */
