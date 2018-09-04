@@ -8,32 +8,31 @@
 #include "clock.h"
 #include "stop.h"
 
-#define DECEL_TABLE_SIZE 5
-// for 40 steps/mm this is 200 mm/sec, 150 mm/sec, ...
-int16 decelTableSpeeds[DECEL_TABLE_SIZE] = {8000, 6000, 4000, 2500, 2000};
-
-// distance before target pos that deceleration should start
-// indexed on speed from decelTableSpeeds above
-// calculates distance based on that speed and acceleration setting
-uint16 decelDist[NUM_MOTORS][DECEL_TABLE_SIZE];
-
-void calcDecelTable(uint8 motIdx) {
-  uint16 accel = mSet[motIdx].val.acceleration;
-  for(uint8 i = 0; i < DECEL_TABLE_SIZE; i++) {
-    uint16 speed = decelTableSpeeds[i];
-    uint16 tgtSpeed = mSet[motIdx].val.noAccelSpeedLimit;
-    // each loop simulates one step of deceleration
-    uint16 dist = 0;
-    for(; speed > tgtSpeed; dist++) {
-      // accel/step = accel/sec / steps/sec
-      uint16 deltaSpeed = (accel / speed);
-      if(deltaSpeed == 0) deltaSpeed = 1;
-      if(deltaSpeed > speed) break;
-      speed -= deltaSpeed;
-    }
-    decelDist[motIdx][i] = dist;
-  }
-}
+//#define DECEL_TABLE_SIZE 5
+//int16 decelTableSpeeds[DECEL_TABLE_SIZE] = {8000, 6500, 5000, 3500, 2000};
+//
+//// distance before target pos that deceleration should start
+//// indexed on speed from decelTableSpeeds above
+//// calculates distance based on that speed and acceleration setting
+//uint16 decelDist[NUM_MOTORS][DECEL_TABLE_SIZE];
+//
+//void calcDecelTable(uint8 motIdx) {
+//  uint16 accel = mSet[motIdx].val.acceleration;
+//  for(uint8 i = 0; i < DECEL_TABLE_SIZE; i++) {
+//    uint16 speed = decelTableSpeeds[i];
+//    uint16 tgtSpeed = mSet[motIdx].val.noAccelSpeedLimit;
+//    // each loop simulates one step of deceleration
+//    uint16 dist = 0;
+//    for(; speed > tgtSpeed; dist++) {
+//      // accel/step = accel/sec / steps/sec
+//      uint16 deltaSpeed = (accel / speed);
+//      if(deltaSpeed == 0) deltaSpeed = 1;
+//      if(deltaSpeed > speed) break;
+//      speed -= deltaSpeed;
+//    }
+//    decelDist[motIdx][i] = dist*3;
+//  }
+//}
 
 void setStep(bool coasting) {
   uint16 clkTicks;
@@ -136,13 +135,18 @@ void checkMotor() {
             distRemaining = -distRemaining;
           }
           // check distance to target to see if we need to slow down
-          for(uint8 i = 0; i < DECEL_TABLE_SIZE; i++) {
-            if(ms->curSpeed >= decelTableSpeeds[i] &&
-               distRemaining <= decelDist[motorIdx][i]) {
+//          for(uint8 i = 0; i < DECEL_TABLE_SIZE; i++) {
+//            if(ms->curSpeed >= decelTableSpeeds[i] &&
+//               distRemaining <= decelDist[motorIdx][i]) {
+//              decelerate = true;
+//              ms->nearTarget = true;
+//              break;
+//            }
+//          }
+          // very crude estimate of when to start slowing down
+          if(ms->curSpeed >= distRemaining*3) {
               decelerate = true;
               ms->nearTarget = true;
-              break;
-            }
           }
         }
       }

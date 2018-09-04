@@ -75,7 +75,7 @@ union settingsUnion{
 // assumes 1/40 mm per step
 // default is same for all motors
 const uint16 settingsInit[NUM_SETTING_WORDS] = {
-   4000, // max speed is 100 mm
+   4000, // default speed is 100 mm
   16000, // max pos is 400 mm
    1200, // no-acceleration speed limit (30 mm/sec)
   40000, // acceleration rate steps/sec/sec  (1000 mm/sec/sec)
@@ -91,7 +91,7 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
 // assumes 1/50 mm per step
 // default is same for all motors
 const uint16 settingsInit[NUM_SETTING_WORDS] = {
-   600,    // max speed: steps/sec (12 mm/sec )
+   600,    // default speed: steps/sec (12 mm/sec )
   5000,    // max pos is 100 mm
    300,    // no-acceleration ms->speed limit (6 mm/sec)
  25000,    // acceleration rate steps/sec/sec  (500 mm/sec/sec)
