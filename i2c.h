@@ -44,9 +44,9 @@
 //
 //   -- 19 byte settings command --
 //   0001 1111  load settings, 16-bit values, big endian
-//      max speed   (and simple move cmd speed) 
+//      default speed for simple move cmd
 //      max pos     (min pos is always zero))
-//      no-acceleration speed limit (and start speed when stopped)
+//      start/stop speed limit
 //      acceleration rate (steps/sec/sec)
 //      homing speed
 //      homing back-up speed

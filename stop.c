@@ -12,7 +12,7 @@ void stopStepping() {
   ms->stepped     = false;
   ms->homing      = false;
   ms->stopping    = false;
-  ms->curSpeed    = sv->noAccelSpeedLimit;
+  ms->curSpeed    = sv->startStopSpeed;
   setDacToSpeed();
   setStateBit(BUSY_BIT, 0);
 }
@@ -55,7 +55,7 @@ void softStopCommand(bool resetAfter) {
     GIE=0;
     ms->lastStepTicks = timeTicks;
     GIE=1;
-    ms->curSpeed = sv->noAccelSpeedLimit;
+    ms->curSpeed = sv->startStopSpeed;
     setDacToSpeed();
   }
   setStateBit(BUSY_BIT, 1);
@@ -63,7 +63,7 @@ void softStopCommand(bool resetAfter) {
 }
 
 void chkStopping() {
-  if(ms->curSpeed <= sv->noAccelSpeedLimit) {
+  if(ms->curSpeed <= sv->startStopSpeed) {
     stopStepping();
     if(ms->resetAfterSoftStop) {
       // reset only this motor

@@ -115,9 +115,7 @@ void i2cInterrupt(void) {
         // prepare all send data
         setSendBytesInt(motIdxInPacket);
         // send packet (i2c read from slave), load buffer for first byte
-        dbg1 = 1;
         I2C_BUF_BYTE = i2cSendBytes[i2cSendBytesPtr++]; // always byte 0
-        dbg1 = 0;
       }
     }
     else {
@@ -133,9 +131,7 @@ void i2cInterrupt(void) {
       }
       else {
         // sent byte (i2c read from slave), load buffer for next send
-        dbg1 = 1;
         I2C_BUF_BYTE = i2cSendBytes[i2cSendBytesPtr++];
-        dbg1 = 0;
       }
     }
   }

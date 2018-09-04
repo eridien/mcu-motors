@@ -48,9 +48,9 @@ extern uint8                   mm; // motor mask (0xf0 or 0x0f or step bit)
 
 // constants loadable from command (all must be 16 bits))
 struct motorSettings {
-  uint16 maxSpeed;
+  uint16 defaultSpeed;
   uint16 maxPos;
-  uint16 noAccelSpeedLimit;
+  uint16 startStopSpeed;
   uint16 acceleration;
   uint16 homingSpeed;
   uint16 homingBackUpSpeed;
@@ -77,8 +77,8 @@ union settingsUnion{
 const uint16 settingsInit[NUM_SETTING_WORDS] = {
    4000, // default speed is 100 mm
   16000, // max pos is 400 mm
-   1200, // no-acceleration speed limit (30 mm/sec)
-  40000, // acceleration rate steps/sec/sec  (1000 mm/sec/sec)
+   1200, // start/stop speed limit (30 mm/sec)
+   8000, // acceleration rate steps/sec/sec  (1000 mm/sec/sec)
    4000, // homing speed (100 mm/sec)
      60, // homing back-up ms->speed (1.5 mm/sec)
      40, // home offset distance: 1 mm
@@ -93,7 +93,7 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
 const uint16 settingsInit[NUM_SETTING_WORDS] = {
    600,    // default speed: steps/sec (12 mm/sec )
   5000,    // max pos is 100 mm
-   300,    // no-acceleration ms->speed limit (6 mm/sec)
+   300,    // start/stop speed limit (6 mm/sec)
  25000,    // acceleration rate steps/sec/sec  (500 mm/sec/sec)
    300,    // homing speed (6 mm/sec)
    100,    // homing back-up ms->speed (2 mm/sec)

@@ -61,7 +61,7 @@ void motorInit() {
     for(uint8 i = 0; i < NUM_SETTING_WORDS; i++) {
        mSet[motIdx].reg[i] = settingsInit[i];
     }
-//    calcDecelTable(motIdx);
+    calcDecel(motIdx);
   }
 }
 
@@ -87,7 +87,7 @@ void setMotorSettings() {
     mSet[motorIdx].reg[i] = (i2cRecvBytes[motorIdx][2*i + 2] << 8) | 
                              i2cRecvBytes[motorIdx][2*i + 3];
   }
-//  calcDecelTable(motorIdx);
+  calcDecel(motorIdx);
 }
 
 // from event loop
@@ -154,7 +154,7 @@ void processMotorCmd() {
   if((firstByte & 0x80) == 0x80) {
     if(lenIs(2)) {
       // simple goto pos command
-      ms->targetSpeed = sv->maxSpeed;
+      ms->targetSpeed = sv->defaultSpeed;
       ms->targetPos   = ((int16) (firstByte & 0x7f) << 8) | rb[2];
       moveCommand();
     }

@@ -60,7 +60,7 @@ void homeCommand(bool start) {
     GIE=0;
     ms->lastStepTicks = timeTicks;
     GIE=1;
-    ms->curSpeed = sv->noAccelSpeedLimit;
+    ms->curSpeed = sv->startStopSpeed;
     setDacToSpeed();
   }
   motorOn();
