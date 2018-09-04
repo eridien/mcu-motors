@@ -35,28 +35,34 @@ void calcDecelTable(uint8 motIdx) {
   }
 }
 
-void setStep() {
-#ifdef BM
-  // adjust ustep
-  while(true) {
-    // approximate pulsesPerSec
-    uint16 pulsesPerSec = ms->curSpeed >> (MAX_USTEP - ms->ustep);
-    if(ms->ustep < MAX_USTEP && pulsesPerSec < 500) {
-      ms->ustep++;
-    }
-    // note that you can only reduce ustep when the phase is correct
-    else if(ms->ustep > MIN_USTEP && pulsesPerSec > 1000 && 
-           (ms->curPos & uStepPhaseMask[ms->ustep]) == 0) {
-      ms->ustep--;
-    }
-    else break;
-  }
-  // set step timing
+void setStep(bool coasting) {
   uint16 clkTicks;
-  switch (ms->ustep) {
-    case 1: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 2); break;
-    case 2: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 1); break;
-    case 3: clkTicks = CLK_TICKS_PER_SEC /  ms->curSpeed      ; break;
+#ifdef BM
+  if(!coasting) {
+    // adjust ustep
+    while(true) {
+      // approximate pulsesPerSec
+      uint16 pulsesPerSec = ms->curSpeed >> (MAX_USTEP - ms->ustep);
+      if(ms->ustep < MAX_USTEP && pulsesPerSec < 500) {
+        ms->ustep++;
+      }
+      // note that you can only reduce ustep when the phase is correct
+      else if(ms->ustep > MIN_USTEP && pulsesPerSec > 1000 && 
+             (ms->curPos & uStepPhaseMask[ms->ustep]) == 0) {
+        ms->ustep--;
+      }
+      else break;
+    }
+    // set step timing
+    switch (ms->ustep) {
+      case 1: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 2); break;
+      case 2: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 1); break;
+      case 3: clkTicks = CLK_TICKS_PER_SEC /  ms->curSpeed      ; break;
+    }
+  }
+  else { // coasting to final position with ustep = max
+    ms->ustep = MAX_USTEP;
+    clkTicks = (CLK_TICKS_PER_SEC / 45);  // ~ 1 mm/sec
   }
   GIE = 0;
   ms->nextStepTicks = ms->lastStepTicks + clkTicks;
@@ -80,41 +86,61 @@ void setStep() {
 void checkMotor() {
   bool accelerate = false;
   bool decelerate = false;
+  bool coast      = false;
   
-  if(underAccelLimit()) {
-    if(!ms->homing && !ms->stopping && ms->curPos == ms->targetPos) {
-      // finished normal move
-      stopStepping();
-      return;
+  if(!ms->homing && !ms->stopping) {
+    // normal move to target position
+    
+    if (ms->curSpeed <= sv->noAccelSpeedLimit) {
+      // going slower than accel threshold
+      
+      if(ms->curPos == ms->targetPos) {
+        // finished normal move
+        stopStepping();
+        return;
+      }
+      int16 distRemaining = (ms->targetPos - ms->curPos);
+      bool distRemPositive = (distRemaining >= 0);
+      if(!distRemPositive) {
+        distRemaining = -distRemaining;
+      }
+      if(distRemaining <= 8) {
+        // dist is smaller than largest step
+        // move to target at speed 1 and max ustep to make sure to hit target
+        coast = true;
+      }
+      // can chg dir any time when slow
+      ms->curDir = ms->targetDir = distRemPositive;
     }
-    if(ms->curDir != ms->targetDir) {
-      // going slow enough to just flip direction
-      ms->curDir = ms->targetDir;
-    }
-  }
-  else {
-    if(ms->curDir != ms->targetDir) {
-      // we need to chg dir but we are going too fast
+    
+    // going faster than accel threshold
+    else if(ms->nearTarget) {
       decelerate = true;
     }
     else {
-      if(!ms->homing && !ms->stopping) {
+      if(ms->curDir != ms->targetDir) {
+        // we need to chg dir but we are going too fast
+        decelerate = true;
+      }
+      else {
         int16 distRemaining = (ms->targetPos - ms->curPos);
-        bool distRemPos = (distRemaining >= 0);
-        if(distRemPos != ms->targetDir) {
+        bool distRemPositive = (distRemaining >= 0);
+        if(distRemPositive != ms->targetDir) {
           // past target, go back
-          ms->targetDir = !ms->curDir;
+          ms->targetDir  = distRemPositive;
+          ms->nearTarget = true;
           decelerate = true;
         }
         else {
-          if(!distRemPos) {
+          if(!distRemPositive) {
             distRemaining = -distRemaining;
           }
-          // check distance to target t0 see if we need to slow down
+          // check distance to target to see if we need to slow down
           for(uint8 i = 0; i < DECEL_TABLE_SIZE; i++) {
             if(ms->curSpeed >= decelTableSpeeds[i] &&
                distRemaining <= decelDist[motorIdx][i]) {
               decelerate = true;
+              ms->nearTarget = true;
               break;
             }
           }
@@ -122,11 +148,11 @@ void checkMotor() {
       }
     }
   }
-  if(!decelerate && !accelerate) {
+  if(!decelerate && !accelerate && !coast) {
     if(ms->curSpeed > ms->targetSpeed) {
       decelerate = true;
     }
-    else if(ms->curSpeed < ms->targetSpeed) {
+    else if(!ms->nearTarget && ms->curSpeed < ms->targetSpeed) {
       accelerate = true;
     }
   }
@@ -143,9 +169,14 @@ void checkMotor() {
     uint16 deltaSpeed = (sv->acceleration / ms->curSpeed);
     if(deltaSpeed == 0) deltaSpeed = 1;
     ms->curSpeed += deltaSpeed;
-  } 
+    if(ms->curSpeed > ms->targetSpeed) {
+     // we just passed target speed
+     // we should never go faster than target speed
+     ms->curSpeed = ms->targetSpeed;
+    }
+  }
   setDacToSpeed();
-  setStep();
+  setStep(coast);
 }
 
 void moveCommand() {
@@ -153,18 +184,16 @@ void moveCommand() {
     setError(NOT_HOMED_ERROR);
     return;
   }
-  if(ms->curSpeed == 0) {
-    ms->targetSpeed = sv->noAccelSpeedLimit;
-  }
+  ms->nearTarget  = false;
   ms->homing      = false;
   ms->stopping    = false;
-  ms->targetDir   = (ms->targetPos >= ms->curPos);   
-  ms->ustep       = MAX_USTEP;
-  if((ms->stateByte & BUSY_BIT) == 0) {
+  ms->targetDir = (ms->targetPos >= ms->curPos);   
+  if(ms->curSpeed == 0 || (ms->stateByte & BUSY_BIT) == 0) {
     GIE=0;
     ms->lastStepTicks = timeTicks;
-    ms->curSpeed = sv->noAccelSpeedLimit;
     GIE=1;
+    ms->curSpeed = sv->noAccelSpeedLimit;
+    ms->curDir = ms->targetDir;
     setDacToSpeed();
   }
   setStateBit(BUSY_BIT, 1);

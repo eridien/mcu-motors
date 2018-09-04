@@ -46,6 +46,7 @@ void resetMotor(bool all) {
 }
 
 void softStopCommand(bool resetAfter) {
+  ms->nearTarget         = true;
   ms->homing             = false;
   ms->targetDir          = ms->curDir;
   ms->targetSpeed        = 0;
@@ -62,7 +63,7 @@ void softStopCommand(bool resetAfter) {
 }
 
 void chkStopping() {
-  if(underAccelLimit()) {
+  if(ms->curSpeed <= sv->noAccelSpeedLimit) {
     stopStepping();
     if(ms->resetAfterSoftStop) {
       // reset only this motor

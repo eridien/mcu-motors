@@ -38,6 +38,7 @@ struct motorState {
   int16  targetPos;
   uint16 targetSpeed;
   bool   targetDir;
+  bool   nearTarget;
   uint8  ustep;  // bipolar only
   uint8  phase;  // unipolar only
   bool   stepPending;

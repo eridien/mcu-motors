@@ -54,12 +54,13 @@ void chkHoming() {
 }
 
 void homeCommand(bool start) {
+  ms->nearTarget  = false;
   if((ms->stateByte & BUSY_BIT) == 0) {
     // not moving -- init speed
     GIE=0;
     ms->lastStepTicks = timeTicks;
-    ms->curSpeed = sv->noAccelSpeedLimit;
     GIE=1;
+    ms->curSpeed = sv->noAccelSpeedLimit;
     setDacToSpeed();
   }
   motorOn();
