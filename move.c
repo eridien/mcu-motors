@@ -25,19 +25,21 @@ void setStep(bool coasting) {
   uint16 clkTicks;
 #ifdef BM
   if(!coasting) {
-    // adjust ustep
-    while(true) {
-      // approximate pulsesPerSec
-      uint16 pulsesPerSec = ms->curSpeed >> (MAX_USTEP - ms->ustep);
-      if(ms->ustep < MAX_USTEP && pulsesPerSec < 500) {
-        ms->ustep++;
+    // adjust ustep unless deceleratin
+    if(!ms->nearTarget) {
+      while(true) {
+        // approximate pulsesPerSec
+        uint16 pulsesPerSec = ms->curSpeed >> (MAX_USTEP - ms->ustep);
+        if(ms->ustep < MAX_USTEP && pulsesPerSec < 500) {
+          ms->ustep++;
+        }
+        // note that you can only reduce ustep when the phase is correct
+        else if(ms->ustep > MIN_USTEP && pulsesPerSec > 1000 && 
+               (ms->curPos & uStepPhaseMask[ms->ustep]) == 0) {
+          ms->ustep--;
+        }
+        else break;
       }
-      // note that you can only reduce ustep when the phase is correct
-      else if(ms->ustep > MIN_USTEP && pulsesPerSec > 1000 && 
-             (ms->curPos & uStepPhaseMask[ms->ustep]) == 0) {
-        ms->ustep--;
-      }
-      else break;
     }
     // set step timing
     switch (ms->ustep) {
@@ -126,10 +128,10 @@ void checkMotor() {
         // debug : dist should be 700
         // distance to start stopping is (speed*speed)/(2*acceleration)
         dbg1=1;
-        uint32 speedSq = (uint32) ms->curSpeed * ms->curSpeed;
-        uint8  zeros = accellLeadingZeros[motorIdx];
-        uint32 decelDist = 700+(speedSq / ((uint32) sv->acceleration >> 1)); // << (zeros);
-        if(distRemaining <= decelDist) {
+//        uint32 speedSq = (uint32) ms->curSpeed * ms->curSpeed;
+//        uint8  zeros = accellLeadingZeros[motorIdx];
+//        uint32 decelDist = 700+(speedSq / ((uint32) sv->acceleration >> 1)); // << (zeros);
+        if(distRemaining <= 800) {
           decelerate = true;
           ms->nearTarget = true;
           dbgPos = ms->curPos;
@@ -153,6 +155,9 @@ void checkMotor() {
     if(deltaSpeed == 0) deltaSpeed = 1;
     if(deltaSpeed < ms->curSpeed) {
       ms->curSpeed -= deltaSpeed;
+    }
+    if(ms->curSpeed < 1200) {
+      int x = 0;
     }
   }
   else if (accelerate) {
