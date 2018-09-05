@@ -41,7 +41,6 @@ void setStep(bool coasting) {
     }
     // set step timing
     switch (ms->ustep) {
-      case 0: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 3); break;
       case 1: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 2); break;
       case 2: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 1); break;
       case 3: clkTicks = CLK_TICKS_PER_SEC /  ms->curSpeed      ; break;
@@ -57,7 +56,6 @@ void setStep(bool coasting) {
     
   ms->stepped = false;
   setBiStepLo();
-  
   ms->stepPending = true;
 
 #else
@@ -69,6 +67,13 @@ void setStep(bool coasting) {
   ms->stepPending = true;
 #endif /* BM */
 }
+
+
+uint16 dbgPos;
+uint16 dbgSpeed;
+uint16 dbgPos2;
+uint16 dbgSpeed2;
+uint16 dbgAccel;
 
 void checkMotor() {
   bool accelerate = false;
@@ -103,6 +108,9 @@ void checkMotor() {
     // going faster than accel threshold
     else if(ms->nearTarget) {
       decelerate = true;
+      dbgPos2   = ms->curPos;
+      dbgSpeed2 = ms->curSpeed;
+      dbgAccel  = mSet[motorIdx].val.acceleration;
     }
     else {
       if(ms->curDir != ms->targetDir) {
@@ -112,37 +120,22 @@ void checkMotor() {
       else {
         int16 distRemaining = (ms->targetPos - ms->curPos);
         bool distRemPositive = (distRemaining >= 0);
-        if(distRemPositive != ms->targetDir) {
-          // past target, go back
-          ms->targetDir  = distRemPositive;
-          ms->nearTarget = true;
+        if(!distRemPositive) {
+          distRemaining = -distRemaining;
+        }
+        // debug : dist should be 700
+        // distance to start stopping is (speed*speed)/(2*acceleration)
+        dbg1=1;
+        uint32 speedSq = (uint32) ms->curSpeed * ms->curSpeed;
+        uint8  zeros = accellLeadingZeros[motorIdx];
+        uint32 decelDist = 700+(speedSq / ((uint32) sv->acceleration >> 1)); // << (zeros);
+        if(distRemaining <= decelDist) {
           decelerate = true;
+          ms->nearTarget = true;
+          dbgPos = ms->curPos;
+          dbgSpeed = ms->curSpeed;
         }
-        else {
-          if(!distRemPositive) {
-            distRemaining = -distRemaining;
-          }          
-          // debug : dist should be 700
-          
-          // distance to start stopping is (speed*speed)/acceleration
-          dbg1=1;
-          uint16 speedHi = (ms->curSpeed - sv->startStopSpeed) >> 8;
-          uint16 speedSq = (speedHi * speedHi);
-          uint8  zeros = accellLeadingZeros[motorIdx];
-          if((zeros <= 12) && (speedSq > (1 << (12-zeros)))) {
-            // speedSq << (zeros+3) would overflow below
-            decelerate = true;
-            ms->nearTarget = true;
-          }
-          else {
-            uint16 decelDist = speedSq << (zeros+3);
-            if(distRemaining <= decelDist) {
-              decelerate = true;
-              ms->nearTarget = true;
-            }
-          dbg1=0;
-          }
-        }
+        dbg1=0;
       }
     }
   }
