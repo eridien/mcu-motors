@@ -57,17 +57,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=clock.c home.c i2c.c main.c motor.c move.c state.c stop.c
+SOURCEFILES_QUOTED_IF_SPACED=clock.c home.c i2c.c main.c motor.c move.c state.c stop.c dist-table.c disttable.asm
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/clock.p1 ${OBJECTDIR}/home.p1 ${OBJECTDIR}/i2c.p1 ${OBJECTDIR}/main.p1 ${OBJECTDIR}/motor.p1 ${OBJECTDIR}/move.p1 ${OBJECTDIR}/state.p1 ${OBJECTDIR}/stop.p1
-POSSIBLE_DEPFILES=${OBJECTDIR}/clock.p1.d ${OBJECTDIR}/home.p1.d ${OBJECTDIR}/i2c.p1.d ${OBJECTDIR}/main.p1.d ${OBJECTDIR}/motor.p1.d ${OBJECTDIR}/move.p1.d ${OBJECTDIR}/state.p1.d ${OBJECTDIR}/stop.p1.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/clock.p1 ${OBJECTDIR}/home.p1 ${OBJECTDIR}/i2c.p1 ${OBJECTDIR}/main.p1 ${OBJECTDIR}/motor.p1 ${OBJECTDIR}/move.p1 ${OBJECTDIR}/state.p1 ${OBJECTDIR}/stop.p1 ${OBJECTDIR}/dist-table.p1 ${OBJECTDIR}/disttable.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/clock.p1.d ${OBJECTDIR}/home.p1.d ${OBJECTDIR}/i2c.p1.d ${OBJECTDIR}/main.p1.d ${OBJECTDIR}/motor.p1.d ${OBJECTDIR}/move.p1.d ${OBJECTDIR}/state.p1.d ${OBJECTDIR}/stop.p1.d ${OBJECTDIR}/dist-table.p1.d ${OBJECTDIR}/disttable.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/clock.p1 ${OBJECTDIR}/home.p1 ${OBJECTDIR}/i2c.p1 ${OBJECTDIR}/main.p1 ${OBJECTDIR}/motor.p1 ${OBJECTDIR}/move.p1 ${OBJECTDIR}/state.p1 ${OBJECTDIR}/stop.p1
+OBJECTFILES=${OBJECTDIR}/clock.p1 ${OBJECTDIR}/home.p1 ${OBJECTDIR}/i2c.p1 ${OBJECTDIR}/main.p1 ${OBJECTDIR}/motor.p1 ${OBJECTDIR}/move.p1 ${OBJECTDIR}/state.p1 ${OBJECTDIR}/stop.p1 ${OBJECTDIR}/dist-table.p1 ${OBJECTDIR}/disttable.o
 
 # Source Files
-SOURCEFILES=clock.c home.c i2c.c main.c motor.c move.c state.c stop.c
+SOURCEFILES=clock.c home.c i2c.c main.c motor.c move.c state.c stop.c dist-table.c disttable.asm
 
 
 CFLAGS=
@@ -149,6 +149,13 @@ ${OBJECTDIR}/stop.p1: stop.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c  -D__DEBUG=1  -fno-short-double -fno-short-float -O0 -maddrqual=ignore -DBM -DB1 -xassembler-with-cpp -Wa,-a -DXPRJ_B1=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-osccal -mno-resetbits -mno-save-resetbits -mno-download -mno-stackcall $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto     -o ${OBJECTDIR}/stop.p1 stop.c 
 	@${FIXDEPS} ${OBJECTDIR}/stop.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
+${OBJECTDIR}/dist-table.p1: dist-table.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/dist-table.p1.d 
+	@${RM} ${OBJECTDIR}/dist-table.p1 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c  -D__DEBUG=1  -fno-short-double -fno-short-float -O0 -maddrqual=ignore -DBM -DB1 -xassembler-with-cpp -Wa,-a -DXPRJ_B1=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-osccal -mno-resetbits -mno-save-resetbits -mno-download -mno-stackcall $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto     -o ${OBJECTDIR}/dist-table.p1 dist-table.c 
+	@${FIXDEPS} ${OBJECTDIR}/dist-table.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
 else
 ${OBJECTDIR}/clock.p1: clock.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
@@ -206,12 +213,33 @@ ${OBJECTDIR}/stop.p1: stop.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c  -fno-short-double -fno-short-float -O0 -maddrqual=ignore -DBM -DB1 -xassembler-with-cpp -Wa,-a -DXPRJ_B1=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-osccal -mno-resetbits -mno-save-resetbits -mno-download -mno-stackcall $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto     -o ${OBJECTDIR}/stop.p1 stop.c 
 	@${FIXDEPS} ${OBJECTDIR}/stop.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
+${OBJECTDIR}/dist-table.p1: dist-table.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/dist-table.p1.d 
+	@${RM} ${OBJECTDIR}/dist-table.p1 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c  -fno-short-double -fno-short-float -O0 -maddrqual=ignore -DBM -DB1 -xassembler-with-cpp -Wa,-a -DXPRJ_B1=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-osccal -mno-resetbits -mno-save-resetbits -mno-download -mno-stackcall $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto     -o ${OBJECTDIR}/dist-table.p1 dist-table.c 
+	@${FIXDEPS} ${OBJECTDIR}/dist-table.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
 endif
 
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: assemble
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
+${OBJECTDIR}/disttable.o: disttable.asm  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/disttable.o.d 
+	@${RM} ${OBJECTDIR}/disttable.o 
+	${MP_CC} -c $(MP_EXTRA_AS_PRE) -mcpu=$(MP_PROCESSOR_OPTION)  -D__DEBUG=1  -fno-short-double -fno-short-float -O0 -maddrqual=ignore -DBM -DB1 -xassembler-with-cpp -Wa,-a -DXPRJ_B1=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-osccal -mno-resetbits -mno-save-resetbits -mno-download -mno-stackcall -std=c99 -gdwarf-3 -mstack=compiled:auto:auto   -o ${OBJECTDIR}/disttable.o  disttable.asm 
+	@${FIXDEPS} ${OBJECTDIR}/disttable.o.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
 else
+${OBJECTDIR}/disttable.o: disttable.asm  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/disttable.o.d 
+	@${RM} ${OBJECTDIR}/disttable.o 
+	${MP_CC} -c $(MP_EXTRA_AS_PRE) -mcpu=$(MP_PROCESSOR_OPTION)  -fno-short-double -fno-short-float -O0 -maddrqual=ignore -DBM -DB1 -xassembler-with-cpp -Wa,-a -DXPRJ_B1=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-osccal -mno-resetbits -mno-save-resetbits -mno-download -mno-stackcall -std=c99 -gdwarf-3 -mstack=compiled:auto:auto   -o ${OBJECTDIR}/disttable.o  disttable.asm 
+	@${FIXDEPS} ${OBJECTDIR}/disttable.o.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
 endif
 
 # ------------------------------------------------------------------------------------
