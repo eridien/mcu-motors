@@ -6,7 +6,8 @@
 #include "motor.h"
 
 // move/home commands start immediately even when already busy
-// all position and distance is in steps (bi: 1/8 ustep, uni: phase)
+// acceleration is 0..7: 4000, 8000, 16000, 24000, 32000, 40000, 50000, 60000
+// all position and distance are in steps (bi: 1/8 ustep, uni: phase)
 // all speed is in steps/sec (except speed-move cmd)
 // homing with no limit switch just sets current position to settings value
 
@@ -42,12 +43,13 @@
 //   0001 0101  motor on (hold place, reset off)
 //   0001 0110  set curpos to home pos value setting (fake homing)
 //
-//   -- 19 byte settings command --
+//   -- 21 byte settings command --
 //   0001 1111  load settings, 16-bit values, big endian
 //      default speed for simple move cmd
 //      max pos     (min pos is always zero))
 //      start/stop speed limit
-//      acceleration rate (steps/sec/sec)
+//      use acceleration
+//      acceleration rate table index 0..7 (steps/sec/sec)
 //      homing speed
 //      homing back-up speed
 //      home offset distance

@@ -7,18 +7,14 @@
 #include "motor.h"
 #include "clock.h"
 #include "stop.h"
+#include "dist-table.h"
 
-uint8 accellLeadingZeros[NUM_MOTORS];
+const uint16 accelTable[8] = 
+       {4000, 8000, 16000, 24000, 32000, 40000, 50000, 60000};
+uint16 accel[NUM_MOTORS];
 
-// speed doesn't matter, only run on settings load
-void calcDecel(uint8 motIdx) {
-  uint16 numZeros;
-  for(uint8 i = 0; i < NUM_MOTORS; i++) {
-    uint16 accel = mSet[motIdx].val.acceleration;
-    for(numZeros = 0; numZeros < 16 && !(accel & 0x8000); 
-                      numZeros++, accel <<= 1);
-  }
-  accellLeadingZeros[motIdx] = numZeros;
+void calcAccel(uint8 motIdx) {
+  accel[motIdx] = accelTable[mSet[motIdx].val.accelCode];
 }
 
 void setStep(bool coasting) {
@@ -70,13 +66,6 @@ void setStep(bool coasting) {
 #endif /* BM */
 }
 
-
-uint16 dbgPos;
-uint16 dbgSpeed;
-uint16 dbgPos2;
-uint16 dbgSpeed2;
-uint16 dbgAccel;
-
 void checkMotor() {
   bool accelerate = false;
   bool decelerate = false;
@@ -110,9 +99,6 @@ void checkMotor() {
     // going faster than accel threshold
     else if(ms->nearTarget) {
       decelerate = true;
-      dbgPos2   = ms->curPos;
-      dbgSpeed2 = ms->curSpeed;
-      dbgAccel  = mSet[motorIdx].val.acceleration;
     }
     else {
       if(ms->curDir != ms->targetDir) {
@@ -125,19 +111,12 @@ void checkMotor() {
         if(!distRemPositive) {
           distRemaining = -distRemaining;
         }
-        // debug : dist should be 700
-        // distance to start stopping is (speed*speed)/(2*acceleration)
-        dbg1=1;
-//        uint32 speedSq = (uint32) ms->curSpeed * ms->curSpeed;
-//        uint8  zeros = accellLeadingZeros[motorIdx];
-//        uint32 decelDist = 700+(speedSq / ((uint32) sv->acceleration >> 1)); // << (zeros);
-        if(distRemaining <= 800) {
+        // look up decel dist target
+        uint16 distTgt = calcDist(ms->ustep, sv->accelCode, ms->curSpeed);
+        if(distRemaining <= distTgt) {
           decelerate = true;
           ms->nearTarget = true;
-          dbgPos = ms->curPos;
-          dbgSpeed = ms->curSpeed;
         }
-        dbg1=0;
       }
     }
   }
@@ -151,7 +130,7 @@ void checkMotor() {
   }
   if(decelerate) {
     // accel/step = accel/sec / steps/sec
-    uint16 deltaSpeed = (sv->acceleration / ms->curSpeed);
+    uint16 deltaSpeed = (accel[motorIdx] / ms->curSpeed);
     if(deltaSpeed == 0) deltaSpeed = 1;
     if(deltaSpeed < ms->curSpeed) {
       ms->curSpeed -= deltaSpeed;
@@ -162,7 +141,7 @@ void checkMotor() {
   }
   else if (accelerate) {
     // accel/step = accel/sec / steps/sec
-    uint16 deltaSpeed = (sv->acceleration / ms->curSpeed);
+    uint16 deltaSpeed = (accel[motorIdx] / ms->curSpeed);
     if(deltaSpeed == 0) deltaSpeed = 1;
     ms->curSpeed += deltaSpeed;
     if(ms->curSpeed > ms->targetSpeed) {

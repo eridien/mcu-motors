@@ -36,6 +36,7 @@
 #include "state.h"
 #include "motor.h"
 #include "clock.h"
+#include "dist-table.h"
 
 void main(void) {
   ANSELA = 0; // no analog inputs
@@ -61,6 +62,7 @@ void main(void) {
   DAC1CON1      = 0;  // DAC input value
   DAC1EN        = 1;  // turn DAC on
           
+  initDistTable();
   i2cInit();
   clkInit();
   motorInit();

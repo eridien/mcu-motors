@@ -3,7 +3,8 @@
 #define	TYPES_H
 
 // allow ustep = 0
-// 
+// support no acceleration
+
 typedef signed char int8;
 typedef unsigned char uint8;
 typedef int int16;
