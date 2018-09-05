@@ -75,10 +75,10 @@ union settingsUnion{
 // assumes 1/40 mm per step
 // default is same for all motors
 const uint16 settingsInit[NUM_SETTING_WORDS] = {
-   4000, // default speed is 100 mm
+   8000, // default speed is 100 mm
   16000, // max pos is 400 mm
    1200, // start/stop speed limit (30 mm/sec)
-   8000, // acceleration rate steps/sec/sec  (1000 mm/sec/sec)
+    100, // acceleration rate steps/sec/sec  (1000 mm/sec/sec)
    4000, // homing speed (100 mm/sec)
      60, // homing back-up ms->speed (1.5 mm/sec)
      40, // home offset distance: 1 mm

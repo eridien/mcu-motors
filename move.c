@@ -129,7 +129,8 @@ void checkMotor() {
           uint16 speedHi = (ms->curSpeed - sv->startStopSpeed) >> 8;
           uint16 speedSq = (speedHi * speedHi);
           uint8  zeros = accellLeadingZeros[motorIdx];
-          if(zeros <= 13 && speedSq > (1 << (13-zeros))) {
+          if((zeros <= 12) && (speedSq > (1 << (12-zeros)))) {
+            // speedSq << (zeros+3) would overflow below
             decelerate = true;
             ms->nearTarget = true;
           }
@@ -139,7 +140,7 @@ void checkMotor() {
               decelerate = true;
               ms->nearTarget = true;
             }
-            dbg1=0;
+          dbg1=0;
           }
         }
       }
