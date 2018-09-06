@@ -9,12 +9,16 @@
 bool nextStateTestPos;
 
 void setStateBit(uint8 mask, uint8 set){
+  GIE=0;
   ms->stateByte = (ms->stateByte & ~mask) | (set ? mask : 0);
+  GIE=1;
 }
 
 void setError(uint8 err) {
   if(err == CLEAR_ERROR) {
+    GIE=0;
     ms->stateByte = ms->stateByte & 0x07;
+    GIE=1;
     I2C_WCOL = 0;                    // clear WCOL
     volatile int x = I2C_BUF_BYTE;   // clear SSPOV
   }

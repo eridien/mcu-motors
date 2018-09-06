@@ -1,4 +1,8 @@
 
+/*  
+  node /root/dev/p3/mcu-motors/dist-table_calc-asm.js
+*/
+
 fs = require('fs');
 
 // js utility to calculate decelerations distance table
@@ -12,8 +16,8 @@ const CLK_TICKS_PER_SEC = 25000;
 // stepsPerPulse = 1,2,4,8, (ustep 0..3)
 // accel: 1500, 1250, 1000, 800, 600, 400, 200, 100
 const accelTab = [4000, 8000, 16000, 24000, 32000, 40000, 50000, 60000];
-// speed resolution of 5 mm/sec
-// 64 speed values, 200 delta, (1..64)*200 (5 to 320 mm/sec)
+// speed resolution of 6.4 mm/sec (256/40)
+// 64 speed values, 256 delta, (1..64)*256 (6.4 to 409.6 mm/sec)
 
 let file = fs.openSync('/root/dev/p3/mcu-motors/disttable.asm', 'w');
 
@@ -29,7 +33,7 @@ for (let stepsPP = 8, ustep = 0; ustep < 4; stepsPP >>= 1, ustep++) {
     let accel = accelTab[accelIdx];
     for (let speedIdx = 0; speedIdx < 64; speedIdx++) {
       let dist = 0;
-      for (let speed = speedIdx * 200; speed > 0; 
+      for (let speed = speedIdx * 256; speed > 0; 
            speed -= Math.max(Math.floor(accel / speed),1), 
            dist += stepsPP);
       if(dist >= 0x4000) {
@@ -38,7 +42,7 @@ for (let stepsPP = 8, ustep = 0; ustep < 4; stepsPP >>= 1, ustep++) {
       }
       let val = dist.toString(16);
       while (val.length < 4) val = '0' + val;
-      fs.writeSync(file, `DW 0X${val}  ; ${dist}, ${ustep}, ${accel}, ${speedIdx * 200}\n`);
+      fs.writeSync(file, `DW 0X${val}  ; ${dist}, ${ustep}, ${accel}, ${speedIdx * 256}\n`);
     }
   }
 }
