@@ -9,9 +9,6 @@
 #include "stop.h"
 #include "dist-table.h"
 
-const uint16 accelTable[8] = 
-       {4000, 8000, 16000, 24000, 32000, 40000, 50000, 60000};
-
 uint16 dbgMinClkTicks;
 
 void setStep(bool coasting) {
@@ -34,18 +31,19 @@ void setStep(bool coasting) {
         ms->ustep = tgtUstep;
       }
     }
-    // set step timing
-    switch (ms->ustep) {
-      case 0: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 3); break;
-      case 1: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 2); break;
-      case 2: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 1); break;
-      case 3: clkTicks = CLK_TICKS_PER_SEC /  ms->curSpeed      ; break;
-    }
   }
   else { 
-    // coasting to final exact position with ustep = max
-    ms->ustep = MAX_USTEP;
-    clkTicks = (CLK_TICKS_PER_SEC / 45);  // ~ 1 mm/sec
+    // adjust ustep to hit exact position
+    while(ms->phase & uStepPhaseMask[ms->ustep]) {
+      ms->ustep++;
+    }
+  }
+  // set step timing
+  switch (ms->ustep) {
+    case 0: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 3); break;
+    case 1: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 2); break;
+    case 2: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 1); break;
+    case 3: clkTicks = CLK_TICKS_PER_SEC /  ms->curSpeed      ; break;
   }
   if (clkTicks < dbgMinClkTicks) {
     dbgMinClkTicks = clkTicks;
@@ -131,13 +129,8 @@ void checkMotor() {
           }
           else {
             // look up decel dist target
-            uint16 decelUstep = ms->ustep;
-            if(decelUstep == 0) {
-              // never decel to zero at stepping 1/1 -- unstable
-              decelUstep = 1;
-            }
             uint16 distTgt = calcDist(sv->accelIdx, ms->curSpeed);
-            if(distRemaining < (distTgt + 200 /* margin */)) {
+            if(distRemaining < distTgt) {
               decelerate = true;
               ms->nearTarget = true;
             }

@@ -8,11 +8,11 @@ fs = require('fs');
 // js utility to calculate deceleration distance table
 // and prepare the .asm file for inclusion in the mcu-motors mcu code
 
-// table is 8 (accel) by 256 (speed)
+// table is 8 (accel) by 256 (speed), 2048 words
 // entry is dist of decel in 1/8 steps
 
 // accel steps/sec/sec (assuming 40 steps/mm): 
-//     1500, 1250, 1000, 800, 600, 400, 200, 0 (off)
+//     1500, 1250, 1000, 800, 600, 400, 200, 0(off)
 const accelTab = [0, 8000, 16000, 24000, 32000, 40000, 50000, 60000];
 
 // speed resolution of 3.2 mm/sec (128/40)  (assuming 40 steps/mm)
@@ -38,7 +38,7 @@ let tooBigCount = 0;
 for (let accelIdx = 0; accelIdx < 8; accelIdx++) {
   let accel = accelTab[accelIdx];
   for (let speedIdx = 0; speedIdx < 256; speedIdx++) {
-    let speed = speedIdx * 256;
+    let speed = speedIdx * 128;
     let dist = 0;
     for (; speed > 0; 
           speed -= Math.max( Math.floor(accel / speed), 1), 
@@ -49,7 +49,7 @@ for (let accelIdx = 0; accelIdx < 8; accelIdx++) {
     }
     let val = dist.toString(16);
     while (val.length < 4) val = '0' + val;
-    fs.writeSync(file, `DW 0X${val}  ; ${dist}, ${accel}, ${speedIdx * 256}\n`);
+    fs.writeSync(file, `DW 0X${val}  ; ${dist}, ${accel}, ${speedIdx * 128}\n`);
   }
 }
 fs.closeSync(file);
