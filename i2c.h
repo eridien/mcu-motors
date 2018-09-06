@@ -64,7 +64,7 @@
 //   CMD_DATA_ERROR      0x30
 //   CMD_NOT_DONE_ERROR  0x40
 //   STEP_NOT_DONE_ERROR 0x50
-//   MOTOR_LIMIT_ERROR   0x60
+//   BOUNDS_ERROR   0x60
 //   NOT_HOMED_ERROR     0x70
 //
 // state response bytes

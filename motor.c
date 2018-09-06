@@ -118,7 +118,7 @@ void checkAll() {
     else {
       // normal moving
       if(ms->curPos < 0 || ms->curPos >= sv->maxPos) {
-        setError(MOTOR_LIMIT_ERROR);
+        setError(BOUNDS_ERROR);
         return;
       }
     }

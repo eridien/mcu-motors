@@ -17,7 +17,7 @@
 #define CMD_DATA_ERROR      0x30
 #define CMD_NOT_DONE_ERROR  0x40
 #define STEP_NOT_DONE_ERROR 0x50
-#define MOTOR_LIMIT_ERROR   0x60
+#define BOUNDS_ERROR   0x60
 #define NOT_HOMED_ERROR     0x70
 #define CLEAR_ERROR         0xff // magic code to clear error
 

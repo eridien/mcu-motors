@@ -91,17 +91,34 @@ void checkMotor() {
   bool accelerate = false;
   bool decelerate = false;
   bool coast      = false;
+  int16 distRemaining;
+  bool distRemPositive;
   
   if(!ms->homing && !ms->stopping) {
     // normal move to target position
-    
+
+    distRemaining = (ms->targetPos - ms->curPos);
+    distRemPositive = (distRemaining >= 0);
+    if(!distRemPositive) {
+      distRemaining = -distRemaining;
+    }
+    if(distRemaining == 0) {
+      // finished normal move
+      stopStepping();
+      return;
+    }
+    if(distRemaining <= 8) { // uStepDist[MIN_USTEP]
+      // dist is smaller than largest step
+      // move to target at speed 1 and max ustep to make sure to hit target
+      coast = true;
+    }
     if (!sv->useAccel) {
       // not using acceleration
       ms->curSpeed = ms->targetSpeed;
       ms->curDir = ms->targetDir = (ms->targetPos > ms->curPos);
     }
-    
     else {
+      // using acceleration
       if (ms->curSpeed <= sv->startStopSpeed) {
         // going slower than accel threshold
 
@@ -109,16 +126,6 @@ void checkMotor() {
           // finished normal move
           stopStepping();
           return;
-        }
-        int16 distRemaining = (ms->targetPos - ms->curPos);
-        bool distRemPositive = (distRemaining >= 0);
-        if(!distRemPositive) {
-          distRemaining = -distRemaining;
-        }
-        if(distRemaining <= uStepDist[MIN_USTEP]) {
-          // dist is smaller than largest step
-          // move to target at speed 1 and max ustep to make sure to hit target
-          coast = true;
         }
         // can chg dir any time when slow
         ms->curDir = ms->targetDir = distRemPositive;
@@ -134,10 +141,6 @@ void checkMotor() {
           decelerate = true;
         }
         else {
-          int16 distRemaining = (ms->targetPos - ms->curPos);
-          if(distRemaining < 0) {
-            distRemaining = -distRemaining;
-          }
           // look up decel dist target
           uint16 decelUstep = ms->ustep;
           if(decelUstep == 0) {
