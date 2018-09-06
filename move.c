@@ -17,7 +17,7 @@ void calcAccel(uint8 motIdx) {
   accel[motIdx] = accelTable[mSet[motIdx].val.accelCode];
 }
 
-void setStep(bool coasting) {
+ void setStep(bool coasting) {
   uint16 clkTicks;
 #ifdef BM
   if(!coasting) {
@@ -37,8 +37,16 @@ void setStep(bool coasting) {
         else break;
       }
     }
+    else {
+      // final deceleration must have at least ustep of 1
+      // 1/1 stepping is unstable at slow speeds
+      if(ms->ustep == 0) {
+        ms->ustep = 1;
+      }
+    }
     // set step timing
     switch (ms->ustep) {
+      case 0: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 3); break;
       case 1: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 2); break;
       case 2: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 1); break;
       case 3: clkTicks = CLK_TICKS_PER_SEC /  ms->curSpeed      ; break;
@@ -87,7 +95,7 @@ void checkMotor() {
       if(!distRemPositive) {
         distRemaining = -distRemaining;
       }
-      if(distRemaining <= 4) {
+      if(distRemaining <= uStepDist[MIN_USTEP]) {
         // dist is smaller than largest step
         // move to target at speed 1 and max ustep to make sure to hit target
         coast = true;
@@ -107,13 +115,17 @@ void checkMotor() {
       }
       else {
         int16 distRemaining = (ms->targetPos - ms->curPos);
-        bool distRemPositive = (distRemaining >= 0);
-        if(!distRemPositive) {
+        if(distRemaining < 0) {
           distRemaining = -distRemaining;
         }
         // look up decel dist target
-        uint16 distTgt = calcDist(ms->ustep, sv->accelCode, ms->curSpeed);
-        if(distRemaining <= (distTgt + 200 /* margin */)) {
+        uint16 decelUstep = ms->ustep;
+        if(decelUstep == 0) {
+          // never decel to zero at stepping 1/1 -- unstable
+          decelUstep = 1;
+        }
+        uint16 distTgt = calcDist(decelUstep, sv->accelCode, ms->curSpeed);
+        if(distRemaining < (distTgt + 200 /* margin */)) {
           decelerate = true;
           ms->nearTarget = true;
         }
