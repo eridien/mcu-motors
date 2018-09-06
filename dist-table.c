@@ -16,10 +16,10 @@ void initDistTable(void){
 // return is dist of decel
 uint16 calcDist(uint8 ustep, uint8 accel, uint16 speed) {
   if(speed > 63 * 200) speed = 63 * 200;
-  uint16 addr = (ustep << 9 | accel << 6 | (speed / 200));
+  uint16 addr = distTableAddr + (ustep << 9 | accel << 6 | (speed / 200));
   NVMCON1bits.NVMREGS = 0;
   NVMADRL = addr & 0xff;
   NVMADRH = addr >> 8;
   NVMCON1bits.RD = 1;
-  return (NVMADRH << 8) | NVMADRL;
+  return (NVMDATH << 8) | NVMDATL;
 }

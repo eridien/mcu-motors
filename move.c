@@ -113,7 +113,7 @@ void checkMotor() {
         }
         // look up decel dist target
         uint16 distTgt = calcDist(ms->ustep, sv->accelCode, ms->curSpeed);
-        if(distRemaining <= distTgt) {
+        if(distRemaining <= (distTgt + 200 /* margin */)) {
           decelerate = true;
           ms->nearTarget = true;
         }
