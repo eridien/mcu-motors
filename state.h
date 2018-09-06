@@ -39,7 +39,7 @@ struct motorState {
   int16  targetPos;
   uint16 targetSpeed;
   bool   targetDir;
-  bool   nearTarget;
+  bool   slowing;
   uint8  ustep;  // bipolar only
   uint8  phase;  // bipolar: always phase inside drv8825, unipolar: step phase
   bool   stepPending;

@@ -54,7 +54,7 @@ void chkHoming() {
 }
 
 void homeCommand(bool start) {
-  ms->nearTarget  = false;
+  ms->slowing  = false;
   if((ms->stateByte & BUSY_BIT) == 0) {
     // not moving -- init speed
     GIE=0;

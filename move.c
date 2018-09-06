@@ -11,10 +11,10 @@
 
 uint16 dbgMinClkTicks;
 
-void setStep(bool coasting) {
+void setStep(bool closing) {
   uint16 clkTicks;
 #ifdef BM
-  if(!coasting) {
+  if(!closing) {
     // adjust ustep
     uint8 tgtUstep;
     // we want pps to be between 500 and 1000, if possible
@@ -33,8 +33,11 @@ void setStep(bool coasting) {
     }
   }
   else { 
-    // adjust ustep to hit exact position
-    while(ms->phase & uStepPhaseMask[ms->ustep]) {
+    // we are closing in (very close to target))
+    // if needed, adjust ustep to hit exact position
+    int8 dist = ms->targetPos - ms->curPos;
+    if(dist < 0) dist = -dist;
+    if(dist & uStepPhaseMask[ms->ustep]) {
       ms->ustep++;
     }
   }
@@ -58,7 +61,7 @@ void setStep(bool coasting) {
     // nextStepTicks is in the past
     setError(STEP_NOT_DONE_ERROR); 
   }
-    
+  
   ms->stepped = false;
   setBiStepLo();
   ms->stepPending = true;
@@ -76,7 +79,7 @@ void setStep(bool coasting) {
 void checkMotor() {
   bool  accelerate = false;
   bool  decelerate = false;
-  bool  coast      = false;
+  bool  closing    = false;
   int16 distRemaining;
   bool  distRemPositive;
   
@@ -93,10 +96,10 @@ void checkMotor() {
       stopStepping();
       return;
     }
-    if(distRemaining <= 8) { // uStepDist[MIN_USTEP]
+    if(distRemaining <= uStepDist[MIN_USTEP]) {
       // dist is smaller than largest step
-      // move to target at speed 1 and max ustep to make sure to hit target
-      coast = true;
+      // adjust ustep each pulse to make sure to hit target exactly
+      closing = true;
     }
     else {
       if (sv->accelIdx == 0) {
@@ -108,7 +111,7 @@ void checkMotor() {
         // using acceleration
         if (ms->curSpeed <= sv->startStopSpeed) {
           // going slower than accel threshold
-
+          
           if(ms->curPos == ms->targetPos) {
             // finished normal move
             stopStepping();
@@ -117,9 +120,9 @@ void checkMotor() {
           // can chg dir any time when slow
           ms->curDir = ms->targetDir = distRemPositive;
         }
-
+        
         // going faster than accel threshold
-        else if(ms->nearTarget) {
+        else if(ms->slowing) {
           decelerate = true;
         }
         else {
@@ -132,15 +135,15 @@ void checkMotor() {
             uint16 distTgt = calcDist(sv->accelIdx, ms->curSpeed);
             if(distRemaining < distTgt) {
               decelerate = true;
-              ms->nearTarget = true;
+              ms->slowing = true;
             }
           }
         }
-        if(!decelerate && !accelerate && !coast) {
+        if(!decelerate && !accelerate && !closing) {
           if(ms->curSpeed > ms->targetSpeed) {
             decelerate = true;
           }
-          else if(!ms->nearTarget && ms->curSpeed < ms->targetSpeed) {
+          else if(!ms->slowing && ms->curSpeed < ms->targetSpeed) {
             accelerate = true;
           }
         }
@@ -167,7 +170,7 @@ void checkMotor() {
     }
   }
   setDacToSpeed();
-  setStep(coast);
+  setStep(closing);
 }
 
 void moveCommand() {
@@ -177,16 +180,16 @@ void moveCommand() {
     setError(NOT_HOMED_ERROR);
     return;
   }
-  ms->nearTarget  = false;
+  ms->slowing     = false;
   ms->homing      = false;
   ms->stopping    = false;
-  ms->targetDir = (ms->targetPos >= ms->curPos);   
+  ms->targetDir   = (ms->targetPos >= ms->curPos);   
   if(ms->curSpeed == 0 || (ms->stateByte & BUSY_BIT) == 0) {
     GIE=0;
     ms->lastStepTicks = timeTicks;
     GIE=1;
     ms->curSpeed = sv->startStopSpeed;
-    ms->curDir = ms->targetDir;
+    ms->curDir   = ms->targetDir;
     setDacToSpeed();
   }
   setStateBit(BUSY_BIT, 1);

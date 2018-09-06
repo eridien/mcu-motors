@@ -46,7 +46,7 @@ void resetMotor(bool all) {
 }
 
 void softStopCommand(bool resetAfter) {
-  ms->nearTarget         = true;
+  ms->slowing            = true;
   ms->homing             = false;
   ms->targetDir          = ms->curDir;
   ms->targetSpeed        = 0;
