@@ -51,8 +51,7 @@ struct motorSettings {
   uint16 defaultSpeed;
   uint16 maxPos;
   uint16 startStopSpeed;
-  uint16 useAccel;
-  uint16 accelCode;
+  uint16 accelIdx;
   uint16 homingSpeed;
   uint16 homingBackUpSpeed;
   uint16 homeOfs;
@@ -60,7 +59,7 @@ struct motorSettings {
   uint16 homeToLim; // home dir, 0:rev, 1:fwd if lim closed, 2:rev if lim closed
 };
 
-#define NUM_SETTING_WORDS 10
+#define NUM_SETTING_WORDS 9
 
 union settingsUnion{
   uint16 reg[NUM_SETTING_WORDS];
@@ -79,8 +78,7 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
    4000, // default speed is 100 mm
   16000, // max pos is 400 mm
    1200, // start/stop speed limit (30 mm/sec)
-   true, // use acceleration
-      5, // acceleration rate code 5 is 1000 mm/sec/sec
+      5, // acceleration rate index, 5 is 1000 mm/sec/sec, 0 is no acceleration
    4000, // homing speed (100 mm/sec)
      60, // homing back-up ms->speed (1.5 mm/sec)
      40, // home offset distance: 1 mm

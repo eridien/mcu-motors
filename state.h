@@ -34,22 +34,23 @@ struct motorState {
   bool   stopping;
   int16  curPos;
   uint16 curSpeed;
+  uint16 acceleration; // fixed by accelIdx setting
   bool   curDir;
   int16  targetPos;
   uint16 targetSpeed;
   bool   targetDir;
   bool   nearTarget;
   uint8  ustep;  // bipolar only
-  uint8  phase;  // unipolar only
+  uint8  phase;  // bipolar: always phase inside drv8825, unipolar: step phase
   bool   stepPending;
   bool   stepped;
   uint16 nextStepTicks;
   uint16 lastStepTicks;
   bool   haveCommand;
   bool   resetAfterSoftStop;
-  bool   nextStateTestPos;
-  int16  homeTestPos;
-  bool   homeReversed;
+  bool   nextStateTestPos; // flag to return homeTestPos on next read
+  int16  homeTestPos;      // pos when limit sw closes
+  bool   homeReversed; // 0: normal, 1: 1: fwd when limit sw closed, 2: opposite
 } mState[NUM_MOTORS];
 
 

@@ -8,8 +8,7 @@
 
 void initDistTable(void);
 
-// table is 4 (ustep) by 8 (accel) by 64 (speed) -> 2048 entries
-// return is 14-bit dist of decel
-uint16 calcDist(uint8 ustep, uint8 accel, uint16 speed);
+// dist of decel in 1/8 steps
+uint16 calcDist(uint16 accel, uint16 speed);
 
 #endif /* DISTTABLE_H */

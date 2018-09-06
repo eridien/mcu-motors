@@ -61,7 +61,7 @@ void motorInit() {
     for(uint8 i = 0; i < NUM_SETTING_WORDS; i++) {
        mSet[motIdx].reg[i] = settingsInit[i];
     }
-    calcAccel(motIdx);
+    ms->acceleration = accelTable[mSet[motIdx].val.accelIdx];
   }
 }
 
@@ -87,7 +87,7 @@ void setMotorSettings() {
     mSet[motorIdx].reg[i] = (i2cRecvBytes[motorIdx][2*i + 2] << 8) | 
                              i2cRecvBytes[motorIdx][2*i + 3];
   }
-  calcAccel(motorIdx);
+  ms->acceleration = accelTable[sv->accelIdx];
 }
 
 // from event loop
@@ -101,10 +101,14 @@ void checkAll() {
   }
   if(ms->stepped) {
     if(ms->curDir) {
-      ms->curPos += uStepDist[ms->ustep];
+      uint8 stepDist = uStepDist[ms->ustep];
+      ms->curPos += stepDist;
+      ms->phase  += stepDist;
     }
     else {
-      ms->curPos -= uStepDist[ms->ustep];
+      uint8 stepDist = uStepDist[ms->ustep];
+      ms->curPos -= stepDist;
+      ms->phase  -= stepDist;
     }
     ms->stepped = false;
   }
@@ -130,6 +134,9 @@ void motorOn() {
   setStateBit(MOTOR_ON_BIT, 1);
 #ifdef BM
   resetLAT = 1; 
+  // counter in drv8825 is cleared by reset
+  // phase always matches counter in drv8825
+  ms->phase = 0;
 #else
   setUniPort(ms->phase); 
 #endif
@@ -203,7 +210,6 @@ void clockInterrupt(void) {
       ms3LAT = ((p->ustep & 0x04) ? 1 : 0);
       dirLAT =   p->curDir        ? 1 : 0;
       setBiStepHiInt(motIdx);
-
 #else
       setUniPortInt(motIdx, ms->phase); 
 #endif

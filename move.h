@@ -12,7 +12,6 @@
 const uint16 uStepPhaseMask[] = {0x0f, 0x07, 0x03, 0x01};
 const uint16 uStepDist[]      = {   8,    4,    2,    1};
 
-void calcAccel(uint8 motIdx);
 void checkMotor(void);
 void moveCommand(void);
 

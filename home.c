@@ -67,7 +67,6 @@ void homeCommand(bool start) {
   if(start && limitPort[motorIdx]) {
     ms->homing = true;
     ms->homingState = homeStarting;
-    ms->ustep = MAX_USTEP;
     setStateBit(BUSY_BIT,  1);
     setStateBit(HOMED_BIT, 0);
   }

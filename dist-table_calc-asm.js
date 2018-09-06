@@ -5,19 +5,19 @@
 
 fs = require('fs');
 
-// js utility to calculate decelerations distance table
+// js utility to calculate deceleration distance table
 // and prepare the .asm file for inclusion in the mcu-motors mcu code
 
-// table is 4 (ustep) by 8 (accel) by 64 (speed)
-// entry is dist of decel
+// table is 8 (accel) by 256 (speed)
+// entry is dist of decel in 1/8 steps
 
-const CLK_TICKS_PER_SEC = 25000;
+// accel steps/sec/sec (assuming 40 steps/mm): 
+//     1500, 1250, 1000, 800, 600, 400, 200, 0 (off)
+const accelTab = [0, 8000, 16000, 24000, 32000, 40000, 50000, 60000];
 
-// stepsPerPulse = 1,2,4,8, (ustep 0..3)
-// accel: 1500, 1250, 1000, 800, 600, 400, 200, 100
-const accelTab = [4000, 8000, 16000, 24000, 32000, 40000, 50000, 60000];
-// speed resolution of 6.4 mm/sec (256/40)
-// 64 speed values, 256 delta, (1..64)*256 (6.4 to 409.6 mm/sec)
+// speed resolution of 3.2 mm/sec (128/40)  (assuming 40 steps/mm)
+// 256 speed values, 128 delta, (6.4 to 819.2 mm/sec)
+// up to 32,767 steps/sec (4 kHz pps)
 
 let file = fs.openSync('/root/dev/p3/mcu-motors/disttable.asm', 'w');
 
@@ -27,23 +27,29 @@ GLOBAL _disttable
 _disttable:
 `, 'w');
 
+const ustep = speed => {
+  if (speed >= (8192 + 4096) / 2) return 1;
+  if (speed >= (4096 + 2048) / 2) return 2;
+  if (speed >= (2048 + 1024) / 2) return 4;
+  else return 8;
+}
+
 let tooBigCount = 0;
-for (let stepsPP = 8, ustep = 0; ustep < 4; stepsPP >>= 1, ustep++) {
-  for (let accelIdx = 0; accelIdx < 8; accelIdx++) {
-    let accel = accelTab[accelIdx];
-    for (let speedIdx = 0; speedIdx < 64; speedIdx++) {
-      let dist = 0;
-      for (let speed = speedIdx * 256; speed > 0; 
-           speed -= Math.max(Math.floor(accel / speed),1), 
-           dist += stepsPP);
-      if(dist >= 0x4000) {
-        dist = 0x3fff;
-        tooBigCount++;
-      }
-      let val = dist.toString(16);
-      while (val.length < 4) val = '0' + val;
-      fs.writeSync(file, `DW 0X${val}  ; ${dist}, ${ustep}, ${accel}, ${speedIdx * 256}\n`);
+for (let accelIdx = 0; accelIdx < 8; accelIdx++) {
+  let accel = accelTab[accelIdx];
+  for (let speedIdx = 0; speedIdx < 256; speedIdx++) {
+    let speed = speedIdx * 256;
+    let dist = 0;
+    for (; speed > 0; 
+          speed -= Math.max( Math.floor(accel / speed), 1), 
+          dist += ustep(speed));
+    if(dist >= 0x4000) {
+      dist = 0x3fff;
+      tooBigCount++;
     }
+    let val = dist.toString(16);
+    while (val.length < 4) val = '0' + val;
+    fs.writeSync(file, `DW 0X${val}  ; ${dist}, ${accel}, ${speedIdx * 256}\n`);
   }
 }
 fs.closeSync(file);

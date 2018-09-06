@@ -11,11 +11,6 @@
 
 const uint16 accelTable[8] = 
        {4000, 8000, 16000, 24000, 32000, 40000, 50000, 60000};
-uint16 accel[NUM_MOTORS];
-
-void calcAccel(uint8 motIdx) {
-  accel[motIdx] = accelTable[mSet[motIdx].val.accelCode];
-}
 
 uint16 dbgMinClkTicks;
 
@@ -23,27 +18,20 @@ void setStep(bool coasting) {
   uint16 clkTicks;
 #ifdef BM
   if(!coasting) {
-    // adjust ustep unless deceleratin
-    if(!ms->nearTarget) {
-      while(true) {
-        // approximate pulsesPerSec
-        uint16 pulsesPerSec = ms->curSpeed >> (MAX_USTEP - ms->ustep);
-        if(ms->ustep < MAX_USTEP && pulsesPerSec < 500) {
-          ms->ustep++;
-        }
-        // note that you can only reduce ustep when the phase is correct
-        else if(ms->ustep > MIN_USTEP && pulsesPerSec > 1000 && 
-               (ms->curPos & uStepPhaseMask[ms->ustep]) == 0) {
-          ms->ustep--;
-        }
-        else break;
-      }
-    }
-    else {
-      // final deceleration must have at least ustep of 1
-      // 1/1 stepping is unstable at slow speeds
-      if(ms->ustep == 0) {
-        ms->ustep = 1;
+    // adjust ustep
+    uint8 tgtUstep;
+    // we want pps to be between 500 and 1000, if possible
+    // low pps gives sw more time to keep up
+    if      (ms->curSpeed > (8192 + 4096) / 2) tgtUstep = 0;
+    else if (ms->curSpeed > (4096 + 2048) / 2) tgtUstep = 1;
+    else if (ms->curSpeed > (2048 + 1024) / 2) tgtUstep = 2;
+    else tgtUstep = 3;
+
+    if(tgtUstep != ms->ustep) {
+      // you can only reduce ustep when the drv8825 phase is correct
+      if(tgtUstep > ms->ustep ||
+         (ms->phase & uStepPhaseMask[ms->ustep]) == 0) {
+        ms->ustep = tgtUstep;
       }
     }
     // set step timing
@@ -88,11 +76,11 @@ void setStep(bool coasting) {
 }
 
 void checkMotor() {
-  bool accelerate = false;
-  bool decelerate = false;
-  bool coast      = false;
+  bool  accelerate = false;
+  bool  decelerate = false;
+  bool  coast      = false;
   int16 distRemaining;
-  bool distRemPositive;
+  bool  distRemPositive;
   
   if(!ms->homing && !ms->stopping) {
     // normal move to target position
@@ -112,73 +100,75 @@ void checkMotor() {
       // move to target at speed 1 and max ustep to make sure to hit target
       coast = true;
     }
-    if (!sv->useAccel) {
-      // not using acceleration
-      ms->curSpeed = ms->targetSpeed;
-      ms->curDir = ms->targetDir = (ms->targetPos > ms->curPos);
-    }
     else {
-      // using acceleration
-      if (ms->curSpeed <= sv->startStopSpeed) {
-        // going slower than accel threshold
-
-        if(ms->curPos == ms->targetPos) {
-          // finished normal move
-          stopStepping();
-          return;
-        }
-        // can chg dir any time when slow
-        ms->curDir = ms->targetDir = distRemPositive;
-      }
-
-      // going faster than accel threshold
-      else if(ms->nearTarget) {
-        decelerate = true;
+      if (sv->accelIdx == 0) {
+        // not using acceleration
+        ms->curSpeed = ms->targetSpeed;
+        ms->curDir = ms->targetDir = (ms->targetPos > ms->curPos);
       }
       else {
-        if(ms->curDir != ms->targetDir) {
-          // we need to chg dir but we are going too fast
+        // using acceleration
+        if (ms->curSpeed <= sv->startStopSpeed) {
+          // going slower than accel threshold
+
+          if(ms->curPos == ms->targetPos) {
+            // finished normal move
+            stopStepping();
+            return;
+          }
+          // can chg dir any time when slow
+          ms->curDir = ms->targetDir = distRemPositive;
+        }
+
+        // going faster than accel threshold
+        else if(ms->nearTarget) {
           decelerate = true;
         }
         else {
-          // look up decel dist target
-          uint16 decelUstep = ms->ustep;
-          if(decelUstep == 0) {
-            // never decel to zero at stepping 1/1 -- unstable
-            decelUstep = 1;
-          }
-          uint16 distTgt = calcDist(decelUstep, sv->accelCode, ms->curSpeed);
-          if(distRemaining < (distTgt + 200 /* margin */)) {
+          if(ms->curDir != ms->targetDir) {
+            // we need to chg dir but we are going too fast
             decelerate = true;
-            ms->nearTarget = true;
+          }
+          else {
+            // look up decel dist target
+            uint16 decelUstep = ms->ustep;
+            if(decelUstep == 0) {
+              // never decel to zero at stepping 1/1 -- unstable
+              decelUstep = 1;
+            }
+            uint16 distTgt = calcDist(sv->accelIdx, ms->curSpeed);
+            if(distRemaining < (distTgt + 200 /* margin */)) {
+              decelerate = true;
+              ms->nearTarget = true;
+            }
           }
         }
-      }
-      if(!decelerate && !accelerate && !coast) {
-        if(ms->curSpeed > ms->targetSpeed) {
-          decelerate = true;
+        if(!decelerate && !accelerate && !coast) {
+          if(ms->curSpeed > ms->targetSpeed) {
+            decelerate = true;
+          }
+          else if(!ms->nearTarget && ms->curSpeed < ms->targetSpeed) {
+            accelerate = true;
+          }
         }
-        else if(!ms->nearTarget && ms->curSpeed < ms->targetSpeed) {
-          accelerate = true;
+        if(decelerate) {
+          // accel/step = accel/sec / steps/sec
+          uint16 deltaSpeed = (ms->acceleration / ms->curSpeed);
+          if(deltaSpeed == 0) deltaSpeed = 1;
+          if(deltaSpeed < ms->curSpeed) {
+            ms->curSpeed -= deltaSpeed;
+          }
         }
-      }
-      if(decelerate) {
-        // accel/step = accel/sec / steps/sec
-        uint16 deltaSpeed = (accel[motorIdx] / ms->curSpeed);
-        if(deltaSpeed == 0) deltaSpeed = 1;
-        if(deltaSpeed < ms->curSpeed) {
-          ms->curSpeed -= deltaSpeed;
-        }
-      }
-      else if (accelerate) {
-        // accel/step = accel/sec / steps/sec
-        uint16 deltaSpeed = (accel[motorIdx] / ms->curSpeed);
-        if(deltaSpeed == 0) deltaSpeed = 1;
-        ms->curSpeed += deltaSpeed;
-        if(ms->curSpeed > ms->targetSpeed) {
-         // we just passed target speed
-         // we should never go faster than target speed
-         ms->curSpeed = ms->targetSpeed;
+        else if (accelerate) {
+          // accel/step = accel/sec / steps/sec
+          uint16 deltaSpeed = (ms->acceleration / ms->curSpeed);
+          if(deltaSpeed == 0) deltaSpeed = 1;
+          ms->curSpeed += deltaSpeed;
+          if(ms->curSpeed > ms->targetSpeed) {
+            // we just passed target speed
+            // we should never go faster than target speed
+            ms->curSpeed = ms->targetSpeed;
+          }
         }
       }
     }
