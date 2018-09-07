@@ -50,7 +50,7 @@ struct motorState {
   bool   resetAfterSoftStop;
   bool   nextStateTestPos; // flag to return homeTestPos on next read
   int16  homeTestPos;      // pos when limit sw closes
-  bool   homeReversed; // 0: normal, 1: 1: fwd when limit sw closed, 2: opposite
+  uint8   homeReversed; // 0: normal, 1: 1: fwd when limit sw closed, 2: opposite
 } mState[NUM_MOTORS];
 
 

@@ -64,7 +64,7 @@ void softStopCommand(bool resetAfter) {
 }
 
 void chkStopping() {
-  if(ms->curSpeed <= sv->startStopSpeed) {
+  if(ms->curSpeed <= sv->startStopSpeed || sv->accelIdx == 0) {
     stopStepping();
     if(ms->resetAfterSoftStop) {
       // reset only this motor

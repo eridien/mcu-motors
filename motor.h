@@ -48,18 +48,19 @@ extern uint8                   mm; // motor mask (0xf0 or 0x0f or step bit)
 
 // constants loadable from command (all must be 16 bits))
 struct motorSettings {
-  uint16 defaultSpeed;
-  uint16 maxPos;
-  uint16 startStopSpeed;
   uint16 accelIdx;
+  uint16 defaultSpeed;
+  uint16 startStopSpeed;
+  uint16 maxPos;
   uint16 homingSpeed;
+  uint16 homingDecelCode;
   uint16 homingBackUpSpeed;
   uint16 homeOfs;
-  uint16 homePos;   // value to set cur pos after homing
-  uint16 homeToLim; // home dir, 0:rev, 1:fwd if lim closed, 2:rev if lim closed
+  uint16 homePos;    // value to set cur pos after homing
+  uint16 limitSwCtl; // codes starting and switch direction and reversing
 };
 
-#define NUM_SETTING_WORDS 9
+#define NUM_SETTING_WORDS 10
 
 union settingsUnion{
   uint16 reg[NUM_SETTING_WORDS];
@@ -75,11 +76,12 @@ union settingsUnion{
 // assumes 1/40 mm per step
 // default is same for all motors
 const uint16 settingsInit[NUM_SETTING_WORDS] = {
+      5, // acceleration rate index,  0 is no acceleration
    4000, // default speed is 100 mm
-  16000, // max pos is 400 mm
    1200, // start/stop speed limit (30 mm/sec)
-      5, // acceleration rate index, 5 is 1000 mm/sec/sec, 0 is no acceleration
+  16000, // max pos is 400 mm
    4000, // homing speed (100 mm/sec)
+      7, // homing decel rate index
      60, // homing back-up ms->speed (1.5 mm/sec)
      40, // home offset distance: 1 mm
       0, // home pos value, set cur pos to this after homing
@@ -91,15 +93,16 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
 // assumes 1/50 mm per step
 // default is same for all motors
 const uint16 settingsInit[NUM_SETTING_WORDS] = {
-   600,    // default speed: steps/sec (12 mm/sec )
-  5000,    // max pos is 100 mm
-   300,    // start/stop speed limit (6 mm/sec)
- 25000,    // acceleration rate steps/sec/sec  (500 mm/sec/sec)
-   300,    // homing speed (6 mm/sec)
-   100,    // homing back-up ms->speed (2 mm/sec)
-    50,    // home offset distance: 1 mm
-     0,    // home pos value, set cur pos to this after homing
-     0,    // use limit sw for home direction
+      5, // acceleration rate index,  0 is no acceleration
+   4000, // default speed is 100 mm
+   1200, // start/stop speed limit (30 mm/sec)
+  16000, // max pos is 400 mm
+   4000, // homing speed (100 mm/sec)
+      7, // homing decel rate index
+     60, // homing back-up ms->speed (1.5 mm/sec)
+     40, // home offset distance: 1 mm
+      0, // home pos value, set cur pos to this after homing
+      0, // use limit sw for home direction, 1: norm, 2: reverse
 };
 #endif /* BM */
 

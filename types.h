@@ -2,7 +2,8 @@
 #ifndef TYPES_H
 #define	TYPES_H
 
-// support no acceleration
+// support short packet for settings
+// support full limit sw ctl
 
 typedef signed char int8;
 typedef unsigned char uint8;

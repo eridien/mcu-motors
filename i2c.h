@@ -43,17 +43,18 @@
 //   0001 0101  motor on (hold place, reset off)
 //   0001 0110  set curpos to home pos value setting (fake homing)
 //
-//   -- 19 byte settings command --
-//   0001 1111  load settings, 16-bit values, big endian
-//      default speed for simple move cmd
+//   -- 21 byte settings command --
+//   0001 1111  load settings, 16-bit values
+//      acceleration rate table index 0..7 (steps/sec/sec), 0 is off
+//      default speed
+//      no-acceleration speed limit (and start speed when stopped)
 //      max pos     (min pos is always zero))
-//      start/stop speed limit
-//      acceleration rate table index 0..7 (see table), 0 is off
 //      homing speed
+//      homing decelleration rate table index 0..7 
 //      homing back-up speed
 //      home offset distance
 //      home pos value (set cur pos to this value after homing, usually 0)
-//      use limit sw for home direction
+//      limit sw controls
 
 // -- 4-byte state response --
 // error code and bit cleared on status read, only on motor being read

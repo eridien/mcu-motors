@@ -14,16 +14,16 @@ void chkHoming() {
     case homeStarting:
       ms->targetSpeed = sv->homingSpeed;
       ms->targetDir   = ms->homeReversed;
-      ms->homingState =  goingHome;
+      ms->homingState = goingHome;
       break;
 
     case goingHome:
       if(limitClosed() != ms->homeReversed) {
         // just passed switch
-        if(ms->homeReversed) {
-          // now home in the normal direction
+        if(sv->limitSwCtl >= 2 && ms->homeReversed) {
+          // now start homing again in the normal direction
           ms->homeReversed = false;
-          ms->homingState = homeStarting;
+          ms->homingState  = homeStarting;
           break;
         }
         ms->targetDir   = !ms->homeReversed;
@@ -62,6 +62,21 @@ void homeCommand(bool start) {
     GIE=1;
     ms->curSpeed = sv->startStopSpeed;
     setDacToSpeed();
+  }
+  
+  
+  //  TODO
+  // code multiple things into sv->limitSwCtl
+  // start dir: 0, 1, limit sw, not limit sw
+  // limit sw closed value
+  // restart when reversed
+  
+  
+  switch(sv->limitSwCtl) {
+    case 0: ms->homeReversed = false; 
+    case 1: ms->homeReversed = true; 
+    case 2: ms->homeReversed =  limitClosed(); 
+    case 3: ms->homeReversed = !limitClosed(); 
   }
   motorOn();
   if(start && limitPort[motorIdx]) {
