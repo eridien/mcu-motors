@@ -80,7 +80,10 @@ void checkMotor() {
   bool  decelerate = false;
   bool  closing    = false;
   
-  if(!ms->homing && !ms->stopping) {
+  if(ms->stopping) {
+    decelerate = true;
+  }
+  else if(!ms->homing) {
     // normal move to target position
 
     int16 distRemaining = (ms->targetPos - ms->curPos);
@@ -144,26 +147,29 @@ void checkMotor() {
             accelerate = true;
           }
         }
-        if(decelerate) {
-          // accel/step = accel/sec / steps/sec
-          uint16 deltaSpeed = (ms->acceleration / ms->curSpeed);
-          if(deltaSpeed == 0) deltaSpeed = 1;
-          if(deltaSpeed < ms->curSpeed) {
-            ms->curSpeed -= deltaSpeed;
-          }
-        }
-        else if (accelerate) {
-          // accel/step = accel/sec / steps/sec
-          uint16 deltaSpeed = (ms->acceleration / ms->curSpeed);
-          if(deltaSpeed == 0) deltaSpeed = 1;
-          ms->curSpeed += deltaSpeed;
-          if(ms->curSpeed > ms->targetSpeed) {
-            // we just passed target speed
-            // we should never go faster than target speed
-            ms->curSpeed = ms->targetSpeed;
-          }
-        }
       }
+    }
+  }
+  if(decelerate) {
+    // accel/step = accel/sec / steps/sec
+    uint16 deltaSpeed = (ms->acceleration / ms->curSpeed);
+    if(deltaSpeed == 0) deltaSpeed = 1;
+    if(deltaSpeed < ms->curSpeed) {
+      ms->curSpeed -= deltaSpeed;
+    } 
+    else {
+      ms->curSpeed = sv->startStopSpeed;
+    }
+  }
+  else if (accelerate) {
+    // accel/step = accel/sec / steps/sec
+    uint16 deltaSpeed = (ms->acceleration / ms->curSpeed);
+    if(deltaSpeed == 0) deltaSpeed = 1;
+    ms->curSpeed += deltaSpeed;
+    if(ms->curSpeed > ms->targetSpeed) {
+      // we just passed target speed
+      // we should never go faster than target speed
+      ms->curSpeed = ms->targetSpeed;
     }
   }
   setDacToSpeed();

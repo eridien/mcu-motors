@@ -126,6 +126,8 @@ void checkAll() {
         return;
       }
     }
+  }
+  if((ms->stateByte & BUSY_BIT) && !haveError()) {
     checkMotor();
   }
 }
