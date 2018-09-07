@@ -82,8 +82,8 @@ bool limitClosed() {  // comment out when limit sw used by dbg4
 }
 
 // setting words are big endian
-void setMotorSettings() {
-  for(uint8 i = 0; i < NUM_SETTING_WORDS; i++) {
+void setMotorSettings(uint8 numWordsRecvd) {
+  for(uint8 i = 0; i < numWordsRecvd; i++) {
     mSet[motorIdx].reg[i] = (i2cRecvBytes[motorIdx][2*i + 2] << 8) | 
                              i2cRecvBytes[motorIdx][2*i + 3];
   }
@@ -135,10 +135,12 @@ void checkAll() {
 void motorOn() {
   setStateBit(MOTOR_ON_BIT, 1);
 #ifdef BM
-  resetLAT = 1; 
-  // counter in drv8825 is cleared by reset
-  // phase always matches counter in drv8825
-  ms->phase = 0;
+  if(!resetLAT) {
+    resetLAT = 1; 
+    // counter in drv8825 is cleared by reset
+    // phase always matches counter in drv8825
+    ms->phase = 0;
+  }
 #else
   setUniPort(ms->phase); 
 #endif
@@ -177,7 +179,11 @@ void processMotorCmd() {
     }
   }
   else if(firstByte == 0x1f) {
-    if(lenIs(1+NUM_SETTING_WORDS*2)) setMotorSettings();
+    uint8 numWords = (numBytesRecvd-1)/2;
+    if((numBytesRecvd & 0x01) == 1 && 
+        numWords > 0 && numWords <= NUM_SETTING_WORDS) {
+      setMotorSettings(numWords);
+    }
   }
   else if((firstByte & 0xf0) == 0x10) {
     if(lenIs(1)) {

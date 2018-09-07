@@ -2,7 +2,6 @@
 #ifndef TYPES_H
 #define	TYPES_H
 
-// support short packet for settings
 // support full limit sw ctl
 
 typedef signed char int8;

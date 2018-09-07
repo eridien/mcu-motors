@@ -81,7 +81,7 @@ void checkMotor() {
   bool  closing    = false;
   
   if(ms->homing) {
-    if (sv->homingDecelCode == 0 || 
+    if (sv->accelIdx == 0 || 
         ms->curSpeed <= sv->startStopSpeed) {
       ms->curSpeed = ms->targetSpeed;
       ms->curDir = ms->targetDir;
@@ -93,7 +93,7 @@ void checkMotor() {
   else if(ms->stopping) {
     decelerate = true;
   }
-  else if(!ms->homing) {
+  else {
     // normal move to target position
 
     int16 distRemaining = (ms->targetPos - ms->curPos);
@@ -161,13 +161,8 @@ void checkMotor() {
     }
   }
   if(decelerate) {
-    uint16 decel = ms->acceleration;
-    if(ms->homing) {
-      // use homing decelleration
-      decel= accelTable[mSet[motorIdx].val.homingDecelCode];
-    }
     // accel/step = accel/sec / steps/sec
-    uint16 deltaSpeed = (decel / ms->curSpeed);
+    uint16 deltaSpeed = (ms->acceleration / ms->curSpeed);
     if(deltaSpeed == 0) deltaSpeed = 1;
     if(deltaSpeed < ms->curSpeed) {
       ms->curSpeed -= deltaSpeed;

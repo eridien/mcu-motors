@@ -50,7 +50,6 @@
 //      no-acceleration speed limit (and start speed when stopped)
 //      max pos     (min pos is always zero))
 //      homing speed
-//      homing decelleration rate table index 0..7 
 //      homing back-up speed
 //      home offset distance
 //      home pos value (set cur pos to this value after homing, usually 0)

@@ -57,6 +57,7 @@ void homeCommand(bool start) {
   ms->slowing  = false;
   if((ms->stateByte & BUSY_BIT) == 0) {
     // not moving -- init speed
+    motorOn();
     GIE=0;
     ms->lastStepTicks = timeTicks;
     GIE=1;
@@ -78,7 +79,6 @@ void homeCommand(bool start) {
     case 2: ms->homeReversed =  limitClosed(); 
     case 3: ms->homeReversed = !limitClosed(); 
   }
-  motorOn();
   if(start && limitPort[motorIdx]) {
     ms->homing = true;
     ms->homingState = homeStarting;

@@ -53,14 +53,13 @@ struct motorSettings {
   uint16 startStopSpeed;
   uint16 maxPos;
   uint16 homingSpeed;
-  uint16 homingDecelCode;
   uint16 homingBackUpSpeed;
   uint16 homeOfs;
   uint16 homePos;    // value to set cur pos after homing
   uint16 limitSwCtl; // codes starting and switch direction and reversing
 };
 
-#define NUM_SETTING_WORDS 10
+#define NUM_SETTING_WORDS 9
 
 union settingsUnion{
   uint16 reg[NUM_SETTING_WORDS];
@@ -81,7 +80,6 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
    1200, // start/stop speed limit (30 mm/sec)
   16000, // max pos is 400 mm
    4000, // homing speed (100 mm/sec)
-      7, // homing decel rate index
      60, // homing back-up ms->speed (1.5 mm/sec)
      40, // home offset distance: 1 mm
       0, // home pos value, set cur pos to this after homing
@@ -98,7 +96,6 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
    1200, // start/stop speed limit (30 mm/sec)
   16000, // max pos is 400 mm
    4000, // homing speed (100 mm/sec)
-      7, // homing decel rate index
      60, // homing back-up ms->speed (1.5 mm/sec)
      40, // home offset distance: 1 mm
       0, // home pos value, set cur pos to this after homing
