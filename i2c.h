@@ -43,7 +43,7 @@
 //   0001 0101  motor on (hold place, reset off)
 //   0001 0110  set curpos to home pos value setting (fake homing)
 //
-//   -- 21 byte settings command --
+//   -- 19 byte settings command --
 //   0001 1111  load settings, 16-bit values
 //      acceleration rate table index 0..7 (steps/sec/sec), 0 is off
 //      default speed
@@ -63,7 +63,7 @@
 //   CMD_DATA_ERROR      0x30
 //   CMD_NOT_DONE_ERROR  0x40
 //   STEP_NOT_DONE_ERROR 0x50
-//   BOUNDS_ERROR   0x60
+//   BOUNDS_ERROR        0x60
 //   NOT_HOMED_ERROR     0x70
 //
 // state response bytes
@@ -73,7 +73,7 @@
 //      e: error bit              (set on all motors when any error in mcu)
 //      b: busy state
 //      o: motor on (not in reset)
-//      z: at home
+//      z: homed
 //   2) aaaa aaaa  current position, top 8 bits (might be result of cmd 0x11)
 //   3) aaaa aaaa  followed by bottom 8 bits
 //   4) cccc cccc  8-bit cksum, sum of first 3 bytes

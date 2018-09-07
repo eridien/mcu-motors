@@ -20,6 +20,7 @@ void chkHoming() {
     case goingHome:
       if(limitClosed() != ms->homeReversed) {
         // just passed switch
+        setStateBit(HOMED_BIT, false);
         if(sv->limitSwCtl >= 2 && ms->homeReversed) {
           // now start homing again in the normal direction
           ms->homeReversed = false;
@@ -34,7 +35,7 @@ void chkHoming() {
       
     case homeReversing:
       if(limitClosed() == ms->homeReversed) {
-        // just passed switch in other direction
+        // just passed switch second time
         ms->homeTestPos = ms->curPos;
         ms->curPos = 0;
         ms->homingState = homingToOfs;
@@ -74,20 +75,20 @@ void homeCommand(bool start) {
   
   
   switch(sv->limitSwCtl) {
-    case 0: ms->homeReversed = false; 
-    case 1: ms->homeReversed = true; 
-    case 2: ms->homeReversed =  limitClosed(); 
-    case 3: ms->homeReversed = !limitClosed(); 
+    case 0: ms->homeReversed = false;            break;
+    case 1: ms->homeReversed = true;             break;
+    case 2: ms->homeReversed =  limitClosed();   break;
+    case 3: ms->homeReversed = !limitClosed();   break;
   }
   if(start && limitPort[motorIdx]) {
     ms->homing = true;
     ms->homingState = homeStarting;
     setStateBit(BUSY_BIT,  1);
-    setStateBit(HOMED_BIT, 0);
+    // this does not affect homed state bit until we get to limit switch
   }
   else {
+    stopStepping();
     ms->curPos = sv->homePos;
-    setStateBit(BUSY_BIT,  0);
     setStateBit(HOMED_BIT, 1);
   }
 }
