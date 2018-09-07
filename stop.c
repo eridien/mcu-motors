@@ -11,8 +11,9 @@ void stopStepping() {
   ms->stepPending = false;
   ms->stepped     = false;
   ms->homing      = false;
+  ms->slowing     = false;
   ms->stopping    = false;
-  ms->curSpeed    = sv->startStopSpeed;
+  ms->curSpeed    = 0;
   setDacToSpeed();
   setStateBit(BUSY_BIT, 0);
 }

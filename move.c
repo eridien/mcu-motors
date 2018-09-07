@@ -22,12 +22,11 @@ void setStep(bool closing) {
     if      (ms->curSpeed > (8192 + 4096) / 2) tgtUstep = 0;
     else if (ms->curSpeed > (4096 + 2048) / 2) tgtUstep = 1;
     else if (ms->curSpeed > (2048 + 1024) / 2) tgtUstep = 2;
-    else tgtUstep = 3;
+    else                                       tgtUstep = 3;
 
     if(tgtUstep != ms->ustep) {
-      // you can only reduce ustep when the drv8825 phase is correct
-      if(tgtUstep > ms->ustep ||
-         (ms->phase & uStepPhaseMask[ms->ustep]) == 0) {
+      // you can only change ustep when the drv8825 phase is correct
+      if((ms->phase & uStepPhaseMask[tgtUstep]) == 0) {
         ms->ustep = tgtUstep;
       }
     }
@@ -80,14 +79,12 @@ void checkMotor() {
   bool  accelerate = false;
   bool  decelerate = false;
   bool  closing    = false;
-  int16 distRemaining;
-  bool  distRemPositive;
   
   if(!ms->homing && !ms->stopping) {
     // normal move to target position
 
-    distRemaining = (ms->targetPos - ms->curPos);
-    distRemPositive = (distRemaining >= 0);
+    int16 distRemaining = (ms->targetPos - ms->curPos);
+    bool  distRemPositive = (distRemaining >= 0);
     if(!distRemPositive) {
       distRemaining = -distRemaining;
     }
