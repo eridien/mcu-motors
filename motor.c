@@ -87,6 +87,7 @@ bool limitSwOn() {  // comment out when limit sw used by dbg4
 
 
 // setting words are big endian
+// write may be short, only setting first entries
 void setMotorSettings(uint8 numWordsRecvd) {
   for(uint8 i = 0; i < numWordsRecvd; i++) {
     mSet[motorIdx].reg[i] = (i2cRecvBytes[motorIdx][2*i + 2] << 8) | 
@@ -171,25 +172,43 @@ void processMotorCmd() {
   
   if((firstByte & 0x80) == 0x80) {
     if(lenIs(2)) {
-      // simple goto pos command
-      ms->targetSpeed = sv->defaultSpeed;
+      // move command
+      ms->targetSpeed = sv->speed;
       ms->targetPos   = ((int16) (firstByte & 0x7f) << 8) | rb[2];
       moveCommand();
     }
   }
-  // speed-move command
   else if((firstByte & 0xc0) == 0x40) {
+    // speed-move command
     if(lenIs(3)) {
-      ms->targetSpeed = (uint16) (firstByte & 0x3f) << 8;
+      // changes settings for speed
+      sv->speed       = (uint16) (firstByte & 0x3f) << 8;
+      ms->targetSpeed = sv->speed;
       ms->targetPos   = ((int16) rb[2] << 8) | rb[3];
       moveCommand();
     }
   }
+  else if((firstByte & 0xf8) == 0x08) {
+    // accel-speed-move command
+    if(lenIs(5)) {
+      // changes settings for acceleration and speed
+      sv->accelIdx     = (firstByte & 0x07);
+      sv->speed        = (((uint16) rb[2] << 8) | rb[3]);
+      ms->acceleration = accelTable[sv->accelIdx];
+      ms->targetSpeed  = sv->speed;
+      ms->targetPos    = ((int16) rb[4] << 8) | rb[5];
+      moveCommand();
+    }
+  }
   else if(firstByte == 0x1f) {
+    // load settings command
     uint8 numWords = (numBytesRecvd-1)/2;
     if((numBytesRecvd & 0x01) == 1 && 
         numWords > 0 && numWords <= NUM_SETTING_WORDS) {
       setMotorSettings(numWords);
+    }
+    else {
+      setError(CMD_DATA_ERROR);
     }
   }
   else if((firstByte & 0xf0) == 0x10) {
@@ -202,11 +221,11 @@ void processMotorCmd() {
         case 4: resetMotor(false);             break; // hard stop (immediate reset)
         case 5: motorOn();                     break; // reset off
         case 6: homeCommand(false);            break;  // set curpos to setting
-        default: lenIs(255); // invalid cmd sets CMD_DATA_ERROR
+        default: setError(CMD_DATA_ERROR);
       }
     }
   }
-  else lenIs(255); // invalid cmd sets CMD_DATA_ERROR
+  else setError(CMD_DATA_ERROR);
 }
 
 void clockInterrupt(void) {

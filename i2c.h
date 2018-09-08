@@ -25,14 +25,7 @@
 //       max step count: 32,000
 //
 // writes ...
-//   (first word of recv buffer is buf len)
-//
-//   -- move ommands --
-//   1aaa aaaa  goto command, top 7 bits of goto addr
-//      aaaa aaaa followed by bottom 8 bits
-//   01ss ssss (speed-move cmd) set max speed = s*256 steps/sec and move to addr
-//     0aaa aaaa top 7 bits of move addr
-//     aaaa aaaa bottom 8 bits
+//   first byte of recv buffer is buf len
 //
 //   -- one-byte commands --
 //   0001 0000  start homing
@@ -43,7 +36,24 @@
 //   0001 0101  motor on (hold place, reset off)
 //   0001 0110  set curpos to home pos value setting (fake homing)
 //
-//   -- 19 byte settings command --
+//   -- 2-byte move command --
+//   1aaa aaaa     top 7 bits of move addr
+//      aaaa aaaa  bottom 8 bits
+
+//   -- 3-byte speed-move command --
+//   01ss ssss     set speed setting to value s times 256
+//     0aaa aaaa   top 7 bits of move addr,
+//     aaaa aaaa   bottom 8 bits
+//
+//   -- 5-byte accel-speed-move command --  
+//   0000 1ccc    set acceleration idx setting
+//     ssss ssss  top 8 bits of speed,
+//     ssss ssss  bottom 8 bits
+//     0aaa aaaa  top 7 bits of move addr,
+//     aaaa aaaa  bottom 8 bits
+//
+//   -- 3-byte to 19-byte settings command --
+//   write may be short, only setting first entries
 //   0001 1111  load settings, 16-bit values
 //      acceleration rate table index 0..7 (steps/sec/sec), 0 is off
 //      default speed

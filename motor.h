@@ -43,13 +43,13 @@ extern uint8                   mm; // motor mask (0xf0 or 0x0f or step bit)
 #define clrUniPort()       (*mp = (*mp & ~mm));
 #define setUniPort(_phase) (*mp = (*mp & ~mm) | motPhaseValue[motorIdx][_phase]);
 #define setUniPortInt(_motIdx, _phase)                                   \
-  (*stepPort[_motIdx] = (*stepPort[_motIdx] & ~stepMask[_motIdx]) |   \
+  (*stepPort[_motIdx] = (*stepPort[_motIdx] & ~stepMask[_motIdx]) |      \
     motPhaseValue[_motIdx][_phase]);
 
-// constants loadable from command (all must be 16 bits))
+// constants loadable from command (all are 16 bits))
 struct motorSettings {
   uint16 accelIdx;
-  uint16 defaultSpeed;
+  uint16 speed;
   uint16 startStopSpeed;
   uint16 maxPos;
   uint16 homingSpeed;

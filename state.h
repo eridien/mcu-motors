@@ -38,7 +38,7 @@ struct motorState {
   bool   stopping;
   int16  curPos;
   uint16 curSpeed;
-  uint16 acceleration; // fixed by accelIdx setting
+  uint16 acceleration;
   bool   curDir;
   int16  targetPos;
   uint16 targetSpeed;
