@@ -164,8 +164,7 @@ bool lenIs(uint8 expected) {
   return true;
 }
 
-// from i2c
-void processMotorCmd() {
+void processCommand() {
   volatile uint8 *rb = ((volatile uint8 *) &i2cRecvBytes[motorIdx]);
   numBytesRecvd   = rb[0];
   uint8 firstByte = rb[1];
@@ -212,6 +211,7 @@ void processMotorCmd() {
     }
   }
   else if((firstByte & 0xf0) == 0x10) {
+    // one-byte commands
     if(lenIs(1)) {
       switch(firstByte & 0x0f) {
         case 0: homeCommand(true);             break; // start homing
@@ -220,7 +220,7 @@ void processMotorCmd() {
         case 3: softStopCommand(true);         break; // stop with reset
         case 4: resetMotor(false);             break; // hard stop (immediate reset)
         case 5: motorOn();                     break; // reset off
-        case 6: homeCommand(false);            break;  // set curpos to setting
+        case 6: homeCommand(false);            break; // stop, set curpos to setting
         default: setError(CMD_DATA_ERROR);
       }
     }

@@ -84,7 +84,7 @@ void main(void) {
         errorIntCode = 0;
       }
       if(ms->haveCommand) {
-        processMotorCmd();
+        processCommand();
         ms->haveCommand = false;
       }
       checkAll();

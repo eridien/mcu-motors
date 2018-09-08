@@ -178,7 +178,7 @@ void checkAll(void);
 bool haveFault(void);        // bipolar only
 bool limitSwOn(void);
 void motorOn(void);
-void processMotorCmd(void);
+void processCommand(void);
 void clockInterrupt(void);
 uint16 getLastStepTicks(void);
 void   setNextStepTicks(uint16 ticks);

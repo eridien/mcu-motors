@@ -83,6 +83,9 @@ void homeCommand(bool start) {
     // so homing can be interrupted by move command
   }
   else {
+    // fake homing for motors with no limit switch
+    // hard stop with no reset
+    // set wherever it lands to home pos
     stopStepping();
     ms->curPos = sv->homePos;
     setStateBit(HOMED_BIT, 1);

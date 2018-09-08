@@ -29,25 +29,25 @@
 
 struct motorState {
   uint8  stateByte;
+  int16  targetPos;
+  uint16 targetSpeed;
+  bool   targetDir;
+  int16  curPos;
+  uint16 curSpeed;
+  bool   curDir;
+  uint8  ustep;
+  uint16 acceleration;
+  bool   stepPending;
+  bool   stepped;
+  bool   stopping;
   bool   homing;
   uint8  homingState;
   uint8  homeDir;
   uint8  homeEndSide;
   uint8  homeWillReverse;
   uint8  limitSwPolarity;
-  bool   stopping;
-  int16  curPos;
-  uint16 curSpeed;
-  uint16 acceleration;
-  bool   curDir;
-  int16  targetPos;
-  uint16 targetSpeed;
-  bool   targetDir;
   bool   slowing;
-  uint8  ustep;  // bipolar only
-  uint8  phase;  // bipolar: always phase inside drv8825, unipolar: step phase
-  bool   stepPending;
-  bool   stepped;
+  uint8  phase;  // bipolar: matches phase inside drv8825, unipolar: step phase
   uint16 nextStepTicks;
   uint16 lastStepTicks;
   bool   haveCommand;

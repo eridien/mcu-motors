@@ -2,8 +2,6 @@
 #ifndef TYPES_H
 #define	TYPES_H
 
-// support full limit sw ctl
-
 typedef signed char int8;
 typedef unsigned char uint8;
 typedef int int16;
