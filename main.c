@@ -46,7 +46,7 @@ void main(void) {
   ANSELD = 0;
 #endif
   
-  debug1TRIS    = 0;
+//  debug1TRIS    = 0;
 //  debug2TRIS    = 0;
 //  debug3TRIS    = 0;
 //  debug4TRIS    = 0;

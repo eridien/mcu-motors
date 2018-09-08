@@ -1,44 +1,6 @@
-#ifndef I2C_H
-#define	I2C_H
-
-#include <xc.h>
-#include "types.h"
-#include "motor.h"
-
-// ===== HARDWARE =====
+//   
+//  eridien P3 mcu motor controller interface
 //
-// One PIC mcu can host multiple motors -- each motor has its own i2c addr
-// Each motor state is independent (except for error which stops entire mcu)
-//
-// At the time of this writing the code can be built for:
-//     One bipolar motor     (define BM and B1) (PIC16F15345)
-//     Three bipolar motors  (define BM and B3) (PIC16F15345)
-//     Six unipolar motors   (define U6)        (PIC16F15375)
-// The PIC models can be different. The MCU pins are set in pins.h.
-//
-// This MCU code has a specific meaning for a step.
-// For bipolar it is a 1/8 micro-step and for unipolar it is one of four phases
-//
-// If using a 20-tooth GT2 pulley, then one step is 1/40 mm for bipolar
-// and 1/50 mm for unipolar motor (28BYJ-48)
-// steps are 1/8 micro-step (bipolar) or one phase (unipolar)
-//    for bipolar: (typical 200 step motor and 20-tooth GT2 pulley)
-//       steps/rev:        1600
-//       dist/rev:           40 mm
-//       max step count: 32,767
-//       max distance:      800 mm
-//    for unipolar:  (28BYJ-48 and 20-tooth GT2 pulley)
-//       steps/rev:        2048
-//       dist/rev:           40 mm
-//       max step count: 32,767
-//       max distance:      625 mm
-// all speed is in steps/sec (except speed-move cmd)
-// acceleration is 0..7: none, 8000, 16000, 24000, 32000, 40000, 50000, 60000
-// for 1/40 mm steps: none, 200, 400, 600, 800, 1000, 1250, 1500 mm/sec/sec
-// move, home, and stop commands start immediately even when motor is busy
-//
-// ===== SOFTWARE =====
-
 //   Each MCU is an I2C slave.  Each motor in the MCU has its own I2C address.
 //   Any I2C write to MCU is a command.  Any read returns 4-byte status.
 // 
@@ -121,28 +83,3 @@
 //   NOT_HOMED_ERROR     0x70  // attempt to do a move when not homed yet
 //
 
-
-#define RECV_BUF_SIZE   (NUM_SETTING_WORDS*2 + 1) // + opcode byte
-#define NUM_SEND_BYTES   4  //  state, posH, posL, cksum
-
-#define I2C_ADDR_MASK 0xf0 // motor idx in d3-d1 (d2-d0 in real addr)
-
-#ifdef B1
-#define I2C_ADDR      0x10  // real addr:0x08, ext box mcu (B1), motor always 0
-#endif
-#ifdef B3
-#define I2C_ADDR      0x20  // real addr:0x10, head mcu (B3)for bipolar motors
-#endif
-#ifdef U6
-#define I2C_ADDR      0x30  // real addr:0x18, head mcu (U6) for unipolar motors
-#endif
-
-extern volatile uint8 i2cRecvBytes[NUM_MOTORS][RECV_BUF_SIZE + 1];
-extern volatile uint8 i2cRecvBytesPtr;
-extern volatile uint8 i2cSendBytes[NUM_SEND_BYTES];
-extern volatile uint8 i2cSendBytesPtr;
-
-void i2cInit(void);
-void i2cInterrupt(void);
-
-#endif	/* I2C_H */
