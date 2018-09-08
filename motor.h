@@ -83,7 +83,7 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
      60, // homing back-up ms->speed (1.5 mm/sec)
      40, // home offset distance: 1 mm
       0, // home pos value, set cur pos to this after homing
-      0, // use limit sw for home direction, 1: norm, 2: reverse
+      0, // limit sw control (0 is normal)
 };
 
 #else
@@ -92,6 +92,7 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
 // default is same for all motors
 const uint16 settingsInit[NUM_SETTING_WORDS] = {
       5, // acceleration rate index,  0 is no acceleration
+      5, // acceleration rate index,  0 is no acceleration
    4000, // default speed is 100 mm
    1200, // start/stop speed limit (30 mm/sec)
   16000, // max pos is 400 mm
@@ -99,7 +100,7 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
      60, // homing back-up ms->speed (1.5 mm/sec)
      40, // home offset distance: 1 mm
       0, // home pos value, set cur pos to this after homing
-      0, // use limit sw for home direction, 1: norm, 2: reverse
+      0, // limit sw control (0 is normal)
 };
 #endif /* BM */
 
@@ -175,7 +176,7 @@ uint8 motPhaseValue[NUM_MOTORS][4] = { // motor, phase
 void motorInit(void);
 void checkAll(void);
 bool haveFault(void);        // bipolar only
-bool limitClosed(void);
+bool limitSwOn(void);
 void motorOn(void);
 void processMotorCmd(void);
 void clockInterrupt(void);

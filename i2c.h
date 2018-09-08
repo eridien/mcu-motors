@@ -54,7 +54,15 @@
 //      home offset distance
 //      home pos value (set cur pos to this value after homing, usually 0)
 //      limit sw controls
-
+//
+//   -- 1 byte limit sw controls --/
+//   in settings
+//   zero-byte is normal behavior
+//   00sslee
+//      ss  start dir: 0: rev, 1: fwd, 2: limit sw, 3: not limit sw
+//       l  switch pin active voltage, 0: lo,  1: hi
+//      ee  force ending side: 0: no, 1: sw pin active, 2: sw pin not active
+//
 // -- 4-byte state response --
 // error code and bit cleared on status read, only on motor being read
 // Error codes 

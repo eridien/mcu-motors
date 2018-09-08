@@ -48,20 +48,23 @@ void motorInit() {
   limitRTRIS = 1;  // zero means at limit switch
   limitXTRIS = 1;  // zero means at limit switch
 #endif /* B3 */
-
+  
   for(uint8 motIdx=0; motIdx < NUM_MOTORS; motIdx++) {
-    struct motorState *p = &mState[motIdx];
-    p->stateByte   = 0;    // no err, not busy, motor off, and not homed
-    p->phase       = 0;    // cur step phase (unipolar only)
-    p->haveCommand = false;
-    p->stepPending = false;
-    p->stepped     = false;
-    p->curSpeed    = 0;
+    struct motorState *msp = &mState[motIdx];
+    msp->stateByte   = 0;    // no err, not busy, motor off, and not homed
+    msp->phase       = 0;    // cur step phase
+    msp->haveCommand = false;
+    msp->stepPending = false;
+    msp->stepped     = false;
+    msp->curSpeed    = 0;
     setDacToSpeed();
     for(uint8 i = 0; i < NUM_SETTING_WORDS; i++) {
        mSet[motIdx].reg[i] = settingsInit[i];
     }
-    ms->acceleration = accelTable[mSet[motIdx].val.accelIdx];
+    msp->acceleration  = accelTable[mSet[motIdx].val.accelIdx];
+    uint8 lsc = mSet[motIdx].val.limitSwCtl;
+    msp->limitSwPolarity = (lsc >> 2) & 0x01;
+    msp->homeEndSide     =  lsc       & 0x03;
   }
 }
 
@@ -73,13 +76,15 @@ bool haveFault() {
   return false;
 }
 
-bool limitClosed() {  // comment out when limit sw used by dbg4
+bool limitSwOn() {  // comment out when limit sw used by dbg4
   volatile unsigned char *p = limitPort[motorIdx];
   if(p != NULL) {
-    return !(*p & limitMask[motorIdx]);
+    return (ms->limitSwPolarity ?  (*p & limitMask[motorIdx])
+                                : !(*p & limitMask[motorIdx]));
   }
   return false;
-}
+}  
+
 
 // setting words are big endian
 void setMotorSettings(uint8 numWordsRecvd) {
@@ -87,7 +92,9 @@ void setMotorSettings(uint8 numWordsRecvd) {
     mSet[motorIdx].reg[i] = (i2cRecvBytes[motorIdx][2*i + 2] << 8) | 
                              i2cRecvBytes[motorIdx][2*i + 3];
   }
-  ms->acceleration = accelTable[sv->accelIdx];
+  ms->acceleration    = accelTable[sv->accelIdx];
+  ms->limitSwPolarity = (sv->limitSwCtl >> 2) & 0x01;
+  ms->homeEndSide     =  sv->limitSwCtl       & 0x03;
 }
 
 // from event loop
