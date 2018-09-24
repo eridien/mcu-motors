@@ -63,6 +63,10 @@ void setStep(bool closing) {
   
   ms->stepped = false;
   setBiStepLo();
+
+          dbg1 = 0;
+
+  
   ms->stepPending = true;
   
 #else

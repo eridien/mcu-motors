@@ -1,5 +1,6 @@
+#ifdef B1
 
-// PIC16F15345 Configuration Bit Settings
+// PIC16F15375 Configuration Bit Settings
 
 #pragma config FEXTOSC = OFF    // External Oscillator mode selection bits (Oscillator not enabled)
 #pragma config RSTOSC = HFINT32 // Power-up default value for COSC bits (HFINTOSC with OSCFRQ= 32 MHz and CDIV = 1:1)
@@ -27,7 +28,35 @@
 #pragma config WRTSAF = OFF     //  (SAF not write protected)
 #pragma config LVP = OFF        // Low Voltage Programming Enable bit (High Voltage on MCLR/Vpp must be used for programming)
 #pragma config CP = OFF         // UserNVM Program memory code protection bit (UserNVM code protection disabled)
+#else
 
+// PIC24FV16KM202 (& PIC24FV16KM204) Configuration Bit Settings
+
+#pragma config BWRP = OFF               // Boot Segment Write Protect (Disabled)
+#pragma config BSS = OFF                // Boot segment Protect (No boot program flash segment)
+#pragma config GWRP = OFF               // General Segment Write Protect (General segment may be written)
+#pragma config GCP = OFF                // General Segment Code Protect (No Protection)
+#pragma config FNOSC = FRC              // Oscillator Select (Fast RC Oscillator (FRC))
+#pragma config SOSCSRC = ANA            // SOSC Source Type (Analog Mode for use with crystal)
+#pragma config LPRCSEL = HP             // LPRC Oscillator Power and Accuracy (High Power, High Accuracy Mode)
+#pragma config IESO = ON                // Internal External Switch Over bit (Internal External Switchover mode enabled (Two-speed Start-up enabled))
+#pragma config POSCMOD = HS             // Primary Oscillator Configuration bits (HS oscillator mode selected)
+#pragma config OSCIOFNC = IO            // CLKO Enable Configuration bit (Port I/O enabled (CLKO disabled))
+#pragma config POSCFREQ = HS            // Primary Oscillator Frequency Range Configuration bits (Primary oscillator/external clock input frequency greater than 8MHz)
+#pragma config SOSCSEL = SOSCHP         // SOSC Power Selection Configuration bits (Secondary Oscillator configured for high-power operation)
+#pragma config FCKSM = CSDCMD           // Clock Switching and Monitor Selection (Both Clock Switching and Fail-safe Clock Monitor are disabled)
+#pragma config WDTPS = PS32768          // Watchdog Timer Postscale Select bits (1:32768)
+#pragma config FWPSA = PR128            // WDT Prescaler bit (WDT prescaler ratio of 1:128)
+#pragma config FWDTEN = OFF             // Watchdog Timer Enable bits (WDT disabled in hardware; SWDTEN bit disabled)
+#pragma config WINDIS = OFF             // Windowed Watchdog Timer Disable bit (Standard WDT selected(windowed WDT disabled))
+#pragma config BOREN = BOR3             // Brown-out Reset Enable bits (Brown-out Reset enabled in hardware, SBOREN bit disabled)
+#pragma config RETCFG = OFF             //  (Retention regulator is not available)
+#pragma config PWRTEN = ON              // Power-up Timer Enable bit (PWRT enabled)
+#pragma config I2C1SEL = PRI            // Alternate I2C1 Pin Mapping bit (Use Default SCL1/SDA1 Pins For I2C1)
+#pragma config BORV = V18               // Brown-out Reset Voltage bits (Brown-out Reset set to lowest voltage (1.8V))
+#pragma config MCLRE = ON               // MCLR Pin Enable bit (RA5 input pin disabled, MCLR pin enabled)
+#pragma config ICS = PGx2               // ICD Pin Placement Select bits (EMUC/EMUD share PGC2/PGD2)
+#endif
 
 #include <xc.h>
 #include "types.h"
@@ -39,18 +68,33 @@
 #include "dist-table.h"
 
 void main(void) {
-  ANSELA = 0; // no analog inputs
-  ANSELB = 0; // these &^%$&^ regs cause a lot of trouble
-  ANSELC = 0; // they should not default to on and override everything else
-#ifndef BM
-  ANSELD = 0;
-#endif
-  
+#ifdef B1
+ ANSELA = 0; // no analog inputs
+ ANSELB = 0; // these &^%$&^ regs cause a lot of trouble
+ ANSELC = 0; // they should not default to on and override everything else
 //  debug1TRIS    = 0;
 //  debug2TRIS    = 0;
 //  debug3TRIS    = 0;
 //  debug4TRIS    = 0;
+#else
+ ANSA = 0;
+ ANSB = 0;
+ 
+ // debug pins
+ tp1TRIS = 0;
+ tp2TRIS = 0;
+ tp3TRIS = 0;
+ tp4TRIS = 0;
+ tp1LAT = 0;
+ tp2LAT = 0;
+ tp3LAT = 0;
+ tp4LAT = 0;
+ 
+ _NSTDIS = 1;  // nested interrupts disabled
+#endif
+
   
+ #ifdef B1
 // show speed on DAC output pin A0 (ICP Data)
 // always leave enabled, doesn't hurt anything
 // remove pickit debugger to see output
@@ -61,14 +105,17 @@ void main(void) {
   DAC1OE2       = 1;  // enable DAC 2 pin
   DAC1CON1      = 0;  // DAC input value
   DAC1EN        = 1;  // turn DAC on
-          
+#endif
+  
   initDistTable();
   i2cInit();
   clkInit();
   motorInit();
 
+ #ifdef B1
   PEIE =  1;   // enable peripheral ints
   GIE  =  1;   // enable all ints
+#endif
   
   // main event loop -- never ends
   while(true) {
@@ -92,6 +139,7 @@ void main(void) {
   }
 }
 
+ #ifdef B1
 // global interrupt routine
 void __interrupt() globalInt() {
   // motor (clock) interrupts every 20 usecs (50 KHz))
@@ -105,5 +153,6 @@ void __interrupt() globalInt() {
     i2cInterrupt();
   }
 }
+#endif
 
 

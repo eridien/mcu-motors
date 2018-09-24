@@ -6,8 +6,6 @@ typedef signed char int8;
 typedef unsigned char uint8;
 typedef int int16;
 typedef unsigned int uint16;
-typedef __int24 int24;
-typedef __uint24 uint24;
 typedef long int32;
 typedef unsigned long uint32;
 typedef char bool;

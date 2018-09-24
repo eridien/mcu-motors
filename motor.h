@@ -6,19 +6,6 @@
 #include "types.h"
 #include "pins.h"
 
-// steps are in 1/8 step (bipolar) or one phase (unipolar)
-//    for bipolar:
-//       steps/rev:        1600
-//       dist/rev:           40 mm
-//       max distance:      800 mm
-//       max step count: 32,000
-//
-//    for unipolar:
-//       steps/rev:        2048
-//       dist/rev:           40 mm
-//       max distance:      625 mm
-//       max step count: 32,000
-
 #ifdef B1
 #define NUM_MOTORS 1
 #endif

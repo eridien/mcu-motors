@@ -47,6 +47,9 @@ void motorInit() {
   
   limitRTRIS = 1;  // zero means at limit switch
   limitXTRIS = 1;  // zero means at limit switch
+  
+  debug1TRIS = 0;  // uncomment to use dbg1, overrides faultETRIS
+  
 #endif /* B3 */
   
   for(uint8 motIdx=0; motIdx < NUM_MOTORS; motIdx++) {
@@ -68,11 +71,11 @@ void motorInit() {
   }
 }
 
-bool haveFault() {
-  volatile unsigned char *p = faultPort[motorIdx];
-  if(p != NULL) {
-    return !(*p & faultMask[motorIdx]);
-  }
+bool haveFault() { // comment out to use dbg1 or dbg2
+//  volatile unsigned char *p = faultPort[motorIdx];
+//  if(p != NULL) {
+//    return !(*p & faultMask[motorIdx]);
+//  }
   return false;
 }
 
@@ -227,8 +230,13 @@ void processCommand() {
   }
   else setError(CMD_DATA_ERROR);
 }
-
+#ifdef B1
 void clockInterrupt(void) {
+#else
+// timer1 is vector 3
+void __interrupt(auto_psv,irq(3)) _T1Interrupt(void) {
+  _T1IF = 0;
+#endif
   timeTicks++;
   for(int motIdx = 0; motIdx < NUM_MOTORS; motIdx++) {
     struct motorState *p = &mState[motIdx];
