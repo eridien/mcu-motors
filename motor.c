@@ -12,6 +12,47 @@
  
 union settingsUnion mSet[NUM_MOTORS];
 
+#ifdef U6
+volatile uint16 *stepPort[NUM_MOTORS] = {
+  &motAPORT, // tube 1
+  &motBPORT, // tube 2
+  &motCPORT, // tube 3
+  &motPPORT, // paster
+  &motZPORT, // camera height
+  &motFPORT, // focus
+};
+
+uint16 stepMask[NUM_MOTORS] = {
+  0x000f << motAOFS,
+  0x000f << motBOFS,
+  0x000f << motCOFS,
+  0x000f << motPOFS,
+  0x000f << motZOFS,
+  0x000f << motFOFS,
+};
+
+volatile uint16 *faultPort[NUM_MOTORS] = {0,0,0,0,0,0};
+const    uint16  faultMask[NUM_MOTORS] = {0,0,0,0,0,0};
+
+volatile uint16 *limitPort[NUM_MOTORS] = {0,0,0,0, &limitZPORT, 0};
+const    uint16  limitMask[NUM_MOTORS] = {0,0,0,0,  limitZBIT,  0};
+
+// -------- phases ----------
+// Color        Bl Pi Ye Or  (red is +5))
+//              {1, 1, 0, 0},
+//              {0, 1, 1, 0},
+//              {0, 0, 1, 1},
+//              {1, 0, 0, 1}
+uint16 motPhaseValue[NUM_MOTORS][4] = { // motor, phase
+  {0x0c << motAOFS, 0x06 << motAOFS, 0x03 << motAOFS, 0x09 << motAOFS},
+  {0x0c << motBOFS, 0x06 << motBOFS, 0x03 << motBOFS, 0x09 << motBOFS},
+  {0x0c << motCOFS, 0x06 << motCOFS, 0x03 << motCOFS, 0x09 << motCOFS},
+  {0x0c << motPOFS, 0x06 << motPOFS, 0x03 << motPOFS, 0x09 << motPOFS},
+  {0x0c << motZOFS, 0x06 << motZOFS, 0x03 << motZOFS, 0x09 << motZOFS},
+  {0x0c << motFOFS, 0x06 << motFOFS, 0x03 << motFOFS, 0x09 << motFOFS},
+};
+#endif
+
 // must match settingsStruct
 #ifdef BM
 // assumes 1/40 mm per step
@@ -33,7 +74,6 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
 // assumes 1/50 mm per step
 // default is same for all motors
 const uint16 settingsInit[NUM_SETTING_WORDS] = {
-      5, // acceleration rate index,  0 is no acceleration
       5, // acceleration rate index,  0 is no acceleration
    4000, // default speed is 100 mm
    1200, // start/stop speed limit (30 mm/sec)

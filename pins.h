@@ -7,15 +7,6 @@
 #define I2C_STOP_BIT  SSP1STATbits.P
 #define I2C_BUF_BYTE  SSP1BUF
 #define I2C_SSPIF     SSP1IF
-
-#else
-
-#define I2C_START_BIT SSP2STATbits.S
-#define I2C_STOP_BIT  SSP2STATbits.P
-#define I2C_WCOL      WCOL2
-#define I2C_SSPOV     SSPOV2
-#define I2C_BUF_BYTE  SSP2BUF
-#define I2C_SSPIF     SSP2IF
 #endif /* BM */
 
 #ifdef B1
@@ -143,37 +134,49 @@
 #endif	/* B3 */
 
 #ifdef U6
+#define I2C_START_BIT SSP2STATbits.S
+#define I2C_STOP_BIT  SSP2STATbits.P
+#define I2C_WCOL      SSP2CON1bits.WCOL
+#define I2C_SSPOV     SSP2CON1bits.SSPOV
+#define I2C_BUF_BYTE  SSP2BUF
+#define I2C_SSPIF     _SSP2IF
+
 #define motAPORT   PORTA  // tube 1
 #define motBPORT   PORTB  // tube 2
 #define motCPORT   PORTC  // tube 3
-#define motPPORT   PORTD  // paster
-#define motZPORT   PORTA  // camera Z
+#define motPPORT   PORTB  // paster
+#define motZPORT   PORTB  // camera Z
 #define motFPORT   PORTC  // focus
 
 #define motAOFS    0
-#define motBOFS    0
+#define motBOFS   12
 #define motCOFS    0
-#define motPOFS    4
+#define motPOFS    8
 #define motZOFS    4
 #define motFOFS    4
 
-#define limitZPORT PORTE
-#define limitZBIT  0x01
+#define limitZPORT PORTA
+#define limitZBIT  0x0100
 
-#define led1TRIS   TRISE1
-#define led2TRIS   TRISE2
-#define led3TRIS   TRISD2
-#define led4TRIS   TRISD3
+#define led1TRIS   _TRISA6
+#define led2TRIS   _TRISA7
+#define led3TRIS   _TRISA4
+#define led4TRIS   _TRISA9
  
-#define led1LAT    LATE1
-#define led2LAT    LATE2
-#define led3LAT    LATD2
-#define led4LAT    LATD3
- 
-#define tp1TRIS    TRISB4
-#define tp1LAT     LATB4
-#define tp2TRIS    TRISB5
-#define tp2LAT     LATB5
+#define led1LAT    _LATA6
+#define led2LAT    _LATA7
+#define led3LAT    _LATA4
+#define led4LAT    _LATA9
+
+#define tp1TRIS    _TRISC8
+#define tp2TRIS    _TRISC9
+#define tp3TRIS    _TRISA10
+#define tp4TRIS    _TRISA11
+
+#define tp1LAT     _LATC8
+#define tp2LAT     _LATC9
+#define tp3LAT     _LATA10
+#define tp4LAT     _LATA11
 #endif
 
 #endif	/* PINS_H */

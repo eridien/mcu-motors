@@ -133,31 +133,15 @@ extern const    uint16  limitMask[NUM_MOTORS];
 #endif /* B3 */
 
 #ifdef U6
-volatile unsigned char *stepPort[NUM_MOTORS] = {
-  &motAPORT, // tube 1
-  &motBPORT, // tube 2
-  &motCPORT, // tube 3
-  &motPPORT, // paster
-  &motZPORT, // camera height
-  &motFPORT, // focus
-};
+extern volatile uint16 *stepPort[NUM_MOTORS];
 
-uint8 stepMask[NUM_MOTORS] = {
-  0x0f << motAOFS,
-  0x0f << motBOFS,
-  0x0f << motCOFS,
-  0x0f << motPOFS,
-  0x0f << motZOFS,
-  0x0f << motFOFS,
-};
+extern uint16 stepMask[NUM_MOTORS];
 
-volatile unsigned char 
-           *faultPort[NUM_MOTORS] = {0,0,0,0,0,0};
-const uint8 faultMask[NUM_MOTORS] = {0,0,0,0,0,0};
+extern volatile uint16 *faultPort[NUM_MOTORS];
+extern const    uint16  faultMask[NUM_MOTORS];
 
-volatile unsigned char 
-           *limitPort[NUM_MOTORS] = {0,0,0,0, &limitZPORT, 0};
-const uint8 limitMask[NUM_MOTORS] = {0,0,0,0,  limitZBIT,  0};
+extern volatile uint16 *limitPort[NUM_MOTORS];
+extern const    uint16  limitMask[NUM_MOTORS];
 
 // -------- phases ----------
 // Color        Bl Pi Ye Or  (red is +5))
@@ -165,14 +149,7 @@ const uint8 limitMask[NUM_MOTORS] = {0,0,0,0,  limitZBIT,  0};
 //              {0, 1, 1, 0},
 //              {0, 0, 1, 1},
 //              {1, 0, 0, 1}
-uint8 motPhaseValue[NUM_MOTORS][4] = { // motor, phase
-  {0x0c << motAOFS, 0x06 << motAOFS, 0x03 << motAOFS, 0x09 << motAOFS},
-  {0x0c << motBOFS, 0x06 << motBOFS, 0x03 << motBOFS, 0x09 << motBOFS},
-  {0x0c << motCOFS, 0x06 << motCOFS, 0x03 << motCOFS, 0x09 << motCOFS},
-  {0x0c << motPOFS, 0x06 << motPOFS, 0x03 << motPOFS, 0x09 << motPOFS},
-  {0x0c << motZOFS, 0x06 << motZOFS, 0x03 << motZOFS, 0x09 << motZOFS},
-  {0x0c << motFOFS, 0x06 << motFOFS, 0x03 << motFOFS, 0x09 << motFOFS},
-};
+extern uint16 motPhaseValue[NUM_MOTORS][4];
 #endif /* U6 */
 
 
@@ -183,8 +160,7 @@ bool limitSwOn(void);
 void motorOn(void);
 void processCommand(void);
 void clockInterrupt(void);
-uint16 getLastStepTicks(void);
-void   setNextStepTicks(uint16 ticks);
+void setNextStepTicks(uint16 ticks);
 
 #endif	/* MOTOR_H */
 

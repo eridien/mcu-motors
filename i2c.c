@@ -74,7 +74,7 @@ void i2cInterrupt(void) {
     i2cRecvBytesPtr = 1; // skip over length byte
     i2cSendBytesPtr = 0;
     I2C_WCOL = 0;                    // clear WCOL
-    volatile int x = I2C_BUF_BYTE;   // clear SSPOV
+    dummy = I2C_BUF_BYTE;   // clear SSPOV
     inPacket = true;
   }
   else if(I2C_STOP_BIT) { 

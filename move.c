@@ -72,8 +72,8 @@ void setStep(bool closing) {
   
 #else
   // check step timing
-  uint16 clkTicks = CLK_TICKS_PER_SEC / ms->curSpeed; // 40 usecs/tick
-  setNextStepTicks(getLastStepTicks() + clkTicks);
+  clkTicks = CLK_TICKS_PER_SEC / ms->curSpeed; // 40 usecs/tick
+  ms->nextStepTicks = ms->lastStepTicks + clkTicks;
   ms->stepped = false;
   ms->phase += ((ms->curDir ? 1 : -1) & 0x03);
   ms->stepPending = true;

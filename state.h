@@ -7,6 +7,8 @@
 
 #define MCU_VERSION 0
 
+extern volatile int dummy;
+
 #ifdef B1
     #define disableAllInts GIE=0
     #define enableAllInts  GIE=1

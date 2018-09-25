@@ -6,6 +6,8 @@
 #include "motor.h"
 #include "stop.h"
 
+volatile int dummy = 0; // used for reading register and ignoring value
+
 struct motorState mState[NUM_MOTORS];
 
 bool nextStateTestPos;
@@ -21,8 +23,8 @@ void setError(uint8 err) {
     disableAllInts;
     ms->stateByte = ms->stateByte & 0x07;
     enableAllInts;
-    I2C_WCOL = 0;                    // clear WCOL
-    volatile int x = I2C_BUF_BYTE;   // clear SSPOV
+    I2C_WCOL = 0;           // clear WCOL
+    dummy = I2C_BUF_BYTE;   // clear SSPOV
   }
   else {
     // an error in one motor sets error bits in all motors
