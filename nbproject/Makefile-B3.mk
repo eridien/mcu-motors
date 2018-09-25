@@ -57,17 +57,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=clock.c home.c i2c.c main.c motor.c move.c state.c stop.c dist-table.c disttable.asm
+SOURCEFILES_QUOTED_IF_SPACED=clock.c home.c i2c.c main.c motor.c move.c state.c stop.c dist-table.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/clock.o ${OBJECTDIR}/home.o ${OBJECTDIR}/i2c.o ${OBJECTDIR}/main.o ${OBJECTDIR}/motor.o ${OBJECTDIR}/move.o ${OBJECTDIR}/state.o ${OBJECTDIR}/stop.o ${OBJECTDIR}/dist-table.o ${OBJECTDIR}/disttable.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/clock.o.d ${OBJECTDIR}/home.o.d ${OBJECTDIR}/i2c.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/motor.o.d ${OBJECTDIR}/move.o.d ${OBJECTDIR}/state.o.d ${OBJECTDIR}/stop.o.d ${OBJECTDIR}/dist-table.o.d ${OBJECTDIR}/disttable.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/clock.o ${OBJECTDIR}/home.o ${OBJECTDIR}/i2c.o ${OBJECTDIR}/main.o ${OBJECTDIR}/motor.o ${OBJECTDIR}/move.o ${OBJECTDIR}/state.o ${OBJECTDIR}/stop.o ${OBJECTDIR}/dist-table.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/clock.o.d ${OBJECTDIR}/home.o.d ${OBJECTDIR}/i2c.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/motor.o.d ${OBJECTDIR}/move.o.d ${OBJECTDIR}/state.o.d ${OBJECTDIR}/stop.o.d ${OBJECTDIR}/dist-table.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/clock.o ${OBJECTDIR}/home.o ${OBJECTDIR}/i2c.o ${OBJECTDIR}/main.o ${OBJECTDIR}/motor.o ${OBJECTDIR}/move.o ${OBJECTDIR}/state.o ${OBJECTDIR}/stop.o ${OBJECTDIR}/dist-table.o ${OBJECTDIR}/disttable.o
+OBJECTFILES=${OBJECTDIR}/clock.o ${OBJECTDIR}/home.o ${OBJECTDIR}/i2c.o ${OBJECTDIR}/main.o ${OBJECTDIR}/motor.o ${OBJECTDIR}/move.o ${OBJECTDIR}/state.o ${OBJECTDIR}/stop.o ${OBJECTDIR}/dist-table.o
 
 # Source Files
-SOURCEFILES=clock.c home.c i2c.c main.c motor.c move.c state.c stop.c dist-table.c disttable.asm
+SOURCEFILES=clock.c home.c i2c.c main.c motor.c move.c state.c stop.c dist-table.c
 
 
 CFLAGS=
@@ -89,8 +89,8 @@ ifneq ($(INFORMATION_MESSAGE), )
 endif
 	${MAKE}  -f nbproject/Makefile-B3.mk dist/${CND_CONF}/${IMAGE_TYPE}/mcu-motors.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 
-MP_PROCESSOR_OPTION=24FV16KM202
-MP_LINKER_FILE_OPTION=,--script=p24FV16KM202.gld
+MP_PROCESSOR_OPTION=24F16KM202
+MP_LINKER_FILE_OPTION=,--script=p24F16KM202.gld
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: compile
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)

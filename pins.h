@@ -5,8 +5,6 @@
 #ifdef BM
 #define I2C_START_BIT SSP1STATbits.S
 #define I2C_STOP_BIT  SSP1STATbits.P
-#define I2C_WCOL      WCOL1
-#define I2C_SSPOV     SSPOV1
 #define I2C_BUF_BYTE  SSP1BUF
 #define I2C_SSPIF     SSP1IF
 
@@ -21,17 +19,24 @@
 #endif /* BM */
 
 #ifdef B1
+#define I2C_WCOL  WCOL1
+#define I2C_SSPOV     SSPOV1
+
 #define dirTRIS   TRISA2
 #define ms1TRIS   TRISC2
 #define ms2TRIS   TRISB4
 #define ms3TRIS   TRISB5
-#define resetTRIS TRISB6
 
 #define dirLAT    LATA2
 #define ms1LAT    LATC2
 #define ms2LAT    LATB4
 #define ms3LAT    LATB5
+
+#define resetTRIS TRISB6
 #define resetLAT  LATB6
+
+#define resetPORT  PORTB
+#define resetBIT   0x40
 
 #define stepTRIS  TRISC5
 #define stepLAT   LATC5
@@ -59,29 +64,41 @@
 #endif /* B1 */
 
 #ifdef B3
-#define dirTRIS   TRISA6
-#define ms1TRIS   TRISA7
-#define ms2TRIS   TRISB7
-#define ms3TRIS   TRISB6
-#define resetRTRIS TRISB15
-#define resetETRIS TRISB14
-#define resetXTRIS TRISB13
+#define I2C_WCOL  SSP1CON1bits.WCOL
+#define I2C_SSPOV SSP1CON1bits.SSPOV
 
-#define dirLAT    LATA6
-#define ms1LAT    LATA7
-#define ms2LAT    LATB7
-#define ms3LAT    LATB6
-#define resetRLAT LATB15
-#define resetELAT LATB14
-#define resetXLAT LATB13
+#define dirTRIS   _TRISA6
+#define ms1TRIS   _TRISA7
+#define ms2TRIS   _TRISB7
+#define ms3TRIS   _TRISB6
 
-#define stepRTRIS  TRISB1
-#define stepETRIS  TRISB2
-#define stepXTRIS  TRISB3
+#define dirLAT    _LATA6
+#define ms1LAT    _LATA7
+#define ms2LAT    _LATB7
+#define ms3LAT    _LATB6
 
-#define stepRLAT   LATB1
-#define stepELAT   LATB2
-#define stepXLAT   LATB3
+#define resetRTRIS _TRISB15
+#define resetETRIS _TRISB14
+#define resetXTRIS _TRISB13
+
+#define resetRLAT _LATB15
+#define resetELAT _LATB14
+#define resetXLAT _LATB13
+
+#define resetRPORT  PORTB
+#define resetRBIT   0x8000
+#define resetEPORT  PORTB
+#define resetEBIT   0x4000
+#define resetXPORT  PORTB
+#define resetXBIT   0x2000
+
+#define stepRTRIS  _TRISB1
+#define stepETRIS  _TRISB2
+#define stepXTRIS  _TRISB3
+
+#define stepRLAT   _LATB1
+#define stepELAT   _LATB2
+#define stepXLAT   _LATB3
 
 #define stepRPORT  PORTB
 #define stepRBIT   0x02
@@ -90,13 +107,13 @@
 #define stepXPORT  PORTB
 #define stepXBIT   0x08
 
-#define faultRTRIS  TRISB4
-#define faultETRIS  TRISA4
-#define faultXTRIS  TRISB5
+#define faultRTRIS  _TRISB4
+#define faultETRIS  _TRISA4
+#define faultXTRIS  _TRISB5
 
-#define faultRLAT   LATB4
-#define faultELAT   LATA4
-#define faultXLAT   LATB5
+#define faultRLAT   _LATB4
+#define faultELAT   _LATA4
+#define faultXLAT   _LATB5
 
 #define faultRPORT  PORTB
 #define faultRBIT   0x10
@@ -105,31 +122,25 @@
 #define faultXPORT  PORTB
 #define faultXBIT   0x20
 
-#define limitRTRIS  TRISA0
-#define limitXTRIS  TRISA1
+#define limitRTRIS  _TRISA0
+#define limitXTRIS  _TRISA1
 
 #define limitRPORT  PORTA
 #define limitRBIT   0x01
 #define limitXPORT  PORTA
 #define limitXBIT   0x02
 
-#define tp1TRIS   TRISB0
-#define tp2TRIS   TRISB12
-#define tp3TRIS   TRISA2
-#define tp4TRIS   TRISA3
+#define tp1TRIS   _TRISB0
+#define tp2TRIS   _TRISB12
+#define tp3TRIS   _TRISA2
+#define tp4TRIS   _TRISA3
 
-#define tp1LAT     LATB0
-#define tp2LAT     LATB12
-#define tp3LAT     LATA2
-#define tp4LAT     LATA3
+#define tp1LAT     _LATB0
+#define tp2LAT     _LATB12
+#define tp3LAT     _LATA2
+#define tp4LAT     _LATA3
 
 #endif	/* B3 */
-
-#define debug1TRIS   TRISC7
-//#define debug2TRIS   TRISB7
-//
-#define dbg1         LATC7 // test point TP1
-//#define dbg2         LATB7 // test point TP2
 
 #ifdef U6
 #define motAPORT   PORTA  // tube 1

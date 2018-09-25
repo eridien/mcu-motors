@@ -19,9 +19,12 @@ void stopStepping() {
 }
 
 void resetMotor(bool all) {
-  // all bi motors share reset line
-#ifdef BM
+#ifdef B1
   resetLAT = 0; 
+#elif B3
+  resetRLAT = 0; 
+  resetELAT = 0; 
+  resetXLAT = 0; 
 #endif
   uint8 savedMotorIdx = motorIdx;
   // set all global motor vars just like event loop
@@ -53,9 +56,9 @@ void softStopCommand(bool resetAfter) {
   ms->targetSpeed        = 0;
   ms->resetAfterSoftStop = resetAfter;
   if((ms->stateByte & BUSY_BIT) == 0) {
-    GIE=0;
+    disableAllInts;
     ms->lastStepTicks = timeTicks;
-    GIE=1;
+    enableAllInts;
     ms->curSpeed = sv->startStopSpeed;
     setDacToSpeed();
   }

@@ -55,15 +55,14 @@ void chkHoming() {
       break;
   }
 }
-
 void homeCommand(bool start) {
   ms->slowing = false;
   if((ms->stateByte & BUSY_BIT) == 0) {
     // not moving -- init speed
     motorOn();
-    GIE=0;
+    disableAllInts;
     ms->lastStepTicks = timeTicks;
-    GIE=1;
+    enableAllInts;
     ms->curSpeed = sv->startStopSpeed;
     setDacToSpeed();
   }

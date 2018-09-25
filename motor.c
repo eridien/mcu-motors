@@ -9,13 +9,68 @@
 #include "home.h"
 #include "move.h"
 #include "stop.h"
+ 
+union settingsUnion mSet[NUM_MOTORS];
+
+// must match settingsStruct
+#ifdef BM
+// assumes 1/40 mm per step
+// default is same for all motors
+const uint16 settingsInit[NUM_SETTING_WORDS] = {
+      5, // acceleration rate index,  0 is no acceleration
+   4000, // default speed is 100 mm
+   1200, // start/stop speed limit (30 mm/sec)
+  16000, // max pos is 400 mm
+   4000, // homing speed (100 mm/sec)
+     60, // homing back-up ms->speed (1.5 mm/sec)
+     40, // home offset distance: 1 mm
+      0, // home pos value, set cur pos to this after homing
+      0, // limit sw control (0 is normal)
+};
+
+#else
+
+// assumes 1/50 mm per step
+// default is same for all motors
+const uint16 settingsInit[NUM_SETTING_WORDS] = {
+      5, // acceleration rate index,  0 is no acceleration
+      5, // acceleration rate index,  0 is no acceleration
+   4000, // default speed is 100 mm
+   1200, // start/stop speed limit (30 mm/sec)
+  16000, // max pos is 400 mm
+   4000, // homing speed (100 mm/sec)
+     60, // homing back-up ms->speed (1.5 mm/sec)
+     40, // home offset distance: 1 mm
+      0, // home pos value, set cur pos to this after homing
+      0, // limit sw control (0 is normal)
+};
+#endif /* BM */
+
+#ifdef B3
+volatile uint16 *stepPort[NUM_MOTORS] = {&stepRPORT, &stepEPORT, &stepXPORT};
+const    uint16  stepMask[NUM_MOTORS] = { stepRBIT,   stepEBIT,   stepXBIT};
+
+volatile uint16 *resetPort[NUM_MOTORS] = {&resetRPORT, &resetEPORT, &resetXPORT};
+const    uint16  resetMask[NUM_MOTORS] = { resetRBIT,   resetEBIT,   resetXBIT};
+
+volatile uint16 *faultPort[NUM_MOTORS] = {&faultRPORT, &faultEPORT, &faultXPORT};
+const    uint16  faultMask[NUM_MOTORS] = { faultRBIT,   faultEBIT,   faultXBIT};
+
+volatile uint16 *limitPort[NUM_MOTORS] = {&limitRPORT, 0, &limitXPORT};
+const    uint16  limitMask[NUM_MOTORS] = { limitRBIT,  0,  limitXBIT};
+#endif
 
 // globals for use in main chk loop
 uint8  motorIdx;
 struct motorState      *ms;
 struct motorSettings   *sv;
-volatile unsigned char *mp; // current motor port (like &PORTA)
 uint8                   mm; // current motor mask (0xf0 or 0x0f or step bit)
+
+#ifdef B1
+volatile unsigned char *mp; // current motor port (like &PORTA)
+#else
+volatile uint16 *mp; // current motor port (like &PORTA)
+#endif
 
 void motorInit() {
 #ifdef BM
@@ -23,14 +78,24 @@ void motorInit() {
   ms1TRIS   = 0;
   ms2TRIS   = 0;
   ms3TRIS   = 0;
+#ifdef B1
   resetLAT  = 0;  // start with reset on
   resetTRIS = 0;
+#else
+  resetRLAT  = 0;  // start with reset on
+  resetELAT  = 0;  // start with reset on
+  resetXLAT  = 0;  // start with reset on
+  resetRTRIS = 0;
+  resetETRIS = 0;
+  resetXTRIS = 0;
+#endif
 #endif
   
 #ifdef B1
   stepTRIS  = 0;
   faultTRIS = 1;  // zero means motor fault
   limitTRIS = 1;  // zero means at limit switch  // may be used by dbg4
+  debug1TRIS = 0;  // uncomment to use dbg1, overrides faultETRIS
 #endif
   
 #ifdef B3
@@ -47,12 +112,9 @@ void motorInit() {
   
   limitRTRIS = 1;  // zero means at limit switch
   limitXTRIS = 1;  // zero means at limit switch
-  
-  debug1TRIS = 0;  // uncomment to use dbg1, overrides faultETRIS
-  
 #endif /* B3 */
-  
-  for(uint8 motIdx=0; motIdx < NUM_MOTORS; motIdx++) {
+  uint8 motIdx;
+  for(motIdx=0; motIdx < NUM_MOTORS; motIdx++) {
     struct motorState *msp = &mState[motIdx];
     msp->stateByte   = 0;    // no err, not busy, motor off, and not homed
     msp->phase       = 0;    // cur step phase
@@ -61,7 +123,8 @@ void motorInit() {
     msp->stepped     = false;
     msp->curSpeed    = 0;
     setDacToSpeed();
-    for(uint8 i = 0; i < NUM_SETTING_WORDS; i++) {
+    uint8 i;
+    for(i = 0; i < NUM_SETTING_WORDS; i++) {
        mSet[motIdx].reg[i] = settingsInit[i];
     }
     msp->acceleration  = accelTable[mSet[motIdx].val.accelIdx];
@@ -80,8 +143,12 @@ bool haveFault() { // comment out to use dbg1 or dbg2
 }
 
 bool limitSwOn() {  // comment out when limit sw used by dbg4
-  volatile unsigned char *p = limitPort[motorIdx];
-  if(p != NULL) {
+#ifdef B1
+  volatile uint8 *p = limitPort[motorIdx];
+#else
+  volatile uint16 *p = limitPort[motorIdx];
+#endif
+  if(p != 0) {
     return (ms->limitSwPolarity ?  (*p & limitMask[motorIdx])
                                 : !(*p & limitMask[motorIdx]));
   }
@@ -92,7 +159,8 @@ bool limitSwOn() {  // comment out when limit sw used by dbg4
 // setting words are big endian
 // write may be short, only setting first entries
 void setMotorSettings(uint8 numWordsRecvd) {
-  for(uint8 i = 0; i < numWordsRecvd; i++) {
+  uint8 i;
+  for(i = 0; i < numWordsRecvd; i++) {
     mSet[motorIdx].reg[i] = (i2cRecvBytes[motorIdx][2*i + 2] << 8) | 
                              i2cRecvBytes[motorIdx][2*i + 3];
   }
@@ -146,8 +214,8 @@ void checkAll() {
 void motorOn() {
   setStateBit(MOTOR_ON_BIT, 1);
 #ifdef BM
-  if(!resetLAT) {
-    resetLAT = 1; 
+  if(resetIsLo()) {
+    setResetHi();
     // counter in drv8825 is cleared by reset
     // phase always matches counter in drv8825
     ms->phase = 0;
@@ -233,12 +301,12 @@ void processCommand() {
 #ifdef B1
 void clockInterrupt(void) {
 #else
-// timer1 is vector 3
-void __interrupt(auto_psv,irq(3)) _T1Interrupt(void) {
+void __attribute__ ((interrupt,shadow,auto_psv)) _T1Interrupt(void) {
   _T1IF = 0;
 #endif
   timeTicks++;
-  for(int motIdx = 0; motIdx < NUM_MOTORS; motIdx++) {
+  int motIdx;
+  for(motIdx = 0; motIdx < NUM_MOTORS; motIdx++) {
     struct motorState *p = &mState[motIdx];
     if(p->stepPending && p->nextStepTicks == timeTicks) {
       if(p->stepped) {

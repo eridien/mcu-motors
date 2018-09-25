@@ -9,6 +9,11 @@
 #include "stop.h"
 #include "dist-table.h"
 
+const uint16 uStepPhaseMask[4] = {0x07, 0x03, 0x01, 0x00};
+const uint16 uStepDist[4]      = {   8,    4,    2,    1};
+const uint16 accelTable[8] = 
+       {4000, 8000, 16000, 24000, 32000, 40000, 50000, 60000};
+
 uint16 dbgMinClkTicks;
 
 void setStep(bool closing) {
@@ -51,11 +56,11 @@ void setStep(bool closing) {
     dbgMinClkTicks = clkTicks;
   }
   bool err;
-  GIE = 0;
+  disableAllInts;
   ms->nextStepTicks = ms->lastStepTicks + clkTicks;
   // modulo 2**16 arithmetic
   err = (ms->nextStepTicks - (timeTicks+1)) > 32000;
-  GIE = 1;
+  enableAllInts;
   if(err) { 
     // nextStepTicks is in the past
     setError(STEP_NOT_DONE_ERROR); 
@@ -63,10 +68,6 @@ void setStep(bool closing) {
   
   ms->stepped = false;
   setBiStepLo();
-
-          dbg1 = 0;
-
-  
   ms->stepPending = true;
   
 #else
@@ -202,9 +203,9 @@ void moveCommand() {
   ms->stopping    = false;
   ms->targetDir   = (ms->targetPos >= ms->curPos);   
   if(ms->curSpeed == 0 || (ms->stateByte & BUSY_BIT) == 0) {
-    GIE=0;
+    disableAllInts;
     ms->lastStepTicks = timeTicks;
-    GIE=1;
+    enableAllInts;
     ms->curSpeed = sv->startStopSpeed;
     ms->curDir   = ms->targetDir;
     setDacToSpeed();

@@ -30,7 +30,7 @@
 #pragma config CP = OFF         // UserNVM Program memory code protection bit (UserNVM code protection disabled)
 #else
 
-// PIC24FV16KM202 (& PIC24FV16KM204) Configuration Bit Settings
+// PIC24F16KM202 (& PIC24F16KM204) Configuration Bit Settings
 
 #pragma config BWRP = OFF               // Boot Segment Write Protect (Disabled)
 #pragma config BSS = OFF                // Boot segment Protect (No boot program flash segment)
@@ -50,7 +50,6 @@
 #pragma config FWDTEN = OFF             // Watchdog Timer Enable bits (WDT disabled in hardware; SWDTEN bit disabled)
 #pragma config WINDIS = OFF             // Windowed Watchdog Timer Disable bit (Standard WDT selected(windowed WDT disabled))
 #pragma config BOREN = BOR3             // Brown-out Reset Enable bits (Brown-out Reset enabled in hardware, SBOREN bit disabled)
-#pragma config RETCFG = OFF             //  (Retention regulator is not available)
 #pragma config PWRTEN = ON              // Power-up Timer Enable bit (PWRT enabled)
 #pragma config I2C1SEL = PRI            // Alternate I2C1 Pin Mapping bit (Use Default SCL1/SDA1 Pins For I2C1)
 #pragma config BORV = V18               // Brown-out Reset Voltage bits (Brown-out Reset set to lowest voltage (1.8V))
@@ -67,7 +66,7 @@
 #include "clock.h"
 #include "dist-table.h"
 
-void main(void) {
+int main(void) {
 #ifdef B1
  ANSELA = 0; // no analog inputs
  ANSELB = 0; // these &^%$&^ regs cause a lot of trouble
@@ -107,15 +106,16 @@ void main(void) {
   DAC1EN        = 1;  // turn DAC on
 #endif
   
-  initDistTable();
   i2cInit();
   clkInit();
   motorInit();
 
- #ifdef B1
+#ifdef B1
+  initDistTable();
   PEIE =  1;   // enable peripheral ints
-  GIE  =  1;   // enable all ints
 #endif
+  
+  enableAllInts;
   
   // main event loop -- never ends
   while(true) {

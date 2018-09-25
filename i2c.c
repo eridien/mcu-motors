@@ -16,13 +16,7 @@ volatile uint8 i2cSendBytes[NUM_SEND_BYTES];
 volatile uint8 i2cSendBytesPtr;
 volatile bool  inPacket;
 
-void i2cInit() {    
-#ifdef BM
-    SSP1CLKPPS = 0x10;           // RC0
-    SSP1DATPPS = 0x11;           // RC1
-    RC0PPS     = 0x15;           // SCL1
-    RC1PPS     = 0x16;           // SDA1
-    
+void i2cInit() { 
     SSP1CON1bits.SSPM = 0x0e;          // slave mode, 7-bit, S & P ints enabled 
     SSP1MSK           = I2C_ADDR_MASK; // address mask, check all top 5 bits
     SSP1ADD           = I2C_ADDR;      // slave address (7-bit addr is 8 or 12)
@@ -32,32 +26,22 @@ void i2cInit() {
     SSP1CON3bits.AHEN = 0;             // no clock stretch before addr ack
     SSP1CON3bits.DHEN = 0;             // no clock stretch before data ack
     SSP1CON3bits.BOEN = 1;             // enable buffer overwrite check
-    CKP1 = 0;                          // stretch clk of first start bit
+    NotStretch        = 0;             // stretch clk of first start bit
     
-    SSP1CON1bits.SSPEN = 1;            // Enable the serial port
+#ifdef B1
+    SSP1CLKPPS = 0x10;           // RC0
+    SSP1DATPPS = 0x11;           // RC1
+    RC0PPS     = 0x15;           // SCL1
+    RC1PPS     = 0x16;           // SDA1
+    
     SSP1IF = 0;                        // nothing received yet
     SSP1IE = 1;                        // Enable ints
 #else
-    SSP2CLKPPS = 0x18;           // RD0
-    SSP2DATPPS = 0x19;           // RD1
-    RD0PPS     = 0x17;           // SCL2
-    RD1PPS     = 0x18;           // SDA2  
-    
-    SSP2CON1bits.SSPM = 0x0e;          // slave mode, 7-bit, S & P ints enabled 
-    SSP2MSK           = I2C_ADDR_MASK; // address mask, check all top 5 bits
-    SSP2ADD           = I2C_ADDR;      // slave address (7-bit addr is 8 or 12)
-    SSP2STATbits.SMP  = 0;             // slew-rate enabled
-    SSP2STATbits.CKE  = 1;             // smb voltage levels
-    SSP2CON2bits.SEN  = 1;             // enable clock stretching 
-    SSP2CON3bits.AHEN = 0;             // no clock stretch before addr ack
-    SSP2CON3bits.DHEN = 0;             // no clock stretch before data ack
-    SSP2CON3bits.BOEN = 1;             // enable buffer overwrite check
-    CKP1 = 0;                          // stretch clk of first start bit
-
-    SSP2CON1bits.SSPEN = 1;            // Enable the serial port
-    SSP2IF = 0;                        // nothing received yet
-    SSP2IE = 1;                        // Enable ints
+    // no pps
+    _SSP1IF = 0;                       // nothing received yet
+    _SSP1IE = 1;                       // Enable ints
 #endif
+    SSP1CON1bits.SSPEN = 1;            // Enable the serial port
 }
 
 // all words are big-endian
@@ -79,7 +63,11 @@ void setSendBytesInt(uint8 motIdx) {
 
 volatile uint8 motIdxInPacket;
 
+#ifdef B1
 void i2cInterrupt(void) {
+#else
+  void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
+#endif
   // SSPxSTATbits.S is set during entire packet
   if(I2C_START_BIT && !inPacket) { 
     // received start bit, prepare for packet
@@ -96,7 +84,7 @@ void i2cInterrupt(void) {
       setErrorInt(motIdxInPacket, I2C_OVERFLOW_ERROR);
     }
     else {
-      if(!SSP1STATbits.RW) {
+      if(!RdNotWrite) {
         // total length of recv is stored in first byte
         i2cRecvBytes[motIdxInPacket][0] = i2cRecvBytesPtr-1;
         // tell event loop that data is available
@@ -108,10 +96,10 @@ void i2cInterrupt(void) {
     }
   }
   else {
-    if(!SSP1STATbits.DA) { 
+    if(!NotAddr) { 
       // received addr byte, extract motor number
       motIdxInPacket = (I2C_BUF_BYTE & 0x0e) >> 1;
-      if(SSP1STATbits.RW) {
+      if(RdNotWrite) {
         // prepare all send data
         setSendBytesInt(motIdxInPacket);
         // send packet (i2c read from slave), load buffer for first byte
@@ -119,7 +107,7 @@ void i2cInterrupt(void) {
       }
     }
     else {
-      if(!SSP1STATbits.RW) {
+      if(!RdNotWrite) {
         if(mState[motIdxInPacket].haveCommand) {
           // last command for this motor not handled yet by event loop
           setErrorInt(motIdxInPacket, CMD_NOT_DONE_ERROR);
@@ -137,5 +125,5 @@ void i2cInterrupt(void) {
   }
   // in packet: set ckp to end stretch after ack
   // stop bit:  clr ckp so next start bit will stretch
-  CKP1 = !I2C_STOP_BIT; 
+  NotStretch = !I2C_STOP_BIT; 
 }

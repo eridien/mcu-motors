@@ -17,15 +17,23 @@
 #endif
 
 // global for use in main chk loop
+#ifdef B1
+extern volatile uint8  *mp; // motor port (like &PORTA)
+#else
+extern volatile uint16 *mp;
+#endif
+
 extern uint8  motorIdx;
 extern struct motorState      *ms;
 extern struct motorSettings   *sv;
-extern volatile unsigned char *mp; // motor port (like &PORTA)
 extern uint8                   mm; // motor mask (0xf0 or 0x0f or step bit)
 
 #define setBiStepLo()           *stepPort[motorIdx] &= ~stepMask[motorIdx]
 #define setBiStepHiInt(_motIdx) *stepPort[_motIdx]  |=  stepMask[_motIdx]
-  
+
+#define resetIsLo()      ((*resetPort[motorIdx] &   resetMask[motorIdx]) == 0)
+#define setResetLo()       *resetPort[motorIdx] &= ~resetMask[motorIdx]
+#define setResetHi()       *resetPort[motorIdx] |=  resetMask[motorIdx]
 
 #define clrUniPort()       (*mp = (*mp & ~mm));
 #define setUniPort(_phase) (*mp = (*mp & ~mm) | motPhaseValue[motorIdx][_phase]);
@@ -51,69 +59,77 @@ struct motorSettings {
 union settingsUnion{
   uint16 reg[NUM_SETTING_WORDS];
   struct motorSettings val;
-} mSet[NUM_MOTORS];
+};
+extern union settingsUnion mSet[NUM_MOTORS];
 
+#ifdef B1
 // show speed on DAC output pin A0 (ICP Data)
 #define setDacToSpeed() DAC1CON1 = (ms->curSpeed >> 8);
+#else
+#define setDacToSpeed()  
+#endif
 
 // default startup values
-// must match settingsStruct
-#ifdef BM
-// assumes 1/40 mm per step
-// default is same for all motors
-const uint16 settingsInit[NUM_SETTING_WORDS] = {
-      5, // acceleration rate index,  0 is no acceleration
-   4000, // default speed is 100 mm
-   1200, // start/stop speed limit (30 mm/sec)
-  16000, // max pos is 400 mm
-   4000, // homing speed (100 mm/sec)
-     60, // homing back-up ms->speed (1.5 mm/sec)
-     40, // home offset distance: 1 mm
-      0, // home pos value, set cur pos to this after homing
-      0, // limit sw control (0 is normal)
-};
-
-#else
-
-// assumes 1/50 mm per step
-// default is same for all motors
-const uint16 settingsInit[NUM_SETTING_WORDS] = {
-      5, // acceleration rate index,  0 is no acceleration
-      5, // acceleration rate index,  0 is no acceleration
-   4000, // default speed is 100 mm
-   1200, // start/stop speed limit (30 mm/sec)
-  16000, // max pos is 400 mm
-   4000, // homing speed (100 mm/sec)
-     60, // homing back-up ms->speed (1.5 mm/sec)
-     40, // home offset distance: 1 mm
-      0, // home pos value, set cur pos to this after homing
-      0, // limit sw control (0 is normal)
-};
-#endif /* BM */
+//// must match settingsStruct
+//#ifdef BM
+//// assumes 1/40 mm per step
+//// default is same for all motors
+//const uint16 settingsInit[NUM_SETTING_WORDS] = {
+//      5, // acceleration rate index,  0 is no acceleration
+//   4000, // default speed is 100 mm
+//   1200, // start/stop speed limit (30 mm/sec)
+//  16000, // max pos is 400 mm
+//   4000, // homing speed (100 mm/sec)
+//     60, // homing back-up ms->speed (1.5 mm/sec)
+//     40, // home offset distance: 1 mm
+//      0, // home pos value, set cur pos to this after homing
+//      0, // limit sw control (0 is normal)
+//};
+//
+//#else
+//
+//// assumes 1/50 mm per step
+//// default is same for all motors
+//const uint16 settingsInit[NUM_SETTING_WORDS] = {
+//      5, // acceleration rate index,  0 is no acceleration
+//      5, // acceleration rate index,  0 is no acceleration
+//   4000, // default speed is 100 mm
+//   1200, // start/stop speed limit (30 mm/sec)
+//  16000, // max pos is 400 mm
+//   4000, // homing speed (100 mm/sec)
+//     60, // homing back-up ms->speed (1.5 mm/sec)
+//     40, // home offset distance: 1 mm
+//      0, // home pos value, set cur pos to this after homing
+//      0, // limit sw control (0 is normal)
+//};
+//#endif /* BM */
 
 #ifdef B1
 volatile unsigned char *stepPort[NUM_MOTORS]  = {&stepPORT};
 const uint8             stepMask[NUM_MOTORS]  = { stepMASK};
 
+volatile unsigned char *resetPort[NUM_MOTORS] = {&resetPORT};
+const uint8             resetMask[NUM_MOTORS] = { resetBIT};
+
 volatile unsigned char *faultPort[NUM_MOTORS] = {&faultPORT};
 const uint8             faultMask[NUM_MOTORS] = { faultMASK};
-  
+
 volatile unsigned char *limitPort[NUM_MOTORS] = {&limitPORT};
 const uint8             limitMask[NUM_MOTORS] = { limitMASK};
 #endif /*B1 */
   
 #ifdef B3
-volatile unsigned char 
-           *stepPort[NUM_MOTORS] = {&stepRPORT, &stepEPORT, &stepXPORT};
-const uint8 stepMask[NUM_MOTORS] = { stepRBIT,   stepEBIT,   stepXBIT};
+extern volatile uint16 *stepPort[NUM_MOTORS];
+extern const    uint16  stepMask[NUM_MOTORS];
 
-volatile unsigned char 
-           *faultPort[NUM_MOTORS] = {&faultRPORT, &faultEPORT, &faultXPORT};
-const uint8 faultMask[NUM_MOTORS] = { faultRBIT,   faultEBIT,   faultXBIT};
+extern volatile uint16 *resetPort[NUM_MOTORS];
+extern const    uint16  resetMask[NUM_MOTORS];
 
-volatile unsigned char 
-           *limitPort[NUM_MOTORS] = {&limitRPORT, 0, &limitXPORT};
-const uint8 limitMask[NUM_MOTORS] = { limitRBIT,  0,  limitXBIT};
+extern volatile uint16 *faultPort[NUM_MOTORS];
+extern const    uint16  faultMask[NUM_MOTORS];
+
+extern volatile uint16 *limitPort[NUM_MOTORS];
+extern const    uint16  limitMask[NUM_MOTORS];
 #endif /* B3 */
 
 #ifdef U6

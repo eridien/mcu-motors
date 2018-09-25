@@ -16,8 +16,13 @@ void clkInit(void) {
   T0EN                =  1;            // enable timer0
   TMR0IE              =  1;            // enable timer int
 #else
-  _T1IP = 0;  // highest priority
-
+  _TSYNC               =  0;            // sync clock
+  _TCS                 =  0;            // Clock Source Internal clock (FOSC/2)
+  _TCKPS               =  CLK_PRESCALE; // prescaler  is 1:1 ( 2 usecs)
+  PR1                  =  CLK_RATE;     // 9, wraps at count 10 (20 usecs, 50 khz)
+  _T1IF                =  0;            // int flag
+  _TON                 =  1;            // enable timer0
+  _T1IE                =  1;            // enable timer int
 #endif
 }
 

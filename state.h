@@ -7,6 +7,14 @@
 
 #define MCU_VERSION 0
 
+#ifdef B1
+    #define disableAllInts GIE=0
+    #define enableAllInts  GIE=1
+#else
+    #define disableAllInts __builtin_disi(0x3FFF)
+    #define enableAllInts  __builtin_disi(0x0000) 
+#endif
+
 // when returning test pos instead of cur pos
 // state byte will have this magic value which can't happen normally
 #define TEST_POS_STATE      0x04
@@ -54,8 +62,9 @@ struct motorState {
   bool   resetAfterSoftStop;
   bool   nextStateTestPos; // flag to return homeTestPos on next read
   int16  homeTestPos;      // pos when limit sw closes
-} mState[NUM_MOTORS];
+};
 
+extern struct motorState mState[NUM_MOTORS];
 
 #define haveError() (errorIntCode || (ms->stateByte & ERROR_BIT))
 
