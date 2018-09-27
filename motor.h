@@ -52,9 +52,13 @@ struct motorSettings {
   uint16 homeOfs;
   uint16 homePos;    // value to set cur pos after homing
   uint16 limitSwCtl; // codes starting and switch direction and reversing
+  uint16 mcuClock;   // period of clock in usecs  (applies to all motors)
 };
 
-#define NUM_SETTING_WORDS 9
+#define mcuClockSettingIdx 9
+#define NUM_SETTING_WORDS 10
+
+extern const uint16 settingsInit[NUM_SETTING_WORDS];
 
 union settingsUnion{
   uint16 reg[NUM_SETTING_WORDS];
@@ -84,6 +88,7 @@ extern union settingsUnion mSet[NUM_MOTORS];
 //     40, // home offset distance: 1 mm
 //      0, // home pos value, set cur pos to this after homing
 //      0, // limit sw control (0 is normal)
+//     50, // period of clock in usecs  (applies to all motors)
 //};
 //
 //#else
@@ -91,7 +96,6 @@ extern union settingsUnion mSet[NUM_MOTORS];
 //// assumes 1/50 mm per step
 //// default is same for all motors
 //const uint16 settingsInit[NUM_SETTING_WORDS] = {
-//      5, // acceleration rate index,  0 is no acceleration
 //      5, // acceleration rate index,  0 is no acceleration
 //   4000, // default speed is 100 mm
 //   1200, // start/stop speed limit (30 mm/sec)
@@ -101,6 +105,7 @@ extern union settingsUnion mSet[NUM_MOTORS];
 //     40, // home offset distance: 1 mm
 //      0, // home pos value, set cur pos to this after homing
 //      0, // limit sw control (0 is normal)
+//     50, // period of clock in usecs  (applies to all motors)
 //};
 //#endif /* B1 */
 

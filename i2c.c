@@ -18,8 +18,8 @@ volatile bool  inPacket;
 
 void i2cInit() { 
     SSP1CON1bits.SSPM = 0x0e;          // slave mode, 7-bit, S & P ints enabled 
-    SSP1MSK           = I2C_ADDR_MASK; // address mask, check all top 5 bits
-    SSP1ADD           = I2C_ADDR;      // slave address (7-bit addr is 8 or 12)
+    SSP1MSK           = I2C_ADDR_MASK; // address mask, check top 5 bits
+    SSP1ADD           = I2C_ADDR;      // slave address (7-bit addr)
     SSP1STATbits.SMP  = 0;             // slew-rate enabled
     SSP1STATbits.CKE  = 1;             // smb voltage levels
     SSP1CON2bits.SEN  = 1;             // enable clock stretching 
@@ -69,11 +69,12 @@ void i2cInterrupt(void) {
 void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
   _SSP1IF = 0;
 #endif
+  dbg11
   // SSPxSTATbits.S is set during entire packet
   if(I2C_START_BIT && !inPacket) { 
     // received start bit, prepare for packet
     i2cRecvBytesPtr = 1;    // skip over length byte
-    i2cSendBytesPtr = 0;
+    i2cSendBytesPtr = 1;    // first is hard-wired to zero
     I2C_WCOL = 0;           // clear WCOL
     dummy = I2C_BUF_BYTE;   // clear SSPOV
     inPacket = true;
@@ -104,16 +105,16 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
         // prepare all send data
         setSendBytesInt(motIdxInPacket);
         // send packet (i2c read from slave), load buffer for first byte
-        I2C_BUF_BYTE = i2cSendBytes[i2cSendBytesPtr++]; // always byte 0
+        I2C_BUF_BYTE = i2cSendBytes[0];
       }
     }
     else {
       if(!RdNotWrite) {
+        // received byte (i2c write to slave)
         if(mState[motIdxInPacket].haveCommand) {
           // last command for this motor not handled yet by event loop
           setErrorInt(motIdxInPacket, CMD_NOT_DONE_ERROR);
         } else {
-          // received byte (i2c write to slave)
           if(i2cRecvBytesPtr < RECV_BUF_SIZE + 1) 
             i2cRecvBytes[motIdxInPacket][i2cRecvBytesPtr++] = I2C_BUF_BYTE;
         }
@@ -127,6 +128,7 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
   // in packet: set ckp to end stretch after ack
   // stop bit:  clr ckp so next start bit will stretch
   NotStretch = !I2C_STOP_BIT; 
+  dbg10
 }
 #ifdef B3
 // ignore bus collision int for now

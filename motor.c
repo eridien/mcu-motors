@@ -61,6 +61,7 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
      40, // home offset distance: 1 mm
       0, // home pos value, set cur pos to this after homing
       0, // limit sw control (0 is normal)
+     40, // period of clock in usecs  (applies to all motors)
 };
 
 #else
@@ -77,6 +78,7 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
      40, // home offset distance: 1 mm
       0, // home pos value, set cur pos to this after homing
       0, // limit sw control (0 is normal)
+     40, // period of clock in usecs  (applies to all motors)
 };
 #endif /* BM */
 
@@ -172,14 +174,21 @@ void motorInit() {
     msp->limitSwPolarity = (lsc >> 2) & 0x01;
     msp->homeEndSide     =  lsc       & 0x03;
   }
+  setTicksSec();
 }
 
-bool haveFault() { // comment out to use dbg1 or dbg2
-//  volatile unsigned char *p = faultPort[motorIdx];
-//  if(p != NULL) {
-//    return !(*p & faultMask[motorIdx]);
-//  }
+bool haveFault() { // B1: comment out to use dbg1 or dbg2
+#ifdef B1
+  volatile uint8 *p = faultPort[motorIdx];
+  return !(*p & faultMask[motorIdx]);
+#endif
+#ifdef B3
+  volatile uint16 *p = faultPort[motorIdx];
+  return !(*p & faultMask[motorIdx]);
+#endif
+#ifdef U6
   return false;
+#endif
 }
 
 bool limitSwOn() {  // B1: comment out when limit sw used by dbg4
@@ -209,6 +218,7 @@ void setMotorSettings(uint8 numWordsRecvd) {
   ms->acceleration    = accelTable[sv->accelIdx];
   ms->limitSwPolarity = (sv->limitSwCtl >> 2) & 0x01;
   ms->homeEndSide     =  sv->limitSwCtl       & 0x03;
+  setTicksSec();
 }
 
 // from event loop
@@ -346,6 +356,7 @@ void clockInterrupt(void) {
 void __attribute__ ((interrupt,shadow,auto_psv)) _T1Interrupt(void) {
   _T1IF = 0;
 #endif
+//  dbg11;
   timeTicks++;
   int motIdx;
   for(motIdx = 0; motIdx < NUM_MOTORS; motIdx++) {
@@ -372,4 +383,5 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _T1Interrupt(void) {
       p->stepped = true;
     }
   }
+//  dbg10;
 }
