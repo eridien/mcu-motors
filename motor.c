@@ -149,8 +149,8 @@ void motorInit() {
 #endif /* B3 */
   
 #ifdef U6
-  volatile uint16 *limitPort[NUM_MOTORS] = {0,0,0,0,0};
-  const    uint16  limitMask[NUM_MOTORS] = {0,0,0,0,0};
+// const uint16 *limitPort[NUM_MOTORS] = {0,0,0,0,0};
+//  const uint16  limitMask[NUM_MOTORS] = {0,0,0,0,0};
 #endif
   
   uint8 motIdx;
@@ -183,6 +183,7 @@ bool haveFault() { // comment out to use dbg1 or dbg2
 }
 
 bool limitSwOn() {  // B1: comment out when limit sw used by dbg4
+#ifndef U6
 #ifdef B1
   volatile uint8 *p = limitPort[motorIdx];
 #else
@@ -192,6 +193,7 @@ bool limitSwOn() {  // B1: comment out when limit sw used by dbg4
     return (ms->limitSwPolarity ?  (*p & limitMask[motorIdx])
                                 : !(*p & limitMask[motorIdx]));
   }
+#endif /* U6 */
   return false;
 }  
 

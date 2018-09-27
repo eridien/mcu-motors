@@ -102,9 +102,10 @@ extern union settingsUnion mSet[NUM_MOTORS];
 //      0, // home pos value, set cur pos to this after homing
 //      0, // limit sw control (0 is normal)
 //};
-//#endif /* BM */
+//#endif /* B1 */
 
-#ifdef U6
+extern volatile uint16 *stepPort[NUM_MOTORS];
+extern          uint16  stepMask[NUM_MOTORS];
 
 #ifdef BM
 volatile unsigned char *resetPort[NUM_MOTORS];
@@ -112,13 +113,11 @@ const uint8             resetMask[NUM_MOTORS];
 
 extern volatile uint16 *faultPort[NUM_MOTORS];
 extern const    uint16  faultMask[NUM_MOTORS];
-#endif
-
-extern volatile uint16 *stepPort[NUM_MOTORS];
-extern          uint16  stepMask[NUM_MOTORS];
 
 extern volatile uint16 *limitPort[NUM_MOTORS];
 extern const    uint16  limitMask[NUM_MOTORS];
+
+#else
 
 // -------- phases ----------
 // Color        Bl Pi Ye Or  (red is +5))
@@ -127,8 +126,7 @@ extern const    uint16  limitMask[NUM_MOTORS];
 //              {0, 0, 1, 1},
 //              {1, 0, 0, 1}
 extern uint16 motPhaseValue[NUM_MOTORS][4];
-#endif /* U6 */
-
+#endif
 
 void motorInit(void);
 void checkAll(void);
