@@ -51,6 +51,7 @@ void setStep(bool closing) {
     case 1: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 2); break;
     case 2: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 1); break;
     case 3: clkTicks = CLK_TICKS_PER_SEC /  ms->curSpeed      ; break;
+    default: clkTicks = 0; // to avoid compiler warning
   }
   if (clkTicks < dbgMinClkTicks) {
     dbgMinClkTicks = clkTicks;
@@ -69,6 +70,10 @@ void setStep(bool closing) {
   ms->stepped = false;
   setBiStepLo();
   ms->stepPending = true;
+  
+//  if(motorIdx==2)
+//    dbg20
+
   
 #else
   // check step timing

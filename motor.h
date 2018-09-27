@@ -13,7 +13,7 @@
 #define NUM_MOTORS 3
 #endif
 #ifdef U6
-#define NUM_MOTORS 6
+#define NUM_MOTORS 5
 #endif
 
 // global for use in main chk loop
@@ -104,41 +104,18 @@ extern union settingsUnion mSet[NUM_MOTORS];
 //};
 //#endif /* BM */
 
-#ifdef B1
-volatile unsigned char *stepPort[NUM_MOTORS]  = {&stepPORT};
-const uint8             stepMask[NUM_MOTORS]  = { stepMASK};
-
-volatile unsigned char *resetPort[NUM_MOTORS] = {&resetPORT};
-const uint8             resetMask[NUM_MOTORS] = { resetBIT};
-
-volatile unsigned char *faultPort[NUM_MOTORS] = {&faultPORT};
-const uint8             faultMask[NUM_MOTORS] = { faultMASK};
-
-volatile unsigned char *limitPort[NUM_MOTORS] = {&limitPORT};
-const uint8             limitMask[NUM_MOTORS] = { limitMASK};
-#endif /*B1 */
-  
-#ifdef B3
-extern volatile uint16 *stepPort[NUM_MOTORS];
-extern const    uint16  stepMask[NUM_MOTORS];
-
-extern volatile uint16 *resetPort[NUM_MOTORS];
-extern const    uint16  resetMask[NUM_MOTORS];
-
-extern volatile uint16 *faultPort[NUM_MOTORS];
-extern const    uint16  faultMask[NUM_MOTORS];
-
-extern volatile uint16 *limitPort[NUM_MOTORS];
-extern const    uint16  limitMask[NUM_MOTORS];
-#endif /* B3 */
-
 #ifdef U6
-extern volatile uint16 *stepPort[NUM_MOTORS];
 
-extern uint16 stepMask[NUM_MOTORS];
+#ifdef BM
+volatile unsigned char *resetPort[NUM_MOTORS];
+const uint8             resetMask[NUM_MOTORS];
 
 extern volatile uint16 *faultPort[NUM_MOTORS];
 extern const    uint16  faultMask[NUM_MOTORS];
+#endif
+
+extern volatile uint16 *stepPort[NUM_MOTORS];
+extern          uint16  stepMask[NUM_MOTORS];
 
 extern volatile uint16 *limitPort[NUM_MOTORS];
 extern const    uint16  limitMask[NUM_MOTORS];

@@ -18,7 +18,6 @@ volatile uint16 *stepPort[NUM_MOTORS] = {
   &motBPORT, // tube 2
   &motCPORT, // tube 3
   &motPPORT, // paster
-  &motZPORT, // camera height
   &motFPORT, // focus
 };
 
@@ -27,15 +26,11 @@ uint16 stepMask[NUM_MOTORS] = {
   0x000f << motBOFS,
   0x000f << motCOFS,
   0x000f << motPOFS,
-  0x000f << motZOFS,
   0x000f << motFOFS,
 };
 
-volatile uint16 *faultPort[NUM_MOTORS] = {0,0,0,0,0,0};
-const    uint16  faultMask[NUM_MOTORS] = {0,0,0,0,0,0};
-
-volatile uint16 *limitPort[NUM_MOTORS] = {0,0,0,0, &limitZPORT, 0};
-const    uint16  limitMask[NUM_MOTORS] = {0,0,0,0,  limitZBIT,  0};
+volatile uint16 *faultPort[NUM_MOTORS] = {0,0,0,0,0};
+const    uint16  faultMask[NUM_MOTORS] = {0,0,0,0,0};
 
 // -------- phases ----------
 // Color        Bl Pi Ye Or  (red is +5))
@@ -48,7 +43,6 @@ uint16 motPhaseValue[NUM_MOTORS][4] = { // motor, phase
   {0x0c << motBOFS, 0x06 << motBOFS, 0x03 << motBOFS, 0x09 << motBOFS},
   {0x0c << motCOFS, 0x06 << motCOFS, 0x03 << motCOFS, 0x09 << motCOFS},
   {0x0c << motPOFS, 0x06 << motPOFS, 0x03 << motPOFS, 0x09 << motPOFS},
-  {0x0c << motZOFS, 0x06 << motZOFS, 0x03 << motZOFS, 0x09 << motZOFS},
   {0x0c << motFOFS, 0x06 << motFOFS, 0x03 << motFOFS, 0x09 << motFOFS},
 };
 #endif
@@ -153,6 +147,12 @@ void motorInit() {
   limitRTRIS = 1;  // zero means at limit switch
   limitXTRIS = 1;  // zero means at limit switch
 #endif /* B3 */
+  
+#ifdef U6
+  volatile uint16 *limitPort[NUM_MOTORS] = {0,0,0,0,0};
+  const    uint16  limitMask[NUM_MOTORS] = {0,0,0,0,0};
+#endif
+  
   uint8 motIdx;
   for(motIdx=0; motIdx < NUM_MOTORS; motIdx++) {
     struct motorState *msp = &mState[motIdx];
@@ -182,7 +182,7 @@ bool haveFault() { // comment out to use dbg1 or dbg2
   return false;
 }
 
-bool limitSwOn() {  // comment out when limit sw used by dbg4
+bool limitSwOn() {  // B1: comment out when limit sw used by dbg4
 #ifdef B1
   volatile uint8 *p = limitPort[motorIdx];
 #else
@@ -360,6 +360,8 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _T1Interrupt(void) {
       ms3LAT = ((p->ustep & 0x04) ? 1 : 0);
       dirLAT =   p->curDir        ? 1 : 0;
       setBiStepHiInt(motIdx);
+//   if(motIdx==2)
+//   dbg21
 #else
       setUniPortInt(motIdx, ms->phase); 
 #endif

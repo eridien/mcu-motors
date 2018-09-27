@@ -66,14 +66,15 @@ volatile uint8 motIdxInPacket;
 #ifdef B1
 void i2cInterrupt(void) {
 #else
-  void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
+void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
+  _SSP1IF = 0;
 #endif
   // SSPxSTATbits.S is set during entire packet
   if(I2C_START_BIT && !inPacket) { 
     // received start bit, prepare for packet
-    i2cRecvBytesPtr = 1; // skip over length byte
+    i2cRecvBytesPtr = 1;    // skip over length byte
     i2cSendBytesPtr = 0;
-    I2C_WCOL = 0;                    // clear WCOL
+    I2C_WCOL = 0;           // clear WCOL
     dummy = I2C_BUF_BYTE;   // clear SSPOV
     inPacket = true;
   }
@@ -127,3 +128,10 @@ void i2cInterrupt(void) {
   // stop bit:  clr ckp so next start bit will stretch
   NotStretch = !I2C_STOP_BIT; 
 }
+#ifdef B3
+// ignore bus collision int for now
+void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1BCInterrupt(void) {
+  _BCL1IF  = 0;
+}
+#endif
+  

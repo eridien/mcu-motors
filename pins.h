@@ -131,6 +131,15 @@
 #define tp3LAT     _LATA2
 #define tp4LAT     _LATA3
 
+#define dbg10 tp1LAT = 0;
+#define dbg11 tp1LAT = 1;
+#define dbg20 tp2LAT = 0;
+#define dbg21 tp2LAT = 1;
+#define dbg30 tp3LAT = 0;
+#define dbg31 tp3LAT = 1;
+#define dbg40 tp4LAT = 0;
+#define dbg41 tp4LAT = 1;
+
 #endif	/* B3 */
 
 #ifdef U6
@@ -145,18 +154,13 @@
 #define motBPORT   PORTB  // tube 2
 #define motCPORT   PORTC  // tube 3
 #define motPPORT   PORTB  // paster
-#define motZPORT   PORTB  // camera Z
 #define motFPORT   PORTC  // focus
 
 #define motAOFS    0
 #define motBOFS   12
 #define motCOFS    0
 #define motPOFS    8
-#define motZOFS    4
 #define motFOFS    4
-
-#define limitZPORT PORTA
-#define limitZBIT  0x0100
 
 #define led1TRIS   _TRISA6
 #define led2TRIS   _TRISA7
@@ -177,6 +181,18 @@
 #define tp2LAT     _LATC9
 #define tp3LAT     _LATA10
 #define tp4LAT     _LATA11
+
+#define dbg10 tp1LAT = 0;
+#define dbg11 tp1LAT = 1;
+#define dbg20 tp2LAT = 0;
+#define dbg21 tp2LAT = 1;
+//#define dbg30 tp3LAT = 0;
+//#define dbg31 tp3LAT = 1;
+#define dbg30 tp4LAT = 0;
+#define dbg31 tp4LAT = 1;
+
+#define m(_mot, _motidx, _tp, _val) \
+  if(_mot == _motidx) tp##_tp##LAT = _val
 #endif
 
 #endif	/* PINS_H */
