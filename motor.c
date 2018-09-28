@@ -21,7 +21,7 @@ volatile uint16 *stepPort[NUM_MOTORS] = {
   &motFPORT, // focus
 };
 
-uint16 stepMask[NUM_MOTORS] = {
+const uint16 stepMask[NUM_MOTORS] = {
   0x000f << motAOFS,
   0x000f << motBOFS,
   0x000f << motCOFS,
@@ -373,8 +373,6 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _T1Interrupt(void) {
       ms3LAT = ((p->ustep & 0x04) ? 1 : 0);
       dirLAT =   p->curDir        ? 1 : 0;
       setBiStepHiInt(motIdx);
-//   if(motIdx==2)
-//   dbg21
 #else
       setUniPortInt(motIdx, ms->phase); 
 #endif

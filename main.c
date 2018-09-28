@@ -100,6 +100,10 @@ int main(void) {
  ANSA = 0;
  ANSB = 0;
  
+#ifdef U6
+ ANSC = 0;
+#endif
+
 #ifdef DEBUG
  tp1TRIS = 0;
  tp2TRIS = 0;
@@ -149,8 +153,6 @@ int main(void) {
     // motorIdx, mp, mm, ms, and sv are globals
     for(motorIdx=0; motorIdx < NUM_MOTORS; motorIdx++) {
       
-      m(motorIdx,0,2,1);
-      
       mp = stepPort[motorIdx]; // (&PORT)
       mm = stepMask[motorIdx]; // 0x000f, 0x00f0, 0x0f00, 0xf000, or step bit
       ms = &mState[motorIdx];
@@ -165,8 +167,6 @@ int main(void) {
         ms->haveCommand = false;
       }
       checkAll();
-        
-      m(motorIdx,0,2,0);
     }
   }
 }

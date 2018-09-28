@@ -7,14 +7,13 @@
 #include "state.h"
 #include "motor.h"
 
-#define CLK LATC0
-#define SDA LATC1
-
 volatile uint8 i2cRecvBytes[NUM_MOTORS][RECV_BUF_SIZE+1]; // added len byte
 volatile uint8 i2cRecvBytesPtr;
 volatile uint8 i2cSendBytes[NUM_SEND_BYTES];
 volatile uint8 i2cSendBytesPtr;
 volatile bool  inPacket;
+
+#ifdef BM
 
 void i2cInit() { 
     SSP1CON1bits.SSPM = 0x0e;          // slave mode, 7-bit, S & P ints enabled 
@@ -44,6 +43,44 @@ void i2cInit() {
     SSP1CON1bits.SSPEN = 1;            // Enable the serial port
 }
 
+#else
+
+void i2cInit() { 
+    SSP2CON1bits.SSPM = 0x0e;          // slave mode, 7-bit, S & P ints enabled 
+    SSP2MSK           = I2C_ADDR_MASK; // address mask, check top 5 bits
+    SSP2ADD           = I2C_ADDR;      // slave address (7-bit addr)
+    SSP2STATbits.SMP  = 0;             // slew-rate enabled
+    SSP2STATbits.CKE  = 1;             // smb voltage levels
+    SSP2CON2bits.SEN  = 1;             // enable clock stretching 
+    SSP2CON3bits.AHEN = 0;             // no clock stretch before addr ack
+    SSP2CON3bits.DHEN = 0;             // no clock stretch before data ack
+    SSP2CON3bits.BOEN = 1;             // enable buffer overwrite check
+    NotStretch        = 0;             // stretch clk of first start bit
+#endif
+    
+#ifdef BM
+#ifdef B1
+    SSP1CLKPPS = 0x10;           // RC0
+    SSP1DATPPS = 0x11;           // RC1
+    RC0PPS     = 0x15;           // SCL1
+    RC1PPS     = 0x16;           // SDA1
+    
+    SSP1IF = 0;                        // nothing received yet
+    SSP1IE = 1;                        // Enable ints
+#else
+    // no pps
+    _SSP1IF = 0;                       // nothing received yet
+    _SSP1IE = 1;                       // Enable ints
+#endif
+    SSP1CON1bits.SSPEN = 1;            // Enable the serial port
+#else
+    // no pps
+    _SSP2IF = 0;                       // nothing received yet
+    _SSP2IE = 1;                       // Enable ints
+    SSP2CON1bits.SSPEN = 1;            // Enable the serial port
+#endif
+}
+
 // all words are big-endian
 void setSendBytesInt(uint8 motIdx) {
   struct motorState *p = &mState[motIdx];
@@ -65,10 +102,16 @@ volatile uint8 motIdxInPacket;
 
 #ifdef B1
 void i2cInterrupt(void) {
-#else
+#endif
+#ifdef B3
 void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
   _SSP1IF = 0;
 #endif
+#ifdef U6
+void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP2Interrupt(void) {
+  _SSP2IF = 0;
+#endif
+
   dbg11
   // SSPxSTATbits.S is set during entire packet
   if(I2C_START_BIT && !inPacket) { 
@@ -130,10 +173,3 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
   NotStretch = !I2C_STOP_BIT; 
   dbg10
 }
-#ifdef B3
-// ignore bus collision int for now
-void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1BCInterrupt(void) {
-  _BCL1IF  = 0;
-}
-#endif
-  

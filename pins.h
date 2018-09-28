@@ -131,6 +131,7 @@
 #define tp3LAT     _LATA2
 #define tp4LAT     _LATA3
 
+// only tp2 works in B3 ???
 #define dbg10 tp1LAT = 0;
 #define dbg11 tp1LAT = 1;
 #define dbg20 tp2LAT = 0;
@@ -182,6 +183,7 @@
 #define tp3LAT     _LATA10
 #define tp4LAT     _LATA11
 
+// tp3 doesn't work ???
 #define dbg10 tp1LAT = 0;
 #define dbg11 tp1LAT = 1;
 #define dbg20 tp2LAT = 0;
@@ -190,10 +192,7 @@
 //#define dbg31 tp3LAT = 1;
 #define dbg30 tp4LAT = 0;
 #define dbg31 tp4LAT = 1;
-
-#define m(_mot, _motidx, _tp, _val) \
-  if(_mot == _motidx) tp##_tp##LAT = _val
-#endif
+#endif /* U6 */
 
 #endif	/* PINS_H */
 

@@ -21,14 +21,21 @@
 #define I2C_ADDR      0x30  // real addr:0x18, head mcu (U6) for unipolar motors
 #endif
 
-#define RdNotWrite SSP1STATbits.I2C_READ
 
 #ifdef B1
+    #define RdNotWrite SSP1STATbits.I2C_READ
     #define NotAddr    SSP1STATbits.DA
     #define NotStretch SSP1CON1bits.CKP1
-#else
+#endif
+#ifdef B3
+    #define RdNotWrite SSP1STATbits.I2C_READ
     #define NotAddr    SSP1STATbits.NOT_ADDRESS
     #define NotStretch SSP1CON1bits.CKP
+#endif
+#ifdef U6
+    #define RdNotWrite SSP2STATbits.I2C_READ
+    #define NotAddr    SSP2STATbits.NOT_ADDRESS
+    #define NotStretch SSP2CON1bits.CKP
 #endif
 
 extern volatile uint8 i2cRecvBytes[NUM_MOTORS][RECV_BUF_SIZE + 1];
