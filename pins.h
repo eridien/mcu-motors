@@ -151,11 +151,17 @@
 #define I2C_BUF_BYTE  SSP2BUF
 #define I2C_SSPIF     _SSP2IF
 
-#define motAPORT   PORTA  // tube 1
-#define motBPORT   PORTB  // tube 2
-#define motCPORT   PORTC  // tube 3
+#define motAPORT   PORTA  // tool A
+#define motBPORT   PORTB  // tool B
+#define motCPORT   PORTC  // tool C
 #define motPPORT   PORTB  // paster
 #define motFPORT   PORTC  // focus
+
+#define motATRIS   TRISA  // tool A
+#define motBTRIS   TRISB  // tool B
+#define motCTRIS   TRISC  // tool C
+#define motPTRIS   TRISB  // paster
+#define motFTRIS   TRISC  // focus
 
 #define motAOFS    0
 #define motBOFS   12
@@ -188,10 +194,10 @@
 #define dbg11 tp1LAT = 1;
 #define dbg20 tp2LAT = 0;
 #define dbg21 tp2LAT = 1;
-//#define dbg30 tp3LAT = 0;
-//#define dbg31 tp3LAT = 1;
-#define dbg30 tp4LAT = 0;
-#define dbg31 tp4LAT = 1;
+#define dbg30 tp3LAT = 0;
+#define dbg31 tp3LAT = 1;
+#define dbg40 tp4LAT = 0;
+#define dbg41 tp4LAT = 1;
 #endif /* U6 */
 
 #endif	/* PINS_H */

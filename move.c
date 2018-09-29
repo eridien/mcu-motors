@@ -56,33 +56,28 @@ void setStep(bool closing) {
   if (clkTicks < dbgMinClkTicks) {
     dbgMinClkTicks = clkTicks;
   }
+#else /* U6 */
+  clkTicks = CLK_TICKS_PER_SEC / ms->curSpeed; // 40 usecs/tick  
+#endif
   bool err;
   disableAllInts;
   ms->nextStepTicks = ms->lastStepTicks + clkTicks;
   // modulo 2**16 arithmetic
   err = (ms->nextStepTicks - (timeTicks+1)) > 32000;
   enableAllInts;
+  ms->stepped = false;
   if(err) { 
     // nextStepTicks is in the past
     setError(STEP_NOT_DONE_ERROR); 
-  }
-  
-  ms->stepped = false;
-  setBiStepLo();
-  ms->stepPending = true;
-  
-//  if(motorIdx==2)
-//    dbg20
-
-  
+  } else {
+#ifdef BM
+    setBiStepLo();
 #else
-  // check step timing
-  clkTicks = CLK_TICKS_PER_SEC / ms->curSpeed; // 40 usecs/tick
-  ms->nextStepTicks = ms->lastStepTicks + clkTicks;
-  ms->stepped = false;
-  ms->phase += ((ms->curDir ? 1 : -1) & 0x03);
-  ms->stepPending = true;
-#endif /* BM */
+    ms->phase = (ms->phase + ((ms->curDir ? 1 : -1)) & 0x03);
+#endif
+    ms->stepPending = true;
+  }
+  dbg40
 }
 
 void checkMotor() {

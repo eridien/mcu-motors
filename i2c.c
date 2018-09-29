@@ -111,8 +111,6 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
 void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP2Interrupt(void) {
   _SSP2IF = 0;
 #endif
-
-  dbg11
   // SSPxSTATbits.S is set during entire packet
   if(I2C_START_BIT && !inPacket) { 
     // received start bit, prepare for packet
@@ -171,5 +169,4 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP2Interrupt(void) {
   // in packet: set ckp to end stretch after ack
   // stop bit:  clr ckp so next start bit will stretch
   NotStretch = !I2C_STOP_BIT; 
-  dbg10
 }
