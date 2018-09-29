@@ -236,7 +236,9 @@ void setMotorSettings(uint8 numWordsRecvd) {
 
 void checkAll() {
   if (haveFault()) {
+    dbg21
     setError(MOTOR_FAULT_ERROR);
+    dbg20
     return;
   }
   if (ms->stepPending) {
@@ -382,18 +384,12 @@ void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void) {
       ms1LAT = ((p->ustep & 0x01) ? 1 : 0);
       ms2LAT = ((p->ustep & 0x02) ? 1 : 0);
       ms3LAT = ((p->ustep & 0x04) ? 1 : 0);
-      dbg11
-      dirLAT = p->curDir ? 1 : 0;
-
-      //  ENSURE SETUP TIME HERE  TODO
-
+      dirLAT =   p->curDir ? 1 : 0;
       setBiStepHiInt(motIdx);
-      dbg10
 #else
       setUniPortInt(motIdx, p->phase);
-      dbg41
 #endif
-              p->stepPending = false;
+      p->stepPending = false;
       p->lastStepTicks = timeTicks;
       p->stepped = true;
     }

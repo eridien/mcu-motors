@@ -25,10 +25,6 @@ void setError(uint8 err) {
     dummy = I2C_BUF_BYTE;   // clear SSPOV
   }
   else {
-#ifdef DEBUG
-    disableAllInts;
-    while(true);
-#endif
     // an error in one motor sets error bit in all motors
     // but error code is only in motor that reported error
     uint8 motIdx;

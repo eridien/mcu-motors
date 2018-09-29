@@ -12,6 +12,7 @@ volatile uint8 i2cRecvBytesPtr;
 volatile uint8 i2cSendBytes[NUM_SEND_BYTES];
 volatile uint8 i2cSendBytesPtr;
 volatile bool  inPacket;
+volatile bool  packetForUs;
 
 #ifdef BM
 
@@ -122,6 +123,7 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP2Interrupt(void) {
     I2C_WCOL = 0;           // clear WCOL
     dummy = I2C_BUF_BYTE;   // clear SSPOV
     inPacket = true;
+    packetForUs = false;
   }
   else if(I2C_STOP_BIT) { 
     // received stop bit
@@ -130,16 +132,18 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP2Interrupt(void) {
       setErrorInt(motIdxInPacket, I2C_OVERFLOW_ERROR);
     }
     else {
-      if(!RdNotWrite) {
-        // total length of recv is stored in first byte
-        i2cRecvBytes[motIdxInPacket][0] = i2cRecvBytesPtr-1;
-        // tell event loop that data is available
-        mState[motIdxInPacket].haveCommand = true;
-      } else {
-        // just sent last status byte, did state have error in it?
-        if(i2cSendBytes[0] & 0x78) {
-          // master just read status with error bit, clear it
-          setErrorInt(motIdxInPacket, CLEAR_ERROR);
+      if(packetForUs) {
+        if(!RdNotWrite) {
+          // done receiving -- total length of recv is stored in first byte
+          i2cRecvBytes[motIdxInPacket][0] = i2cRecvBytesPtr-1;
+          // tell event loop that data is available
+          mState[motIdxInPacket].haveCommand = true;
+        } else {
+          // sent last byte of status packet
+          if(i2cSendBytes[0] & 0x78) {
+            // master just read status with error bit, clear it
+            setErrorInt(motIdxInPacket, CLEAR_ERROR);
+          }
         }
       }
     }
@@ -147,6 +151,7 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP2Interrupt(void) {
   else {
     if(!NotAddr) { 
       // received addr byte, extract motor number
+      packetForUs = true;
       motIdxInPacket = (I2C_BUF_BYTE & 0x0e) >> 1;
       if(RdNotWrite) {
         // prepare all send data
