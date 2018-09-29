@@ -102,10 +102,6 @@
 #define faultETRIS  _TRISA4
 #define faultXTRIS  _TRISB5
 
-#define faultRLAT   _LATB4
-#define faultELAT   _LATA4
-#define faultXLAT   _LATB5
-
 #define faultRPORT  PORTB
 #define faultRBIT   0x10
 #define faultEPORT  PORTA

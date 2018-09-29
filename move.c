@@ -73,7 +73,7 @@ void setStep(bool closing) {
 #ifdef BM
     setBiStepLo();
 #else
-    ms->phase = (ms->phase + ((ms->curDir ? 1 : -1)) & 0x03);
+    ms->phase = (ms->phase + (ms->curDir ? 1 : -1)) & 0x03;
 #endif
     ms->stepPending = true;
   }

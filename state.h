@@ -70,8 +70,8 @@ extern struct motorState mState[NUM_MOTORS];
 
 #define haveError() (errorIntCode || (ms->stateByte & ERROR_BIT))
 
-extern volatile bool errorIntMot;
-extern volatile bool errorIntCode;
+extern volatile uint8 errorIntMot;
+extern volatile uint8 errorIntCode;
 
 void  setStateBit(uint8 mask, uint8 set);
 void  setError(uint8 err);

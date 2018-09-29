@@ -89,17 +89,12 @@
 int main(void) {
 #ifdef B1
  ANSELA = 0; // no analog inputs
- ANSELB = 0; // these &^%$&^ regs cause a lot of trouble
- ANSELC = 0; // they should not default to on and override everything else
-//  debug1TRIS    = 0;
-//  debug2TRIS    = 0;
-//  debug3TRIS    = 0;
-//  debug4TRIS    = 0;
+ ANSELB = 0;  
+ ANSELC = 0; 
 #else
- _RCDIV = 0;
- ANSA = 0;
+ _RCDIV = 0; // switch instruction clock from 4 MHz to 8 MHz
+ ANSA = 0;   // no analog inputs
  ANSB = 0;
- 
 #ifdef U6
  ANSC = 0;
 #endif

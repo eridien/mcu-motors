@@ -39,11 +39,11 @@ void i2cInit() {
     // no pps
     _SSP1IF = 0;                       // nothing received yet
     _SSP1IE = 1;                       // Enable ints
-#endif
+    
+#endif  /* BM */
     SSP1CON1bits.SSPEN = 1;            // Enable the serial port
-}
 
-#else
+#else /* not BM */
 
 void i2cInit() { 
     SSP2CON1bits.SSPM = 0x0e;          // slave mode, 7-bit, S & P ints enabled 
@@ -56,9 +56,10 @@ void i2cInit() {
     SSP2CON3bits.DHEN = 0;             // no clock stretch before data ack
     SSP2CON3bits.BOEN = 1;             // enable buffer overwrite check
     NotStretch        = 0;             // stretch clk of first start bit
-#endif
+#endif /* not BM */
     
 #ifdef BM
+    
 #ifdef B1
     SSP1CLKPPS = 0x10;           // RC0
     SSP1DATPPS = 0x11;           // RC1
@@ -72,13 +73,15 @@ void i2cInit() {
     _SSP1IF = 0;                       // nothing received yet
     _SSP1IE = 1;                       // Enable ints
 #endif
+    
     SSP1CON1bits.SSPEN = 1;            // Enable the serial port
-#else
+    
+#else /* not BM */
     // no pps
     _SSP2IF = 0;                       // nothing received yet
     _SSP2IE = 1;                       // Enable ints
     SSP2CON1bits.SSPEN = 1;            // Enable the serial port
-#endif
+#endif /* not BM */
 }
 
 // all words are big-endian
@@ -133,8 +136,11 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP2Interrupt(void) {
         // tell event loop that data is available
         mState[motIdxInPacket].haveCommand = true;
       } else {
-        // master just read status,  clear any error
-        setErrorInt(motIdxInPacket, CLEAR_ERROR);
+        // just sent last status byte, did state have error in it?
+        if(i2cSendBytes[0] & 0x78) {
+          // master just read status with error bit, clear it
+          setErrorInt(motIdxInPacket, CLEAR_ERROR);
+        }
       }
     }
   }

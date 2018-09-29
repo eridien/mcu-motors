@@ -131,7 +131,7 @@ void motorInit() {
   stepTRIS = 0;
   faultTRIS = 1; // zero means motor fault
   limitTRIS = 1; // zero means at limit switch  // may be used by dbg4
-  debug1TRIS = 0; // uncomment to use dbg1, overrides faultETRIS
+//  debug1TRIS = 0; // uncomment to use dbg1, overrides faultETRIS
 #endif
 
 #ifdef B3
@@ -190,6 +190,10 @@ bool haveFault() { // B1: comment out to use dbg1 or dbg2
 #endif
 #ifdef B3
   volatile uint16 *p = faultPort[motorIdx];
+  
+  // fault input pins for motor R (B4) and E(A4) are not working!   TODO
+  if(motorIdx < 2) return false;
+  
   return !(*p & faultMask[motorIdx]);
 #endif
 #ifdef U6
@@ -378,11 +382,13 @@ void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void) {
       ms1LAT = ((p->ustep & 0x01) ? 1 : 0);
       ms2LAT = ((p->ustep & 0x02) ? 1 : 0);
       ms3LAT = ((p->ustep & 0x04) ? 1 : 0);
+      dbg11
       dirLAT = p->curDir ? 1 : 0;
 
       //  ENSURE SETUP TIME HERE  TODO
 
       setBiStepHiInt(motIdx);
+      dbg10
 #else
       setUniPortInt(motIdx, p->phase);
       dbg41
