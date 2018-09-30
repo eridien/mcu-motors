@@ -132,7 +132,8 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP2Interrupt(void) {
       setErrorInt(motIdxInPacket, I2C_OVERFLOW_ERROR);
     }
     else {
-      if(packetForUs) {
+      // motIdxInPacket == NUM_MOTORS for LEDs
+      if(packetForUs && motIdxInPacket < NUM_MOTORS) {
         if(!RdNotWrite) {
           // done receiving -- total length of recv is stored in first byte
           i2cRecvBytes[motIdxInPacket][0] = i2cRecvBytesPtr-1;
@@ -163,10 +164,18 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP2Interrupt(void) {
     else {
       if(!RdNotWrite) {
         // received byte (i2c write to slave)
-        if(mState[motIdxInPacket].haveCommand) {
-          // last command for this motor not handled yet by event loop
-          setErrorInt(motIdxInPacket, CMD_NOT_DONE_ERROR);
-        } else {
+        if(motIdxInPacket == NUM_MOTORS) {
+          uint8 leds = I2C_BUF_BYTE;
+          led1LAT  = !!(leds & 0xc0);
+          led2LAT  = !!(leds & 0x30);
+          led3LAT  = !!(leds & 0x0c);
+          led4LAT  = !!(leds & 0x03);
+        }
+        else if(mState[motIdxInPacket].haveCommand) {
+            // last command for this motor not handled yet by event loop
+            setErrorInt(motIdxInPacket, CMD_NOT_DONE_ERROR);
+        } 
+        else {
           if(i2cRecvBytesPtr < RECV_BUF_SIZE + 1) 
             i2cRecvBytes[motIdxInPacket][i2cRecvBytesPtr++] = I2C_BUF_BYTE;
         }

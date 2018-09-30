@@ -97,7 +97,16 @@ int main(void) {
  ANSB = 0;
  
 #ifdef U6
- ANSC = 0;
+  ANSC     = 0;
+  led1TRIS = 0;
+  led2TRIS = 0;
+  led3TRIS = 0;
+  led4TRIS = 0;
+  // leds on in beginning
+  led1LAT  = 1;
+  led2LAT  = 1;
+  led3LAT  = 1;
+  led4LAT  = 1;
 #endif
 
 #ifdef DEBUG
