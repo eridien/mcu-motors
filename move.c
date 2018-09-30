@@ -56,7 +56,7 @@ void setStep(bool closing) {
   if (clkTicks < dbgMinClkTicks) {
     dbgMinClkTicks = clkTicks;
   }
-#else /* U6 */
+#else /* U5 */
   clkTicks = CLK_TICKS_PER_SEC / ms->curSpeed; // 40 usecs/tick  
 #endif
   bool err;

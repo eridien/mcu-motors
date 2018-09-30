@@ -12,7 +12,7 @@
 
 union settingsUnion mSet[NUM_MOTORS];
 
-#ifdef U6
+#ifdef U5
 volatile uint16 *stepPort[NUM_MOTORS] = {
   &motAPORT, // tube 1
   &motBPORT, // tube 2
@@ -82,18 +82,32 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
 };
 #endif /* BM */
 
-#ifdef B3
+#ifdef B1
+volatile uint8 *stepPort[NUM_MOTORS] = {&stepPORT};
+const    uint8  stepMask[NUM_MOTORS] =  {stepMASK};
+
+volatile uint8 *resetPort[NUM_MOTORS] = {&resetPORT};
+const     uint8 resetMask[NUM_MOTORS] = {resetMASK};
+
+volatile uint8 *faultPort[NUM_MOTORS] = {&faultPORT};
+const    uint8  faultMask[NUM_MOTORS] = {faultMASK};
+
+volatile uint8 *limitPort[NUM_MOTORS] = {&limitPORT};
+const    uint8  limitMask[NUM_MOTORS] = {limitMASK};
+#endif
+
+#ifdef B4
 volatile uint16 *stepPort[NUM_MOTORS] = {&stepRPORT, &stepEPORT, &stepXPORT};
-const uint16 stepMask[NUM_MOTORS] = {stepRBIT, stepEBIT, stepXBIT};
+const    uint16 stepMask[NUM_MOTORS] = {stepRBIT, stepEBIT, stepXBIT};
 
 volatile uint16 *resetPort[NUM_MOTORS] = {&resetRPORT, &resetEPORT, &resetXPORT};
-const uint16 resetMask[NUM_MOTORS] = {resetRBIT, resetEBIT, resetXBIT};
+const    uint16 resetMask[NUM_MOTORS] = {resetRBIT, resetEBIT, resetXBIT};
 
 volatile uint16 *faultPort[NUM_MOTORS] = {&faultRPORT, &faultEPORT, &faultXPORT};
-const uint16 faultMask[NUM_MOTORS] = {faultRBIT, faultEBIT, faultXBIT};
+const    uint16 faultMask[NUM_MOTORS] = {faultRBIT, faultEBIT, faultXBIT};
 
 volatile uint16 *limitPort[NUM_MOTORS] = {&limitRPORT, 0, &limitXPORT};
-const uint16 limitMask[NUM_MOTORS] = {limitRBIT, 0, limitXBIT};
+const    uint16 limitMask[NUM_MOTORS] = {limitRBIT, 0, limitXBIT};
 #endif
 
 // globals for use in main chk loop
@@ -134,7 +148,7 @@ void motorInit() {
 //  debug1TRIS = 0; // uncomment to use dbg1, overrides faultETRIS
 #endif
 
-#ifdef B3
+#ifdef B4
   stepRTRIS = 0;
   stepRLAT = 1; // step idle is high
   stepETRIS = 0;
@@ -148,9 +162,9 @@ void motorInit() {
 
   limitRTRIS = 1; // zero means at limit switch
   limitXTRIS = 1; // zero means at limit switch
-#endif /* B3 */
+#endif /* B4 */
 
-#ifdef U6
+#ifdef U5
   motATRIS = (motATRIS & ~(0x0f << motAOFS));
   motBTRIS = (motBTRIS & ~(0x0f << motBOFS));
   motCTRIS = (motCTRIS & ~(0x0f << motCOFS));
@@ -188,7 +202,7 @@ bool haveFault() { // B1: comment out to use dbg1 or dbg2
   volatile uint8 *p = faultPort[motorIdx];
   return !(*p & faultMask[motorIdx]);
 #endif
-#ifdef B3
+#ifdef B4
   volatile uint16 *p = faultPort[motorIdx];
   
   // fault input pins for motor R (B4) and E(A4) are not working!   TODO
@@ -196,13 +210,13 @@ bool haveFault() { // B1: comment out to use dbg1 or dbg2
   
   return !(*p & faultMask[motorIdx]);
 #endif
-#ifdef U6
+#ifdef U5
   return false;
 #endif
 }
 
 bool limitSwOn() { // B1: comment out when limit sw used by dbg4
-#ifndef U6
+#ifndef U5
 #ifdef B1
   volatile uint8 *p = limitPort[motorIdx];
 #else
@@ -212,7 +226,7 @@ bool limitSwOn() { // B1: comment out when limit sw used by dbg4
     return (ms->limitSwPolarity ? (*p & limitMask[motorIdx])
             : !(*p & limitMask[motorIdx]));
   }
-#endif /* U6 */
+#endif /* U5 */
   return false;
 }
 

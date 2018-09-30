@@ -107,11 +107,11 @@ volatile uint8 motIdxInPacket;
 #ifdef B1
 void i2cInterrupt(void) {
 #endif
-#ifdef B3
+#ifdef B4
 void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
   _SSP1IF = 0;
 #endif
-#ifdef U6
+#ifdef U5
 void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP2Interrupt(void) {
   _SSP2IF = 0;
 #endif
@@ -164,14 +164,16 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP2Interrupt(void) {
     else {
       if(!RdNotWrite) {
         // received byte (i2c write to slave)
+#ifdef U5
         if(motIdxInPacket == NUM_MOTORS) {
           uint8 leds = I2C_BUF_BYTE;
           led1LAT  = !!(leds & 0xc0);
           led2LAT  = !!(leds & 0x30);
           led3LAT  = !!(leds & 0x0c);
           led4LAT  = !!(leds & 0x03);
-        }
-        else if(mState[motIdxInPacket].haveCommand) {
+        } else 
+#endif          
+        if (mState[motIdxInPacket].haveCommand) {
             // last command for this motor not handled yet by event loop
             setErrorInt(motIdxInPacket, CMD_NOT_DONE_ERROR);
         } 

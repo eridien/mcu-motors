@@ -27,7 +27,7 @@
 #define resetLAT  LATB6
 
 #define resetPORT  PORTB
-#define resetBIT   0x40
+#define resetMASK  0x40
 
 #define stepTRIS  TRISC5
 #define stepLAT   LATC5
@@ -52,9 +52,18 @@
 //#define dbg3         LATC6 // test point TP3
 //#define dbg4         LATA4 // usually lim y switch
 
+#define dbg10 
+#define dbg11 
+#define dbg20 
+#define dbg21 
+#define dbg30 
+#define dbg31 
+#define dbg40 
+#define dbg41 
+
 #endif /* B1 */
 
-#ifdef B3
+#ifdef B4
 #define I2C_WCOL  SSP1CON1bits.WCOL
 #define I2C_SSPOV SSP1CON1bits.SSPOV
 
@@ -127,7 +136,7 @@
 #define tp3LAT     _LATA2
 #define tp4LAT     _LATA3
 
-// only tp2 works in B3 ???
+// only tp2 works in B4 ???
 #define dbg10 tp1LAT = 0;
 #define dbg11 tp1LAT = 1;
 #define dbg20 tp2LAT = 0;
@@ -137,9 +146,9 @@
 #define dbg40 tp4LAT = 0;
 #define dbg41 tp4LAT = 1;
 
-#endif	/* B3 */
+#endif	/* B4 */
 
-#ifdef U6
+#ifdef U5
 #define I2C_START_BIT SSP2STATbits.S
 #define I2C_STOP_BIT  SSP2STATbits.P
 #define I2C_WCOL      SSP2CON1bits.WCOL
@@ -194,7 +203,7 @@
 #define dbg31 tp3LAT = 1;
 #define dbg40 tp4LAT = 0;
 #define dbg41 tp4LAT = 1;
-#endif /* U6 */
+#endif /* U5 */
 
 #endif	/* PINS_H */
 

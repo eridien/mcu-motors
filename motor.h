@@ -9,10 +9,10 @@
 #ifdef B1
 #define NUM_MOTORS 1
 #endif
-#ifdef B3
-#define NUM_MOTORS 3
+#ifdef B4
+#define NUM_MOTORS 4
 #endif
-#ifdef U6
+#ifdef U5
 #define NUM_MOTORS 5
 #endif
 
@@ -79,8 +79,8 @@ extern union settingsUnion mSet[NUM_MOTORS];
 extern volatile uint8 *stepPort[NUM_MOTORS];
 extern const    uint8  stepMask[NUM_MOTORS];
 
-extern volatile uint8  *resetPort[NUM_MOTORS];
-extern const    uint8   resetMask[NUM_MOTORS];
+extern volatile uint8 *resetPort[NUM_MOTORS];
+extern const    uint8  resetMask[NUM_MOTORS];
 
 extern volatile uint8 *faultPort[NUM_MOTORS];
 extern const    uint8  faultMask[NUM_MOTORS];
@@ -103,7 +103,7 @@ extern volatile uint16 *limitPort[NUM_MOTORS];
 extern const    uint16  limitMask[NUM_MOTORS];
 #endif
 
-#else /* U6 */
+#else /* U5 */
 
 extern volatile uint16 *stepPort[NUM_MOTORS];
 extern const    uint16  stepMask[NUM_MOTORS];

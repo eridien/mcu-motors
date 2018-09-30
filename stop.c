@@ -21,7 +21,7 @@ void stopStepping() {
 void resetMotor(bool all) {
 #ifdef B1
   resetLAT = 0; 
-#elif B3
+#elif B4
   resetRLAT = 0; 
   resetELAT = 0; 
   resetXLAT = 0; 

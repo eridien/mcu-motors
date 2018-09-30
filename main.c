@@ -66,12 +66,12 @@
 #pragma config BORV = V18               // Brown-out Reset Voltage bits (Brown-out Reset set to lowest voltage (1.8V))
 #pragma config MCLRE = ON               // MCLR Pin Enable bit (RA5 input pin disabled, MCLR pin enabled)
 
-#ifdef B3
+#ifdef B4
 // FICD
 #pragma config ICS = PGx2               // ICD Pin Placement Select bits (EMUC/EMUD share PGC2/PGD2)
 #endif
 
-#ifdef U6
+#ifdef U5
 #pragma config ICS = PGx1               // ICD Pin Placement Select bits (EMUC/EMUD share PGC1/PGD1)
 #endif
 
@@ -96,7 +96,7 @@ int main(void) {
  ANSA = 0;   // no analog inputs
  ANSB = 0;
  
-#ifdef U6
+#ifdef U5
   ANSC     = 0;
   led1TRIS = 0;
   led2TRIS = 0;
