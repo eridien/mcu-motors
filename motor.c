@@ -352,6 +352,8 @@ void processCommand() {
       // direction bit is 0x10
       if(firstByte & 0x10) ms->targetPos = ms->curPos + dist;
       else                 ms->targetPos = ms->curPos - dist;
+      ms->acceleration = 0;
+      ms->targetSpeed  = sv->startStopSpeed;
       moveCommand(true);
     }
   } else if (firstByte == 0x1f) {
