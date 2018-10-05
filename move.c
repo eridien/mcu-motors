@@ -42,7 +42,7 @@ void setStep(bool closing) {
     if(dist & uStepPhaseMask[ms->ustep]) {
       ms->ustep++;
     }
-  }
+  } 
   // set step timing
   switch (ms->ustep) {
     case 0: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 3); break;

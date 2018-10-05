@@ -347,6 +347,7 @@ void processCommand() {
   } else if ((firstByte & 0xe0) == 0x20) {
     // jog command - no bounds checking and doesn't need to be homed
     if (lenIs(2)) {
+      motorOn();
       uint16 dist = (((uint16) (firstByte & 0x0f) << 8) | rb[2]);
       // direction bit is 0x10
       if(firstByte & 0x10) ms->targetPos = ms->curPos + dist;

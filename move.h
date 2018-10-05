@@ -14,7 +14,7 @@ extern const uint16 uStepDist[4];
 extern const uint16 accelTable[8];
 
 void checkMotor(void);
-void moveCommand(void);
+void moveCommand(bool noRules);
 
 #endif	/* MOVE_H */
 
