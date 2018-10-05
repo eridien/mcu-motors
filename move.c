@@ -14,8 +14,6 @@ const uint16 uStepDist[4]      = {   8,    4,    2,    1};
 const uint16 accelTable[8] = 
        {4000, 8000, 16000, 24000, 32000, 40000, 50000, 60000};
 
-uint16 dbgMinClkTicks;
-
 void setStep(bool closing) {
   uint16 clkTicks;
 #ifdef BM
@@ -52,9 +50,6 @@ void setStep(bool closing) {
     case 2: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 1); break;
     case 3: clkTicks = CLK_TICKS_PER_SEC /  ms->curSpeed      ; break;
     default: clkTicks = 0; // to avoid compiler warning
-  }
-  if (clkTicks < dbgMinClkTicks) {
-    dbgMinClkTicks = clkTicks;
   }
 #else /* U5 */
   clkTicks = CLK_TICKS_PER_SEC / ms->curSpeed; // 40 usecs/tick  
@@ -191,10 +186,10 @@ void checkMotor() {
   setStep(closing);
 }
 
-void moveCommand() {
-  dbgMinClkTicks = 0xffff;
-
-  if((ms->stateByte & HOMED_BIT) == 0) {
+void moveCommand(bool noRules) {
+  ms->noBounds = noRules;
+  
+  if((ms->stateByte & HOMED_BIT) == 0 && !noRules) {
     setError(NOT_HOMED_ERROR);
     return;
   }

@@ -58,13 +58,13 @@
   changing settings when motor is busy may cause unpredictable results
 
   -- one-byte commands --
-  0001 0000  start homing
-  0001 0001  next read position is end position of homing (test pos)
-  0001 0010  soft stop, decelerates, no reset
-  0001 0011  soft stop, decelerates first, then reset
-  0001 0100  hard stop (power down motor with immediate reset)
-  0001 0101  motor on  (power up motor by removing reset)
-  0001 0110  set curpos to home pos value setting (fake homing)
+  0001 0000  home       start homing
+  0001 0001             next read position is end position of homing (test pos)
+  0001 0010  stop       soft stop, decelerates, no reset
+  0001 0011  stopRst,   decelerates and then resets
+  0001 0100  reset      hard stop (power down motor with immediate reset)
+  0001 0101  motorOn    (power up motor by removing reset)
+  0001 0110  fakeHome   set curpos to home pos value setting and turn motor on (fake homing)
 
   -- 2-byte move command --
   1aaa aaaa     top 7 bits of move addr
@@ -81,6 +81,10 @@
     ssss ssss  bottom 8 bits
     0aaa aaaa  top 7 bits of move addr,
     aaaa aaaa  bottom 8 bits
+
+  -- 2-byte jog command  (no bounds checking, does not need to be homed)
+  001d ssss    d: direction  
+    ssss ssss  s: number of steps
 
   -- 3-byte to 21-byte settings command --
   write may be short, only setting first entries
@@ -117,7 +121,7 @@
     1) vccc eboh  state byte
         v: version (1-bit)
       ccc: error code (see below) (code only set on motor causing error)
-        e: error bit              (bit set on all motors on every error)
+        e: error bit              (bit set on all motors in mcu on every error)
         b: busy     (homing, moving, or stopping)
         o: motor on (not in reset)
         h: homed    (motor has been homed since last reset)

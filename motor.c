@@ -262,7 +262,7 @@ void checkAll() {
     if (ms->curDir) {
       uint8 stepDist = uStepDist[ms->ustep];
       ms->curPos += stepDist;
-      ms->phase += stepDist;
+      ms->phase  += stepDist;
     } else {
       uint8 stepDist = uStepDist[ms->ustep];
       ms->curPos -= stepDist;
@@ -277,7 +277,7 @@ void checkAll() {
       chkStopping();
     } else {
       // normal moving
-      if (ms->curPos < 0 || ms->curPos >= sv->maxPos) {
+      if ((ms->curPos < 0 || ms->curPos >= sv->maxPos) && !ms->noBounds) {
         setError(BOUNDS_ERROR);
         return;
       }
@@ -322,7 +322,7 @@ void processCommand() {
       // move command
       ms->targetSpeed = sv->speed;
       ms->targetPos = ((int16) (firstByte & 0x7f) << 8) | rb[2];
-      moveCommand();
+      moveCommand(false);
     }
   } else if ((firstByte & 0xc0) == 0x40) {
     // speed-move command
@@ -331,7 +331,7 @@ void processCommand() {
       sv->speed = (uint16) (firstByte & 0x3f) << 8;
       ms->targetSpeed = sv->speed;
       ms->targetPos = ((int16) rb[2] << 8) | rb[3];
-      moveCommand();
+      moveCommand(false);
     }
   } else if ((firstByte & 0xf8) == 0x08) {
     // accel-speed-move command
@@ -342,7 +342,16 @@ void processCommand() {
       ms->acceleration = accelTable[sv->accelIdx];
       ms->targetSpeed = sv->speed;
       ms->targetPos = ((int16) rb[4] << 8) | rb[5];
-      moveCommand();
+      moveCommand(false);
+    }
+  } else if ((firstByte & 0xe0) == 0x20) {
+    // jog command - no bounds checking and doesn't need to be homed
+    if (lenIs(2)) {
+      uint16 dist = (((uint16) (firstByte & 0x0f) << 8) | rb[2]);
+      // direction bit is 0x10
+      if(firstByte & 0x10) ms->targetPos = ms->curPos + dist;
+      else                 ms->targetPos = ms->curPos - dist;
+      moveCommand(true);
     }
   } else if (firstByte == 0x1f) {
     // load settings command

@@ -42,6 +42,7 @@ struct motorState {
   int16  targetPos;
   uint16 targetSpeed;
   bool   targetDir;
+  bool   noBounds;
   int16  curPos;
   uint16 curSpeed;
   bool   curDir;
