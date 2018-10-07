@@ -52,7 +52,7 @@ struct motorSettings {
   uint16 homeOfs;
   uint16 homePos;    // value to set cur pos after homing
   uint16 limitSwCtl; // codes starting and switch direction and reversing
-  uint16 mcuClock;   // period of clock in usecs  (applies to all motors)
+  uint16 mcuClock;   // period of clock in usecs  (applies to all motors in mcu)
 };
 
 #define mcuClockSettingIdx 9

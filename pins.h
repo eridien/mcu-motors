@@ -42,24 +42,24 @@
 #define limitPORT PORTA
 #define limitMASK 0x10
 
-#define debug1TRIS   TRISC4
-//#define debug2TRIS   TRISC3
-//#define debug3TRIS   TRISC6
-//#define debug4TRIS   TRISA4
-//
-#define dbg1         LATC4 // test point TP1
-//#define dbg2         LATC3 // test point TP2
-//#define dbg3         LATC6 // test point TP3
-//#define dbg4         LATA4 // usually lim y switch
+#define tp1TRIS TRISC4
+#define tp2TRIS TRISC3
+#define tp3TRIS TRISC6
+#define tp4TRIS TRISA4
 
-#define dbg10 
-#define dbg11 
-#define dbg20 
-#define dbg21 
-#define dbg30 
-#define dbg31 
-#define dbg40 
-#define dbg41 
+#define tp1LAT  LATC4
+#define tp2LAT  LATC3
+#define tp3LAT  LATC6
+#define tp4LAT  LATA4
+
+#define dbg10   tp1LAT = 0;
+#define dbg11   tp1LAT = 1;
+#define dbg20   tp2LAT = 0;
+#define dbg21   tp2LAT = 1;
+#define dbg30   tp3LAT = 0;
+#define dbg31   tp3LAT = 1;
+#define dbg40   tp4LAT = 0;
+#define dbg41   tp4LAT = 1;
 
 #endif /* B1 */
 

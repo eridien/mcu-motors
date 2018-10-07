@@ -45,14 +45,14 @@ void setStep(bool closing) {
   } 
   // set step timing
   switch (ms->ustep) {
-    case 0: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 3); break;
-    case 1: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 2); break;
-    case 2: clkTicks = CLK_TICKS_PER_SEC / (ms->curSpeed >> 1); break;
-    case 3: clkTicks = CLK_TICKS_PER_SEC /  ms->curSpeed      ; break;
+    case 0:  clkTicks = clkTicksPerSec / (ms->curSpeed >> 3); break;
+    case 1:  clkTicks = clkTicksPerSec / (ms->curSpeed >> 2); break;
+    case 2:  clkTicks = clkTicksPerSec / (ms->curSpeed >> 1); break;
+    case 3:  clkTicks = clkTicksPerSec /  ms->curSpeed      ; break;
     default: clkTicks = 0; // to avoid compiler warning
   }
 #else /* U5 */
-  clkTicks = CLK_TICKS_PER_SEC / ms->curSpeed; // 40 usecs/tick  
+  clkTicks = clkTicksPerSec / ms->curSpeed; // 40 usecs/tick  
 #endif
   bool err;
   disableAllInts;
@@ -72,7 +72,7 @@ void setStep(bool closing) {
 #endif
     ms->stepPending = true;
   }
-  dbg40
+  dbg10
 }
 
 void checkMotor() {

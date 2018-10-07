@@ -61,7 +61,7 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
   40, // home offset distance: 1 mm
   0, // home pos value, set cur pos to this after homing
   0, // limit sw control (0 is normal)
-  40, // period of clock in usecs  (applies to all motors)
+  30, // period of clock in usecs  (applies to all motors)
 };
 
 #else
@@ -78,7 +78,7 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
   40, // home offset distance: 1 mm
   0, // home pos value, set cur pos to this after homing
   0, // limit sw control (0 is normal)
-  40, // period of clock in usecs  (applies to all motors)
+  20, // period of clock in usecs  (applies to all motors)
 };
 #endif /* BM */
 
@@ -195,6 +195,7 @@ void motorInit() {
     msp->homeEndSide = lsc & 0x03;
   }
   setTicksSec();
+  clkTicksPerSec = ((uint16) (1000000 / mSet[0].val.mcuClock));
 }
 
 bool haveFault() { // B1: comment out to use dbg1 or dbg2
@@ -243,16 +244,15 @@ void setMotorSettings(uint8 numWordsRecvd) {
   ms->acceleration = accelTable[sv->accelIdx];
   ms->limitSwPolarity = (sv->limitSwCtl >> 2) & 0x01;
   ms->homeEndSide = sv->limitSwCtl & 0x03;
-  setTicksSec();
+  setTicksSec();  
+  clkTicksPerSec = ((uint16) (1000000 / mSet[0].val.mcuClock));
 }
 
 // from event loop
 
 void checkAll() {
   if (haveFault()) {
-    dbg21
     setError(MOTOR_FAULT_ERROR);
-    dbg20
     return;
   }
   if (ms->stepPending) {
@@ -396,6 +396,7 @@ void clockInterrupt(void) {
 void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void) {
   _T1IF = 0;
 #endif
+  dbg21
   timeTicks++;
   int motIdx;
   for (motIdx = 0; motIdx < NUM_MOTORS; motIdx++) {
@@ -412,6 +413,7 @@ void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void) {
       ms3LAT = ((p->ustep & 0x04) ? 1 : 0);
       dirLAT =   p->curDir ? 1 : 0;
       setBiStepHiInt(motIdx);
+      dbg11
 #else
       setUniPortInt(motIdx, p->phase);
 #endif
@@ -420,4 +422,5 @@ void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void) {
       p->stepped = true;
     }
   }
+  dbg20
 }

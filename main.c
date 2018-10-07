@@ -95,6 +95,7 @@ int main(void) {
  _RCDIV = 0; // switch instruction clock from 4 MHz to 8 MHz
  ANSA = 0;   // no analog inputs
  ANSB = 0;
+ _NSTDIS = 1;  // nested interrupts disabled
  
 #ifdef U5
   ANSC     = 0;
@@ -108,7 +109,8 @@ int main(void) {
   led3LAT  = 1;
   led4LAT  = 1;
 #endif
-
+#endif
+  
 #ifdef DEBUG
  tp1TRIS = 0;
  tp2TRIS = 0;
@@ -123,9 +125,6 @@ int main(void) {
  tp2TRIS = 1;
  tp3TRIS = 1;
  tp4TRIS = 1; 
-#endif
- 
- _NSTDIS = 1;  // nested interrupts disabled
 #endif
 
   
