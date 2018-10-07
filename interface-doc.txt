@@ -8,10 +8,9 @@
   The LEDS also have their own slave addr.
 
   At the time of this writing the controller code can be built for:
-      One bipolar motor    (define BM and B1) (PIC16F15345)
+      One bipolar motor    (define BM and B1) (PIC16F15375)
       Four bipolar motors  (define BM and B4) (PIC24F16KM202)
       Five unipolar motors (define U5)        (PIC24F16KM204)
-  The PIC models can be different.
 
   The motors have code letters (name) used in many places
   // B1
@@ -38,17 +37,15 @@
     for bipolar: (typical 200 step motor and 20-tooth GT2 pulley)
         steps/rev:        1600
         dist/rev:           40 mm
-        max step count: 32,767
-        max distance:      800 mm
+        max distance:      800 mm  (max step count: 32,767)
     for unipolar:  (geared 28BYJ-48 motor and 20-tooth GT2 pulley)
         steps/rev:        2048
         dist/rev:           40 mm
-        max step count: 32,767
-        max distance:      625 mm
+        max distance:      625 mm  ((max step count: 32,767)
 
   all speed is in steps/sec (except speed-move cmd)
-  acceleration is 0..7: none, 8000, 16000, 24000, 32000, 40000, 50000, 60000
-  for 1/40 mm steps: none, 200, 400, 600, 800, 1000, 1250, 1500 mm/sec/sec
+  accel is 0..7: none, 4000, 8000, 20000, 40000, 80000, 200000, 400000 steps/sec/sec
+  for 1/40 mm steps: none, 100, 200, 500, 1000, 2000, 5000, 10000 mm/sec/sec
   
   Any I2C write to MCU is a command.  Any read returns a 4-byte status.
   all commands are started immediately even when motor is busy (moving, homing, etc.)
@@ -130,7 +127,7 @@
     4) cccc cccc  8-bit cksum, sum of first 3 bytes
 
   Error codes for state byte above 
-    MOTOR_FAULT_ERROR   0x10  over-heated or over-current driver chip
+    MOTOR_FAULT_ERROR   0x10  missing, over-heated, or over-current driver chip
     I2C_OVERFLOW_ERROR  0x20  i2c byte received before last taken
     CMD_DATA_ERROR      0x30  command format incorrect
     CMD_NOT_DONE_ERROR  0x40  new command arrived before old cmd finished

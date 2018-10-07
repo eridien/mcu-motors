@@ -145,7 +145,6 @@ void motorInit() {
   stepTRIS = 0;
   faultTRIS = 1; // zero means motor fault
   limitTRIS = 1; // zero means at limit switch  // may be used by dbg4
-//  debug1TRIS = 0; // uncomment to use dbg1, overrides faultETRIS
 #endif
 
 #ifdef B4
@@ -198,7 +197,7 @@ void motorInit() {
   clkTicksPerSec = ((uint16) (1000000 / mSet[0].val.mcuClock));
 }
 
-bool haveFault() { // B1: comment out to use dbg1 or dbg2
+bool haveFault() {
 #ifdef B1
   volatile uint8 *p = faultPort[motorIdx];
   return !(*p & faultMask[motorIdx]);
@@ -396,7 +395,7 @@ void clockInterrupt(void) {
 void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void) {
   _T1IF = 0;
 #endif
-  dbg21
+//  dbg21
   timeTicks++;
   int motIdx;
   for (motIdx = 0; motIdx < NUM_MOTORS; motIdx++) {
@@ -413,7 +412,7 @@ void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void) {
       ms3LAT = ((p->ustep & 0x04) ? 1 : 0);
       dirLAT =   p->curDir ? 1 : 0;
       setBiStepHiInt(motIdx);
-      dbg11
+      dbg21
 #else
       setUniPortInt(motIdx, p->phase);
 #endif
@@ -422,5 +421,5 @@ void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void) {
       p->stepped = true;
     }
   }
-  dbg20
+//  dbg20
 }

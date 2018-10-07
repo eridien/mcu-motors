@@ -11,8 +11,11 @@
 
 const uint16 uStepPhaseMask[4] = {0x07, 0x03, 0x01, 0x00};
 const uint16 uStepDist[4]      = {   8,    4,    2,    1};
-const uint16 accelTable[8] = 
-       {4000, 8000, 16000, 24000, 32000, 40000, 50000, 60000};
+
+//  accel is 0..7: none, 4000, 8000, 20000, 40000, 80000, 200000, 400000 steps/sec/sec
+//  for 1/40 mm steps: none, 100, 200, 500, 1000, 2000, 5000, 10000 mm/sec/sec
+const uint16 accelTable[8] = // (steps/sec/sec accel) / 8
+       {0, 500, 1000, 2500, 5000, 10000, 25000, 50000};
 
 void setStep(bool closing) {
   uint16 clkTicks;
@@ -67,12 +70,13 @@ void setStep(bool closing) {
   } else {
 #ifdef BM
     setBiStepLo();
+    dbg20;
 #else
     ms->phase = (ms->phase + (ms->curDir ? 1 : -1)) & 0x03;
 #endif
     ms->stepPending = true;
   }
-  dbg10
+  dbg20
 }
 
 void checkMotor() {
@@ -162,7 +166,7 @@ void checkMotor() {
   }
   if(decelerate) {
     // accel/step = accel/sec / steps/sec
-    uint16 deltaSpeed = (ms->acceleration / ms->curSpeed);
+    uint16 deltaSpeed = (ms->acceleration / ms->curSpeed)*8; // accel val is 1/8
     if(deltaSpeed == 0) deltaSpeed = 1;
     if(deltaSpeed < ms->curSpeed) {
       ms->curSpeed -= deltaSpeed;
@@ -173,7 +177,7 @@ void checkMotor() {
   }
   else if (accelerate) {
     // accel/step = accel/sec / steps/sec
-    uint16 deltaSpeed = (ms->acceleration / ms->curSpeed);
+    uint16 deltaSpeed = (ms->acceleration / ms->curSpeed)*8;
     if(deltaSpeed == 0) deltaSpeed = 1;
     ms->curSpeed += deltaSpeed;
     if(ms->curSpeed > ms->targetSpeed) {

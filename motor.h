@@ -10,10 +10,10 @@
 #define NUM_MOTORS 1
 #endif
 #ifdef B4
-#define NUM_MOTORS 4
+#define NUM_MOTORS 3
 #endif
 #ifdef U5
-#define NUM_MOTORS 5
+#define NUM_MOTORS 6
 #endif
 
 // global for use in main chk loop
