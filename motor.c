@@ -52,33 +52,32 @@ uint16 motPhaseValue[NUM_MOTORS][4] = {// motor, phase
 // assumes 1/40 mm per step
 // default is same for all motors
 const uint16 settingsInit[NUM_SETTING_WORDS] = {
-  5, // acceleration rate index,  0 is no acceleration
+  4,    // acceleration index,  0 is no acceleration (1000 mm/sec/sec))
   4000, // default speed is 100 mm
-  1200, // start/stop speed limit (30 mm/sec)
-  16000, // max pos is 400 mm
+  1200, // jerk (start/stop speed limit) (30 mm/sec)
+ 32000, // max pos is 800 mm (debug))
   4000, // homing speed (100 mm/sec)
-  60, // homing back-up ms->speed (1.5 mm/sec)
-  40, // home offset distance: 1 mm
-  0, // home pos value, set cur pos to this after homing
-  0, // limit sw control (0 is normal)
-  30, // period of clock in usecs  (applies to all motors)
+  60,   // homing back-up ms->speed (1.5 mm/sec)
+  40,   // home offset distance: 1 mm
+  0,    // home pos value, set cur pos to this after homing
+  0,    // limit sw control (0 is normal)
+  30,   // period of clock in usecs  (applies to all motors)
 };
 
 #else
 
-// assumes 1/50 mm per step
 // default is same for all motors
 const uint16 settingsInit[NUM_SETTING_WORDS] = {
-  5, // acceleration rate index,  0 is no acceleration
+  4,    // acceleration index,  0 is no acceleration (1000 mm/sec/sec))
   4000, // default speed is 100 mm
-  1200, // start/stop speed limit (30 mm/sec)
-  16000, // max pos is 400 mm
+  1200, // jerk (start/stop speed limit) (30 mm/sec)
+ 32000, // max pos is 800 mm (debug))
   4000, // homing speed (100 mm/sec)
-  60, // homing back-up ms->speed (1.5 mm/sec)
-  40, // home offset distance: 1 mm
-  0, // home pos value, set cur pos to this after homing
-  0, // limit sw control (0 is normal)
-  20, // period of clock in usecs  (applies to all motors)
+  60,   // homing back-up ms->speed (1.5 mm/sec)
+  40,   // home offset distance: 1 mm
+  0,    // home pos value, set cur pos to this after homing
+  0,    // limit sw control (0 is normal)
+  20,   // period of clock in usecs  (applies to all motors)
 };
 #endif /* BM */
 
@@ -352,7 +351,7 @@ void processCommand() {
       if(firstByte & 0x10) ms->targetPos = ms->curPos + dist;
       else                 ms->targetPos = ms->curPos - dist;
       ms->acceleration = 0;
-      ms->targetSpeed  = sv->startStopSpeed;
+      ms->targetSpeed  = sv->jerk;
       moveCommand(true);
     }
   } else if (firstByte == 0x1f) {

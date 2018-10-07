@@ -59,7 +59,7 @@ void softStopCommand(bool resetAfter) {
     disableAllInts;
     ms->lastStepTicks = timeTicks;
     enableAllInts;
-    ms->curSpeed = sv->startStopSpeed;
+    ms->curSpeed = sv->jerk;
     setDacToSpeed();
   }
   setStateBit(BUSY_BIT, 1);
@@ -67,7 +67,7 @@ void softStopCommand(bool resetAfter) {
 }
 
 void chkStopping() {
-  if(ms->curSpeed <= sv->startStopSpeed || sv->accelIdx == 0) {
+  if(ms->curSpeed <= sv->jerk || sv->accelIdx == 0) {
     stopStepping();
     if(ms->resetAfterSoftStop) {
       // reset only this motor

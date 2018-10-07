@@ -88,7 +88,7 @@
   0001 1111  load settings, all are two-byte, big-endian, 16-bit values
     acceleration rate table index 0..7, 0 is off
     default speed
-    start/stop speed (above this, acceleration is needed)
+    jerk (above this speed, acceleration is needed)
     max pos     (min pos is always zero))
     homing speed
     homing back-up speed

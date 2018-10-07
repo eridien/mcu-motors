@@ -86,7 +86,7 @@ void checkMotor() {
   
   if(ms->homing) {
     if (sv->accelIdx == 0 || 
-        ms->curSpeed <= sv->startStopSpeed) {
+        ms->curSpeed <= sv->jerk) {
       ms->curSpeed = ms->targetSpeed;
       ms->curDir = ms->targetDir;
     }
@@ -123,7 +123,7 @@ void checkMotor() {
       }
       else {
         // using acceleration
-        if (ms->curSpeed <= sv->startStopSpeed) {
+        if (ms->curSpeed <= sv->jerk) {
           // going slower than accel threshold
           
           if(ms->curPos == ms->targetPos) {
@@ -166,18 +166,26 @@ void checkMotor() {
   }
   if(decelerate) {
     // accel/step = accel/sec / steps/sec
-    uint16 deltaSpeed = (ms->acceleration / ms->curSpeed)*8; // accel val is 1/8
+#ifdef B1
+    uint16 deltaSpeed = ((uint24) ms->acceleration * 8) / ms->curSpeed; // accel val is 1/8
+#else
+    uint16 deltaSpeed = ((uint32) ms->acceleration * 8) / ms->curSpeed;
+#endif
     if(deltaSpeed == 0) deltaSpeed = 1;
     if(deltaSpeed < ms->curSpeed) {
       ms->curSpeed -= deltaSpeed;
     } 
     else {
-      ms->curSpeed = sv->startStopSpeed;
+      ms->curSpeed = sv->jerk;
     }
   }
   else if (accelerate) {
     // accel/step = accel/sec / steps/sec
-    uint16 deltaSpeed = (ms->acceleration / ms->curSpeed)*8;
+#ifdef B1
+    uint16 deltaSpeed = ((uint24) ms->acceleration * 8) / ms->curSpeed; // accel val is 1/8
+#else
+    uint16 deltaSpeed = ((uint32) ms->acceleration * 8) / ms->curSpeed;
+#endif
     if(deltaSpeed == 0) deltaSpeed = 1;
     ms->curSpeed += deltaSpeed;
     if(ms->curSpeed > ms->targetSpeed) {
@@ -205,7 +213,7 @@ void moveCommand(bool noRules) {
     disableAllInts;
     ms->lastStepTicks = timeTicks;
     enableAllInts;
-    ms->curSpeed = sv->startStopSpeed;
+    ms->curSpeed = sv->jerk;
     ms->curDir   = ms->targetDir;
     setDacToSpeed();
   }

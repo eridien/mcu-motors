@@ -45,7 +45,7 @@ extern uint8                   mm; // motor mask (0xf0 or 0x0f or step bit)
 struct motorSettings {
   uint16 accelIdx;
   uint16 speed;
-  uint16 startStopSpeed;
+  uint16 jerk;
   uint16 maxPos;
   uint16 homingSpeed;
   uint16 homingBackUpSpeed;

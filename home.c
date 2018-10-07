@@ -63,7 +63,7 @@ void homeCommand(bool start) {
     disableAllInts;
     ms->lastStepTicks = timeTicks;
     enableAllInts;
-    ms->curSpeed = sv->startStopSpeed;
+    ms->curSpeed = sv->jerk;
     setDacToSpeed();
   }
 #ifdef BM
