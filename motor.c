@@ -67,17 +67,18 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
 #else
 
 // default is same for all motors
+// assumes 1/200 mm per step
 const uint16 settingsInit[NUM_SETTING_WORDS] = {
-  4,    // acceleration index,  0 is no acceleration (1000 mm/sec/sec))
-  4000, // default speed is 100 mm
-  1200, // jerk (start/stop speed limit) (30 mm/sec)
- 32000, // max pos is 800 mm (debug))
-  4000, // homing speed (100 mm/sec)
+     4, // acceleration index,  0 is no acceleration
+   400, // default speed is 2 mm/sec
+   200, // jerk (start/stop speed limit) (4 mm/sec)
+ 32767, // max pos is 600 mm (debug))
+   400, // homing speed (8 mm/sec)
   60,   // homing back-up ms->speed (1.5 mm/sec)
   40,   // home offset distance: 1 mm
   0,    // home pos value, set cur pos to this after homing
   0,    // limit sw control (0 is normal)
-  20,   // period of clock in usecs  (applies to all motors)
+  30,   // period of clock in usecs  (applies to all motors)
 };
 #endif /* BM */
 
@@ -394,7 +395,7 @@ void clockInterrupt(void) {
 void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void) {
   _T1IF = 0;
 #endif
-//  dbg21
+  dbg11
   timeTicks++;
   int motIdx;
   for (motIdx = 0; motIdx < NUM_MOTORS; motIdx++) {
@@ -411,14 +412,14 @@ void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void) {
       ms3LAT = ((p->ustep & 0x04) ? 1 : 0);
       dirLAT =   p->curDir ? 1 : 0;
       setBiStepHiInt(motIdx);
-      dbg21
 #else
       setUniPortInt(motIdx, p->phase);
 #endif
       p->stepPending = false;
       p->lastStepTicks = timeTicks;
       p->stepped = true;
+      dbg21
     }
   }
-//  dbg20
+  dbg10
 }

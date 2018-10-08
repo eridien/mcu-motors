@@ -36,9 +36,6 @@ uint16 calcDist(uint16 accel, uint16 speed) {
   if(speed >= 0x8000) speed = 0x7fff;
   uint16 idx = (accel << 8) | (speed >> 7);
   uint16 val = disttable[idx];
-  if(val > 16000) {
-    volatile bool x = 0;
-  }
   return val;
 }
 

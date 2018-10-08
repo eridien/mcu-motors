@@ -33,16 +33,23 @@
   For bipolar it is a 1/8 micro-step and for unipolar it is one of four phases.
 
   If using a 20-tooth GT2 pulley, then one step is 1/40 mm for bipolar
-  and 1/50 mm for unipolar motor (28BYJ-48)
+  and 1/400 mm for unipolar motor (28BYJ-48)
+
     for bipolar: (typical 200 step motor and 20-tooth GT2 pulley)
         steps/rev:        1600
         dist/rev:           40 mm
+        dist/step         1/40 mm
         max distance:      800 mm  (max step count: 32,767)
-    for unipolar:  (geared 28BYJ-48 motor and 20-tooth GT2 pulley)
-        steps/rev:        2048
-        dist/rev:           40 mm
-        max distance:      625 mm  ((max step count: 32,767)
 
+    for unipolar:  (geared 28BYJ-48 motor and 20-tooth GT2 pulley)
+        steps/rev:       16384
+        dist/rev:           40 mm
+        dist/step        1/400 mm
+        max distance:       80 mm  ((max step count: 32,767)
+        fastest            800 steps/sec (2 secs/rev)
+
+  pos is 1 step per unit in bipolar and 10 steps per unit in unipolar
+  note that unipolar only has the factor of 10 in distance units, not speed or accel
   all speed is in steps/sec (except speed-move cmd)
   accel is 0..7: none, 4000, 8000, 20000, 40000, 80000, 200000, 400000 steps/sec/sec
   for 1/40 mm steps: none, 100, 200, 500, 1000, 2000, 5000, 10000 mm/sec/sec
@@ -69,14 +76,14 @@
 
   -- 3-byte speed-move command --
   01ss ssss     set speed setting to value s times 256
-    0aaa aaaa   top 7 bits of move addr,
+    0aaa aaaa   top 7 bits of target position,
     aaaa aaaa   bottom 8 bits
 
   -- 5-byte accel-speed-move command --  
   0000 1ccc    set acceleration idx setting
     ssss ssss  top 8 bits of speed,
     ssss ssss  bottom 8 bits
-    0aaa aaaa  top 7 bits of move addr,
+    0aaa aaaa  top 7 bits of target position,
     aaaa aaaa  bottom 8 bits
 
   -- 2-byte jog command  (no bounds checking, does not need to be homed)
@@ -89,7 +96,7 @@
     acceleration rate table index 0..7, 0 is off
     default speed
     jerk (above this speed, acceleration is needed)
-    max pos     (min pos is always zero))
+    max pos (min pos is always zero))
     homing speed
     homing back-up speed
     home offset distance (final home distance from switch)

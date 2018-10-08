@@ -59,7 +59,7 @@ void softStopCommand(bool resetAfter) {
     disableAllInts;
     ms->lastStepTicks = timeTicks;
     enableAllInts;
-    ms->curSpeed = sv->jerk;
+    ms->curSpeed = sv->jerk; // triggers shutdown code
     setDacToSpeed();
   }
   setStateBit(BUSY_BIT, 1);

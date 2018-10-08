@@ -17,6 +17,7 @@ uint16 clkTicksPerSec;
 void clkInit(void) {
   uint16 clkUsec =  settingsInit[mcuClockSettingIdx];
 #ifdef B1
+  // timer 0
   T0ASYNC             =  0;              // sync clock
   T016BIT             =  0;              // 8-bit counter
   T0CON1bits.T0CS     =  3;              // src clk is HFINTOSC (32 Mhz)
@@ -27,10 +28,11 @@ void clkInit(void) {
   T0EN                =  1;              // enable timer0
   TMR0IE              =  1;              // enable timer int
 #else
+  // timer 0
   _TSYNC              =  0;              // sync clock
   _TCS                =  0;              // Clock Source Internal clock (FOSC/2)
   _TCKPS              =  0;              // prescaler  is 1:1 (0.25 usecs)
-  PR1                 =  (16*clkUsec)-1; // wraps at ths count
+  PR1                 =  (4*clkUsec)-1; // wraps at ths count
   _T1IF               =  0;              // int flag
   _TON                =  1;              // enable timer0
   _T1IE               =  1;              // enable timer int
