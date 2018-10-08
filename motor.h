@@ -36,10 +36,11 @@ extern uint8                   mm; // motor mask (0xf0 or 0x0f or step bit)
 #define setResetHi()       *resetPort[motorIdx] |=  resetMask[motorIdx]
 
 #define clrUniPort()       (*mp = (*mp & ~mm));
-#define setUniPort(_phase) (*mp = (*mp & ~mm) | motPhaseValue[motorIdx][_phase]);
+#define setUniPort(_phase) (*mp = (*mp & ~mm) |                          \
+                            motPhaseValue[motorIdx][_phase & 0x03]);
 #define setUniPortInt(_motIdx, _phase)                                   \
   (*stepPort[_motIdx] = (*stepPort[_motIdx] & ~stepMask[_motIdx]) |      \
-    motPhaseValue[_motIdx][_phase]);
+    motPhaseValue[_motIdx][_phase & 0x03]);
 
 // constants loadable from command (all are 16 bits))
 struct motorSettings {

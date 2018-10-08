@@ -39,7 +39,7 @@ extern volatile int dummy;
 
 struct motorState {
   uint8  stateByte;
-  int16  targetPos; // steps for bipolar, 10x steps for unipolar
+  int16  targetPos;
   uint16 targetSpeed;
   bool   targetDir;
   bool   noBounds;

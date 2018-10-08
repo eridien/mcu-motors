@@ -61,24 +61,24 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
   40,   // home offset distance: 1 mm
   0,    // home pos value, set cur pos to this after homing
   0,    // limit sw control (0 is normal)
-  30,   // period of clock in usecs  (applies to all motors)
+  30,   // period of clock in usecs  (applies to all motors in mcu)
 };
 
 #else
 
 // default is same for all motors
-// assumes 1/200 mm per step
+// assumes 1/50 mm per step
 const uint16 settingsInit[NUM_SETTING_WORDS] = {
      4, // acceleration index,  0 is no acceleration
-   400, // default speed is 2 mm/sec
+   400, // default speed is 1 mm/sec (2mm/sec is fastest motor can handle)
    200, // jerk (start/stop speed limit) (4 mm/sec)
  32767, // max pos is 600 mm (debug))
    400, // homing speed (8 mm/sec)
-  60,   // homing back-up ms->speed (1.5 mm/sec)
-  40,   // home offset distance: 1 mm
-  0,    // home pos value, set cur pos to this after homing
-  0,    // limit sw control (0 is normal)
-  30,   // period of clock in usecs  (applies to all motors)
+    60, // homing back-up ms->speed (1.5 mm/sec)
+    40, // home offset distance: 1 mm
+     0, // home pos value, set cur pos to this after homing
+     0, // limit sw control (0 is normal)
+    30, // period of clock in usecs  (applies to all motors in mcu)
 };
 #endif /* BM */
 
@@ -258,16 +258,19 @@ void checkAll() {
     return;
   }
   if (ms->stepped) {
+    ms->stepped = false;
+#ifdef BM
+    uint8 stepDist = uStepDist[ms->ustep];
     if (ms->curDir) {
-      uint8 stepDist = uStepDist[ms->ustep];
       ms->curPos += stepDist;
       ms->phase  += stepDist;
     } else {
-      uint8 stepDist = uStepDist[ms->ustep];
       ms->curPos -= stepDist;
       ms->phase -= stepDist;
     }
-    ms->stepped = false;
+#else
+    ms->curPos += ((ms->curDir) ? 1 : -1);
+#endif
   }
   if ((ms->stateByte & BUSY_BIT) && !haveError()) {
     if (ms->homing) {

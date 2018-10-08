@@ -45,11 +45,9 @@
         steps/rev:       16384
         dist/rev:           40 mm
         dist/step        1/400 mm
-        max distance:       80 mm  ((max step count: 32,767)
-        fastest            800 steps/sec (2 secs/rev)
+        max distance:       80 mm  ((max step count: 32,767, i.e. 2 revolutions)
+        fastest            800 steps/sec (2.5 secs/rev)
 
-  pos is 1 step per unit in bipolar and 10 steps per unit in unipolar
-  note that unipolar only has the factor of 10 in distance units, not speed or accel
   all speed is in steps/sec (except speed-move cmd)
   accel is 0..7: none, 4000, 8000, 20000, 40000, 80000, 200000, 400000 steps/sec/sec
   for 1/40 mm steps: none, 100, 200, 500, 1000, 2000, 5000, 10000 mm/sec/sec

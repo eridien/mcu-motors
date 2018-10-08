@@ -55,7 +55,7 @@ void setStep(bool closing) {
     default: clkTicks = 0; // to avoid compiler warning
   }
 #else /* U5 */
-  clkTicks = clkTicksPerSec / ms->curSpeed; // 30 usecs/tick  
+  clkTicks = clkTicksPerSec / ms->curSpeed;
 #endif
   bool err;
   disableAllInts;
@@ -71,11 +71,11 @@ void setStep(bool closing) {
 #ifdef BM
     setBiStepLo();
 #else
-    ms->phase = (ms->phase + (ms->curDir ? 1 : -1)) & 0x03;
+    ms->phase += (ms->curDir ? 1 : -1);
 #endif
     ms->stepPending = true;
     dbg20;
- }
+  }
 }
 
 void checkMotor() {
