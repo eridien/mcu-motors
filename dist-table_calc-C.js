@@ -6,14 +6,13 @@
 fs = require('fs');
 
 // js utility to calculate deceleration distance table
-// and prepare data for the C file for inclusion in the mcu-motors mcu code
+// and prepare data for the C file for inclusion in dist-table.c
 
 // table is 8 (accel) by 256 (speed), 2048 words
 // entry is dist of decel in 1/8 steps
 
-// accel steps/sec/sec (assuming 40 steps/mm): 
-//     1500, 1250, 1000, 800, 600, 400, 200, 0(off)
-const accelTab = [0, 8000, 16000, 24000, 32000, 40000, 50000, 60000];
+// for 1/40 mm steps: none, 100, 200, 500, 1000, 2000, 5000, 10000 mm/sec/sec
+const accelTab = [0, 4000, 8000, 20000, 40000, 80000, 200000, 400000];
 
 // speed resolution of 3.2 mm/sec (128/40)  (assuming 40 steps/mm)
 // 256 speed values, 128 delta, (6.4 to 819.2 mm/sec)

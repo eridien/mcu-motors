@@ -311,7 +311,7 @@ bool lenIs(uint8 expected) {
 }
 
 void processCommand() {
-  volatile uint8 *rb = ((volatile uint8 *) & i2cRecvBytes[motorIdx]);
+  volatile uint8 *rb = ((volatile uint8 *) i2cRecvBytes[motorIdx]);
   numBytesRecvd = rb[0];
   uint8 firstByte = rb[1];
 
