@@ -29,11 +29,12 @@
   // not really a motor
   { name: 'L', i2cAddr: 0x1d, mcu:U5, descr: 'Leds' },
 
-  The MCU controller has a specific meaning for a step.
+  The MCU controller has a specific different meaning for a step.
   For bipolar it is a 1/8 micro-step and for unipolar it is one of four phases.
+  This makes bipolar numbers close to unipolar and lets things fit in 16 bits.
 
   If using a 20-tooth GT2 pulley, then one step is 1/40 mm for bipolar
-  and 1/400 mm for unipolar motor (28BYJ-48)
+  and 1/50 mm for unipolar motor (28BYJ-48)
 
     for bipolar: (typical 200 step motor and 20-tooth GT2 pulley)
         steps/rev:        1600
@@ -42,11 +43,11 @@
         max distance:      800 mm  (max step count: 32,767)
 
     for unipolar:  (geared 28BYJ-48 motor and 20-tooth GT2 pulley)
-        steps/rev:       16384
+        steps/rev:        2048
         dist/rev:           40 mm
-        dist/step        1/400 mm
-        max distance:       80 mm  ((max step count: 32,767, i.e. 2 revolutions)
-        fastest            800 steps/sec (2.5 secs/rev)
+        dist/step         1/50 mm
+        max distance:      640 mm  ((max step count: 32,767, i.e. 16 revolutions)
+        max speed         1000 steps/sec (2 secs/rev, no torque) (measured)
 
   all speed is in steps/sec (except speed-move cmd)
   accel is 0..7: none, 4000, 8000, 20000, 40000, 80000, 200000, 400000 steps/sec/sec
@@ -69,8 +70,8 @@
   0001 0110  fakeHome   set curpos to home pos value setting and turn motor on (fake homing)
 
   -- 2-byte move command --
-  1aaa aaaa     top 7 bits of move addr
-    aaaa aaaa  bottom 8 bit
+  1aaa aaaa    top 7 bits of target position
+    aaaa aaaa  bottom 8 bits
 
   -- 3-byte speed-move command --
   01ss ssss     set speed setting to value s times 256
@@ -93,7 +94,7 @@
   0001 1111  load settings, all are two-byte, big-endian, 16-bit values
     acceleration rate table index 0..7, 0 is off
     default speed
-    jerk (above this speed, acceleration is needed)
+    jerk (start/stop speed and above this speed, acceleration is needed)
     max pos (min pos is always zero))
     homing speed
     homing back-up speed

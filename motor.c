@@ -70,12 +70,12 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
 // assumes 1/50 mm per step
 const uint16 settingsInit[NUM_SETTING_WORDS] = {
      4, // acceleration index,  0 is no acceleration
-   400, // default speed is 1 mm/sec (2mm/sec is fastest motor can handle)
-   200, // jerk (start/stop speed limit) (4 mm/sec)
+   400, // default speed is 8 mm/sec (20 mm/sec is max motor can go w no torque)
+   100, // jerk (start/stop speed limit) (2 mm/sec)
  32767, // max pos is 600 mm (debug))
-   400, // homing speed (8 mm/sec)
-    60, // homing back-up ms->speed (1.5 mm/sec)
-    40, // home offset distance: 1 mm
+   200, // homing speed (4 mm/sec)
+    60, // homing back-up ms->speed (1.2 mm/sec)
+    25, // home offset distance: 0.5 mm
      0, // home pos value, set cur pos to this after homing
      0, // limit sw control (0 is normal)
     30, // period of clock in usecs  (applies to all motors in mcu)
