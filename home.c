@@ -70,6 +70,7 @@ void homeCommand(bool start) {
   if(start && limitPort[motorIdx]) {
 #else
   if(false) {
+
 #endif
     ms->homing = true;
     ms->homingState = homeStarting;
