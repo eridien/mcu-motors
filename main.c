@@ -66,7 +66,7 @@
 #pragma config BORV = V18               // Brown-out Reset Voltage bits (Brown-out Reset set to lowest voltage (1.8V))
 #pragma config MCLRE = ON               // MCLR Pin Enable bit (RA5 input pin disabled, MCLR pin enabled)
 
-#ifdef B4
+#ifdef B5
 // FICD
 #pragma config ICS = PGx2               // ICD Pin Placement Select bits (EMUC/EMUD share PGC2/PGD2)
 #endif
@@ -85,6 +85,7 @@
 #include "motor.h"
 #include "clock.h"
 #include "dist-table.h"
+#include "sens.h"
 
 int main(void) {
 #ifdef B1
@@ -120,7 +121,8 @@ int main(void) {
  tp2LAT = 0;
  tp3LAT = 0;
  tp4LAT = 0;
-#else
+#endif
+#ifdef U5
  tp1TRIS = 1;
  tp2TRIS = 1;
  tp3TRIS = 1;
@@ -144,6 +146,7 @@ int main(void) {
   i2cInit();
   clkInit();
   motorInit();
+  sensInit();
 
 #ifdef B1
   initDistTable();

@@ -41,7 +41,8 @@ void i2cInit() {
     _SSP1IF = 0;                       // nothing received yet
     _SSP1IE = 1;                       // Enable ints
     
-#endif  /* BM */
+#endif  /* B1 */
+  
     SSP1CON1bits.SSPEN = 1;            // Enable the serial port
 
 #else /* not BM */
@@ -57,31 +58,6 @@ void i2cInit() {
     SSP2CON3bits.DHEN = 0;             // no clock stretch before data ack
     SSP2CON3bits.BOEN = 1;             // enable buffer overwrite check
     NotStretch        = 0;             // stretch clk of first start bit
-#endif /* not BM */
-    
-#ifdef BM
-    
-#ifdef B1
-    SSP1CLKPPS = 0x10;           // RC0
-    SSP1DATPPS = 0x11;           // RC1
-    RC0PPS     = 0x15;           // SCL1
-    RC1PPS     = 0x16;           // SDA1
-    
-    SSP1IF = 0;                        // nothing received yet
-    SSP1IE = 1;                        // Enable ints
-#else
-    // no pps
-    _SSP1IF = 0;                       // nothing received yet
-    _SSP1IE = 1;                       // Enable ints
-#endif
-    
-    SSP1CON1bits.SSPEN = 1;            // Enable the serial port
-    
-#else /* not BM */
-    // no pps
-    _SSP2IF = 0;                       // nothing received yet
-    _SSP2IE = 1;                       // Enable ints
-    SSP2CON1bits.SSPEN = 1;            // Enable the serial port
 #endif /* not BM */
 }
 
@@ -107,7 +83,7 @@ volatile uint8 motIdxInPacket;
 #ifdef B1
 void i2cInterrupt(void) {
 #endif
-#ifdef B4
+#ifdef B5
 void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
   _SSP1IF = 0;
 #endif

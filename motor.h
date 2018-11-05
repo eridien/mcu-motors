@@ -9,8 +9,8 @@
 #ifdef B1
 #define NUM_MOTORS 1
 #endif
-#ifdef B4
-#define NUM_MOTORS 3
+#ifdef B5
+#define NUM_MOTORS 5
 #endif
 #ifdef U5
 #define NUM_MOTORS 6

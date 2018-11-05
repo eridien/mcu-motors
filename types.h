@@ -7,8 +7,8 @@ typedef unsigned char uint8;
 typedef int int16;
 typedef unsigned int uint16;
 #ifdef B1
-typedef short long int24;
-typedef unsigned short long uint24;
+typedef /* short */ long int24;
+typedef unsigned /* short */ long uint24;
 #endif
 typedef long int32;
 typedef unsigned long uint32;

@@ -11,7 +11,7 @@
 
 #ifdef B1
 #define I2C_WCOL  WCOL1
-#define I2C_SSPOV     SSPOV1
+#define I2C_SSPOV SSPOV1
 
 #define dirTRIS   TRISA2
 #define ms1TRIS   TRISC2
@@ -63,7 +63,7 @@
 
 #endif /* B1 */
 
-#ifdef B4
+#ifdef B5
 #define I2C_WCOL  SSP1CON1bits.WCOL
 #define I2C_SSPOV SSP1CON1bits.SSPOV
 
@@ -77,76 +77,80 @@
 #define ms2LAT    _LATB7
 #define ms3LAT    _LATB6
 
-#define resetRTRIS _TRISB15
-#define resetETRIS _TRISB14
-#define resetXTRIS _TRISB13
-
-#define resetRLAT _LATB15
-#define resetELAT _LATB14
-#define resetXLAT _LATB13
-
-#define resetRPORT  PORTB
-#define resetRBIT   0x8000
-#define resetEPORT  PORTB
-#define resetEBIT   0x4000
-#define resetXPORT  PORTB
-#define resetXBIT   0x2000
+#define resetTRIS _TRISB15
+#define resetLAT  _LATB15
+#define resetPORT  PORTB
+#define resetBIT   0x8000
 
 #define stepRTRIS  _TRISB1
 #define stepETRIS  _TRISB2
 #define stepXTRIS  _TRISB3
+#define stepFTRIS  _TRISB13
+#define stepZTRIS  _TRISA2
 
 #define stepRLAT   _LATB1
 #define stepELAT   _LATB2
 #define stepXLAT   _LATB3
-
+#define stepFLAT   _LATB13
+#define stepZLAT   _LATA2
 #define stepRPORT  PORTB
-#define stepRBIT   0x02
+#define stepRBIT   0x0002
 #define stepEPORT  PORTB
-#define stepEBIT   0x04
+#define stepEBIT   0x0004
 #define stepXPORT  PORTB
-#define stepXBIT   0x08
+#define stepXBIT   0x0008
+#define stepFPORT  PORTB
+#define stepFBIT   0x2000
+#define stepZPORT  PORTA
+#define stepZBIT   0x0002
 
 #define faultRTRIS  _TRISB4
 #define faultETRIS  _TRISA4
 #define faultXTRIS  _TRISB5
-
+#define faultFTRIS  _TRISB12
+#define faultZTRIS  _TRISA3
 #define faultRPORT  PORTB
-#define faultRBIT   0x10
+#define faultRBIT   0x0010
 #define faultEPORT  PORTA
-#define faultEBIT   0x10
+#define faultEBIT   0x0010
 #define faultXPORT  PORTB
-#define faultXBIT   0x20
+#define faultXBIT   0x0020
+#define faultFPORT  PORTB
+#define faultFBIT   0x1000
+#define faultZPORT  PORTA
+#define faultZBIT   0x0008
 
 #define limitRTRIS  _TRISA0
 #define limitXTRIS  _TRISA1
-
+#define limitFTRIS  _TRISB14
+#define limitZTRIS  _TRISB0
 #define limitRPORT  PORTA
-#define limitRBIT   0x01
+#define limitRBIT   0x0001
 #define limitXPORT  PORTA
-#define limitXBIT   0x02
+#define limitXBIT   0x0002
+#define limitFPORT  PORTB
+#define limitFBIT   0x4000
+#define limitZPORT  PORTB
+#define limitZBIT   0x0001
 
-#define tp1TRIS   _TRISB0
-#define tp2TRIS   _TRISB12
-#define tp3TRIS   _TRISA2
-#define tp4TRIS   _TRISA3
+#ifdef DEBUG
+#define tp1TRIS     faultRTRIS
+#define tp2TRIS     faultETRIS
+#define tp3TRIS     faultXTRIS
 
-#define tp1LAT     _LATB0
-#define tp2LAT     _LATB12
-#define tp3LAT     _LATA2
-#define tp4LAT     _LATA3
+#define tp1LAT      faultRLAT
+#define tp2LAT      faultELAT
+#define tp3LAT      faultXLAT
 
-// only tp2 works in B4 ???
 #define dbg10 tp1LAT = 0;
 #define dbg11 tp1LAT = 1;
 #define dbg20 tp2LAT = 0;
 #define dbg21 tp2LAT = 1;
 #define dbg30 tp3LAT = 0;
 #define dbg31 tp3LAT = 1;
-#define dbg40 tp4LAT = 0;
-#define dbg41 tp4LAT = 1;
+#endif
 
-#endif	/* B4 */
+#endif	/* B5 */
 
 #ifdef U5
 #define I2C_START_BIT SSP2STATbits.S

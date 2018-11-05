@@ -19,13 +19,7 @@ void stopStepping() {
 }
 
 void resetMotor(bool all) {
-#ifdef B1
   resetLAT = 0; 
-#elif B4
-  resetRLAT = 0; 
-  resetELAT = 0; 
-  resetXLAT = 0; 
-#endif
   uint8 savedMotorIdx = motorIdx;
   // set all global motor vars just like event loop
   for(motorIdx=0; motorIdx < NUM_MOTORS; motorIdx++) {

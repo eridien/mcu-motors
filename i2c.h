@@ -14,8 +14,8 @@
 #ifdef B1
 #define I2C_ADDR      0x10  // real addr:0x08, box mcu (B1), motor always 0
 #endif
-#ifdef B4
-#define I2C_ADDR      0x20  // real addr:0x10, head mcu (B4) for bipolar motors
+#ifdef B5
+#define I2C_ADDR      0x20  // real addr:0x10, head mcu (B5) for bipolar motors
 #endif
 #ifdef U5
 #define I2C_ADDR      0x30  // real addr:0x18, head mcu (U5) for unipolar motors
@@ -27,7 +27,7 @@
     #define NotAddr    SSP1STATbits.DA
     #define NotStretch SSP1CON1bits.CKP1
 #endif
-#ifdef B4
+#ifdef B5
     #define RdNotWrite SSP1STATbits.I2C_READ
     #define NotAddr    SSP1STATbits.NOT_ADDRESS
     #define NotStretch SSP1CON1bits.CKP

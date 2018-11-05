@@ -96,18 +96,18 @@ volatile uint8 *limitPort[NUM_MOTORS] = {&limitPORT};
 const    uint8  limitMask[NUM_MOTORS] = {limitMASK};
 #endif
 
-#ifdef B4
-volatile uint16 *stepPort[NUM_MOTORS] = {&stepRPORT, &stepEPORT, &stepXPORT};
+#ifdef B5
+volatile uint16 *stepPort[NUM_MOTORS] = {&stepRPORT, &stepEPORT, &stepXPORT, &stepFPORT, &stepZPORT};
 const    uint16 stepMask[NUM_MOTORS] = {stepRBIT, stepEBIT, stepXBIT};
 
-volatile uint16 *resetPort[NUM_MOTORS] = {&resetRPORT, &resetEPORT, &resetXPORT};
-const    uint16 resetMask[NUM_MOTORS] = {resetRBIT, resetEBIT, resetXBIT};
+volatile uint16 *resetPort[NUM_MOTORS] = {&resetPORT, &resetPORT, &resetPORT, &resetPORT, &resetPORT};
+const    uint16 resetMask[NUM_MOTORS] = {resetBIT, resetBIT, resetBIT, resetBIT, resetBIT};
 
-volatile uint16 *faultPort[NUM_MOTORS] = {&faultRPORT, &faultEPORT, &faultXPORT};
-const    uint16 faultMask[NUM_MOTORS] = {faultRBIT, faultEBIT, faultXBIT};
+volatile uint16 *faultPort[NUM_MOTORS] = {&faultRPORT, &faultEPORT, &faultXPORT, &faultFPORT, &faultZPORT};
+const    uint16 faultMask[NUM_MOTORS] = {faultRBIT, faultEBIT, faultXBIT, faultFBIT, faultZBIT};
 
-volatile uint16 *limitPort[NUM_MOTORS] = {&limitRPORT, 0, &limitXPORT};
-const    uint16 limitMask[NUM_MOTORS] = {limitRBIT, 0, limitXBIT};
+volatile uint16 *limitPort[NUM_MOTORS] = {&limitRPORT, 0, &limitXPORT, &limitFPORT, &limitZPORT};
+const    uint16 limitMask[NUM_MOTORS] = {limitRBIT, 0, limitXBIT, limitFBIT, limitZBIT};
 #endif
 
 // globals for use in main chk loop
@@ -132,12 +132,8 @@ void motorInit() {
   resetLAT = 0; // start with reset on
   resetTRIS = 0;
 #else
-  resetRLAT = 0; // start with reset on
-  resetELAT = 0; // start with reset on
-  resetXLAT = 0; // start with reset on
-  resetRTRIS = 0;
-  resetETRIS = 0;
-  resetXTRIS = 0;
+  resetLAT = 0; // start with reset on
+  resetTRIS = 0;
 #endif
 #endif
 
@@ -147,21 +143,29 @@ void motorInit() {
   limitTRIS = 1; // zero means at limit switch  // may be used by dbg4
 #endif
 
-#ifdef B4
+#ifdef B5
   stepRTRIS = 0;
   stepRLAT = 1; // step idle is high
   stepETRIS = 0;
   stepELAT = 1; // step idle is high
   stepXTRIS = 0;
   stepXLAT = 1; // step idle is high
+  stepFTRIS = 0;
+  stepFLAT = 1; // step idle is high
+  stepZTRIS = 0;
+  stepZLAT = 1; // step idle is high
 
   faultRTRIS = 1; // zero means motor fault
   faultETRIS = 1; // zero means motor fault
   faultXTRIS = 1; // zero means motor fault 
+  faultFTRIS = 1; // zero means motor fault 
+  faultZTRIS = 1; // zero means motor fault 
 
   limitRTRIS = 1; // zero means at limit switch
   limitXTRIS = 1; // zero means at limit switch
-#endif /* B4 */
+  limitFTRIS = 1; // zero means at limit switch
+  limitZTRIS = 1; // zero means at limit switch
+#endif /* B5 */
 
 #ifdef U5
   motATRIS = (motATRIS & ~(0x0f << motAOFS));
@@ -202,20 +206,21 @@ bool haveFault() {
   volatile uint8 *p = faultPort[motorIdx];
   return !(*p & faultMask[motorIdx]);
 #endif
-#ifdef B4
+#ifdef B5
+#ifdef DEBUG
+  return false
+#else
   volatile uint16 *p = faultPort[motorIdx];
-  
-  // fault input pins for motor R (B4) and E(A4) are not working!   TODO
-  if(motorIdx < 2) return false;
-  
   return !(*p & faultMask[motorIdx]);
 #endif
+#endif
+  
 #ifdef U5
   return false;
 #endif
 }
 
-bool limitSwOn() { // B1: comment out when limit sw used by dbg4
+bool limitSwOn() {
 #ifndef U5
 #ifdef B1
   volatile uint8 *p = limitPort[motorIdx];
@@ -398,7 +403,6 @@ void clockInterrupt(void) {
 void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void) {
   _T1IF = 0;
 #endif
-  dbg11
   timeTicks++;
   int motIdx;
   for (motIdx = 0; motIdx < NUM_MOTORS; motIdx++) {
@@ -421,8 +425,6 @@ void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void) {
       p->stepPending = false;
       p->lastStepTicks = timeTicks;
       p->stepped = true;
-      dbg21
     }
   }
-  dbg10
 }

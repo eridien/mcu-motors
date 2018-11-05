@@ -74,7 +74,6 @@ void setStep(bool closing) {
     ms->phase += (ms->curDir ? 1 : -1);
 #endif
     ms->stepPending = true;
-    dbg20;
   }
 }
 

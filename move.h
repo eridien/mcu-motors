@@ -6,7 +6,7 @@
 #include "motor.h"
 
 // only 1/1 -> 1/8 ustep allowed 
-// so MS3 can be wired low in boards
+// MS3 can be wired low in boards
 #define MIN_USTEP 0
 #define MAX_USTEP 3
 extern const uint16 uStepPhaseMask[4];
