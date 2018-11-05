@@ -12,8 +12,8 @@
 #ifdef B5
 #define NUM_MOTORS 5
 #endif
-#ifdef U5
-#define NUM_MOTORS 6
+#ifdef U3
+#define NUM_MOTORS 3
 #endif
 
 // global for use in main chk loop
@@ -28,19 +28,20 @@ extern struct motorState      *ms;
 extern struct motorSettings   *sv;
 extern uint8                   mm; // motor mask (0xf0 or 0x0f or step bit)
 
+#ifdef BM
 #define setBiStepLo()           *stepPort[motorIdx] &= ~stepMask[motorIdx]
 #define setBiStepHiInt(_motIdx) *stepPort[_motIdx]  |=  stepMask[_motIdx]
-
 #define resetIsLo()      ((*resetPort[motorIdx] &   resetMask[motorIdx]) == 0)
 #define setResetLo()       *resetPort[motorIdx] &= ~resetMask[motorIdx]
 #define setResetHi()       *resetPort[motorIdx] |=  resetMask[motorIdx]
-
+#else
 #define clrUniPort()       (*mp = (*mp & ~mm));
 #define setUniPort(_phase) (*mp = (*mp & ~mm) |                          \
                             motPhaseValue[motorIdx][_phase & 0x03]);
 #define setUniPortInt(_motIdx, _phase)                                   \
   (*stepPort[_motIdx] = (*stepPort[_motIdx] & ~stepMask[_motIdx]) |      \
     motPhaseValue[_motIdx][_phase & 0x03]);
+#endif
 
 // constants loadable from command (all are 16 bits))
 struct motorSettings {
@@ -74,6 +75,14 @@ extern union settingsUnion mSet[NUM_MOTORS];
 #define setDacToSpeed()  
 #endif
 
+#ifdef B1
+extern volatile uint8 *limitPort[NUM_MOTORS];
+extern const    uint8  limitMask[NUM_MOTORS];
+#else
+extern volatile uint16 *limitPort[NUM_MOTORS];
+extern const    uint16  limitMask[NUM_MOTORS];
+#endif
+
 #ifdef BM
 
 #ifdef B1
@@ -86,9 +95,6 @@ extern const    uint8  resetMask[NUM_MOTORS];
 extern volatile uint8 *faultPort[NUM_MOTORS];
 extern const    uint8  faultMask[NUM_MOTORS];
 
-extern volatile uint8 *limitPort[NUM_MOTORS];
-extern const    uint8  limitMask[NUM_MOTORS];
-
 #else
 
 extern volatile uint16 *stepPort[NUM_MOTORS];
@@ -100,11 +106,9 @@ extern const    uint16   resetMask[NUM_MOTORS];
 extern volatile uint16 *faultPort[NUM_MOTORS];
 extern const    uint16  faultMask[NUM_MOTORS];
 
-extern volatile uint16 *limitPort[NUM_MOTORS];
-extern const    uint16  limitMask[NUM_MOTORS];
 #endif
 
-#else /* U5 */
+#else /* not BM */
 
 extern volatile uint16 *stepPort[NUM_MOTORS];
 extern const    uint16  stepMask[NUM_MOTORS];

@@ -12,25 +12,21 @@
 
 union settingsUnion mSet[NUM_MOTORS];
 
-#ifdef U5
+#ifdef U3
 volatile uint16 *stepPort[NUM_MOTORS] = {
   &motAPORT, // tube 1
   &motBPORT, // tube 2
-  &motCPORT, // tube 3
   &motPPORT, // paster
-  &motFPORT, // focus
 };
 
 const uint16 stepMask[NUM_MOTORS] = {
   0x000f << motAOFS,
   0x000f << motBOFS,
-  0x000f << motCOFS,
-  0x000f << motPOFS,
-  0x000f << motFOFS,
+  0x00f0 << motPOFS,
 };
 
-volatile uint16 *faultPort[NUM_MOTORS] = {0, 0, 0, 0, 0};
-const uint16 faultMask[NUM_MOTORS] = {0, 0, 0, 0, 0};
+volatile uint16 *faultPort[NUM_MOTORS] = {0, 0, 0};
+const uint16 faultMask[NUM_MOTORS] = {0, 0, 0};
 
 // -------- phases ----------
 // Color        Bl Pi Ye Or  (red is +5))
@@ -41,9 +37,7 @@ const uint16 faultMask[NUM_MOTORS] = {0, 0, 0, 0, 0};
 uint16 motPhaseValue[NUM_MOTORS][4] = {// motor, phase
   {0x0c << motAOFS, 0x06 << motAOFS, 0x03 << motAOFS, 0x09 << motAOFS},
   {0x0c << motBOFS, 0x06 << motBOFS, 0x03 << motBOFS, 0x09 << motBOFS},
-  {0x0c << motCOFS, 0x06 << motCOFS, 0x03 << motCOFS, 0x09 << motCOFS},
   {0x0c << motPOFS, 0x06 << motPOFS, 0x03 << motPOFS, 0x09 << motPOFS},
-  {0x0c << motFOFS, 0x06 << motFOFS, 0x03 << motFOFS, 0x09 << motFOFS},
 };
 #endif
 
@@ -66,8 +60,8 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
 
 #else
 
-// default is same for all motors
 // assumes 1/50 mm per step
+// default is same for all motors
 const uint16 settingsInit[NUM_SETTING_WORDS] = {
      4, // acceleration index,  0 is no acceleration
    400, // default speed is 8 mm/sec (20 mm/sec is max motor can go w no torque)
@@ -108,6 +102,11 @@ const    uint16 faultMask[NUM_MOTORS] = {faultRBIT, faultEBIT, faultXBIT, faultF
 
 volatile uint16 *limitPort[NUM_MOTORS] = {&limitRPORT, 0, &limitXPORT, &limitFPORT, &limitZPORT};
 const    uint16 limitMask[NUM_MOTORS] = {limitRBIT, 0, limitXBIT, limitFBIT, limitZBIT};
+#endif
+
+#ifdef U3
+volatile uint16 *limitPort[NUM_MOTORS] = {&limitAPORT, &limitBPORT, 0};
+const    uint16  limitMask[NUM_MOTORS] = { limitABIT,   limitBBIT,  0};
 #endif
 
 // globals for use in main chk loop
@@ -167,15 +166,12 @@ void motorInit() {
   limitZTRIS = 1; // zero means at limit switch
 #endif /* B5 */
 
-#ifdef U5
+#ifdef U3
   motATRIS = (motATRIS & ~(0x0f << motAOFS));
   motBTRIS = (motBTRIS & ~(0x0f << motBOFS));
-  motCTRIS = (motCTRIS & ~(0x0f << motCOFS));
   motPTRIS = (motPTRIS & ~(0x0f << motPOFS));
-  motFTRIS = (motFTRIS & ~(0x0f << motFOFS));
-
-  // const uint16 *limitPort[NUM_MOTORS] = {0,0,0,0,0};
-  //  const uint16  limitMask[NUM_MOTORS] = {0,0,0,0,0};
+  limitATRIS = 1; // zero means at limit switch
+  limitBTRIS = 1; // zero means at limit switch
 #endif
 
   uint8 motIdx;
@@ -214,14 +210,13 @@ bool haveFault() {
   return !(*p & faultMask[motorIdx]);
 #endif
 #endif
-  
-#ifdef U5
+#ifdef U3
   return false;
 #endif
 }
 
 bool limitSwOn() {
-#ifndef U5
+#ifndef U3
 #ifdef B1
   volatile uint8 *p = limitPort[motorIdx];
 #else
@@ -231,7 +226,7 @@ bool limitSwOn() {
     return (ms->limitSwPolarity ? (*p & limitMask[motorIdx])
             : !(*p & limitMask[motorIdx]));
   }
-#endif /* U5 */
+#endif /* not U3 */
   return false;
 }
 
@@ -396,10 +391,8 @@ void processCommand() {
   } else setError(CMD_DATA_ERROR);
 }
 #ifdef B1
-
 void clockInterrupt(void) {
 #else
-
 void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void) {
   _T1IF = 0;
 #endif

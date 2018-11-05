@@ -54,7 +54,7 @@ void setStep(bool closing) {
     case 3:  clkTicks = clkTicksPerSec /  ms->curSpeed      ; break;
     default: clkTicks = 0; // to avoid compiler warning
   }
-#else /* U5 */
+#else /* U3 */
   clkTicks = clkTicksPerSec / ms->curSpeed;
 #endif
   bool err;

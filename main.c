@@ -30,7 +30,7 @@
 #pragma config CP = OFF         // UserNVM Program memory code protection bit (UserNVM code protection disabled)
 #else
 
-// PIC24F16KM202 (& PIC24F16KM204) Configuration Bit Settings
+// PIC24F16KM202 Configuration Bit Settings
 
 // FBS
 #pragma config BWRP = OFF               // Boot Segment Write Protect (Disabled)
@@ -65,16 +65,8 @@
 #pragma config I2C1SEL = PRI            // Alternate I2C1 Pin Mapping bit (Use Default SCL1/SDA1 Pins For I2C1)
 #pragma config BORV = V18               // Brown-out Reset Voltage bits (Brown-out Reset set to lowest voltage (1.8V))
 #pragma config MCLRE = ON               // MCLR Pin Enable bit (RA5 input pin disabled, MCLR pin enabled)
-
-#ifdef B5
 // FICD
 #pragma config ICS = PGx2               // ICD Pin Placement Select bits (EMUC/EMUD share PGC2/PGD2)
-#endif
-
-#ifdef U5
-#pragma config ICS = PGx1               // ICD Pin Placement Select bits (EMUC/EMUD share PGC1/PGD1)
-#endif
-
 #endif
 
 #include <xc.h>
@@ -97,8 +89,9 @@ int main(void) {
  ANSA = 0;   // no analog inputs
  ANSB = 0;
  _NSTDIS = 1;  // nested interrupts disabled
+#endif
  
-#ifdef U5
+#ifdef U3
   ANSC     = 0;
   led1TRIS = 0;
   led2TRIS = 0;
@@ -110,7 +103,6 @@ int main(void) {
   led3LAT  = 1;
   led4LAT  = 1;
 #endif
-#endif
   
 #ifdef DEBUG
  tp1TRIS = 0;
@@ -118,17 +110,11 @@ int main(void) {
  tp3TRIS = 0;
  tp4TRIS = 0;
  tp1LAT = 0;
+ // only 1 led on when debugging
  tp2LAT = 0;
  tp3LAT = 0;
  tp4LAT = 0;
 #endif
-#ifdef U5
- tp1TRIS = 1;
- tp2TRIS = 1;
- tp3TRIS = 1;
- tp4TRIS = 1; 
-#endif
-
   
  #ifdef B1
 // show speed on DAC output pin A0 (ICP Data)

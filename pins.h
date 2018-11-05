@@ -2,17 +2,20 @@
 #ifndef PINS_H
 #define	PINS_H
 
-#ifdef BM
 #define I2C_START_BIT SSP1STATbits.S
 #define I2C_STOP_BIT  SSP1STATbits.P
 #define I2C_BUF_BYTE  SSP1BUF
 #define I2C_SSPIF     SSP1IF
-#endif /* BM */
 
 #ifdef B1
-#define I2C_WCOL  WCOL1
-#define I2C_SSPOV SSPOV1
+#define I2C_WCOL      WCOL1
+#define I2C_SSPOV     SSPOV1
+#else
+#define I2C_WCOL      SSP1CON1bits.WCOL
+#define I2C_SSPOV     SSP1CON1bits.SSPOV
+#endif
 
+#ifdef B1
 #define dirTRIS   TRISA2
 #define ms1TRIS   TRISC2
 #define ms2TRIS   TRISB4
@@ -64,9 +67,6 @@
 #endif /* B1 */
 
 #ifdef B5
-#define I2C_WCOL  SSP1CON1bits.WCOL
-#define I2C_SSPOV SSP1CON1bits.SSPOV
-
 #define dirTRIS   _TRISA6
 #define ms1TRIS   _TRISA7
 #define ms2TRIS   _TRISB7
@@ -152,53 +152,46 @@
 
 #endif	/* B5 */
 
-#ifdef U5
-#define I2C_START_BIT SSP2STATbits.S
-#define I2C_STOP_BIT  SSP2STATbits.P
-#define I2C_WCOL      SSP2CON1bits.WCOL
-#define I2C_SSPOV     SSP2CON1bits.SSPOV
-#define I2C_BUF_BYTE  SSP2BUF
-#define I2C_SSPIF     _SSP2IF
-
+#ifdef U3
 #define motAPORT   PORTA  // tool A
 #define motBPORT   PORTB  // tool B
-#define motCPORT   PORTC  // tool C
 #define motPPORT   PORTB  // paster
-#define motFPORT   PORTC  // focus
 
 #define motATRIS   TRISA  // tool A
 #define motBTRIS   TRISB  // tool B
-#define motCTRIS   TRISC  // tool C
 #define motPTRIS   TRISB  // paster
-#define motFTRIS   TRISC  // focus
 
 #define motAOFS    0
-#define motBOFS   12
-#define motCOFS    0
+#define motBOFS    0
 #define motPOFS    8
-#define motFOFS    4
 
-#define led1TRIS   _TRISA6
-#define led2TRIS   _TRISA7
-#define led3TRIS   _TRISA4
-#define led4TRIS   _TRISA9
+#define limitATRIS  _TRISA6
+#define limitBTRIS  _TRISA7
+#define limitAPORT  PORTA
+#define limitBPORT  PORTA
+#define limitABIT   0x0040
+#define limitBBIT   0x0080
+
+#define led1TRIS   _TRISB12
+#define led2TRIS   _TRISB13
+#define led3TRIS   _TRISB14
+#define led4TRIS   _TRISB15
  
-#define led1LAT    _LATA6
-#define led2LAT    _LATA7
-#define led3LAT    _LATA4
-#define led4LAT    _LATA9
+#define led1LAT    _LATB12
+#define led2LAT    _LATB13
+#define led3LAT    _LATB14
+#define led4LAT    _LATB15
 
-#define tp1TRIS    _TRISC8
-#define tp2TRIS    _TRISC9
-#define tp3TRIS    _TRISA10
-#define tp4TRIS    _TRISA11
+#define tp1TRIS    _TRISA4
+#define tp2TRIS    led1TRIS
+#define tp3TRIS    led2TRIS
+#define tp4TRIS    led3TRIS
 
-#define tp1LAT     _LATC8
-#define tp2LAT     _LATC9
-#define tp3LAT     _LATA10
-#define tp4LAT     _LATA11
+#define tp1LAT     _LATA4
+#define tp2LAT     led1LAT
+#define tp3LAT     led2LAT
+#define tp4LAT     led3LAT
 
-// tp3 doesn't work ???
 #define dbg10 tp1LAT = 0;
 #define dbg11 tp1LAT = 1;
 #define dbg20 tp2LAT = 0;
@@ -207,7 +200,7 @@
 #define dbg31 tp3LAT = 1;
 #define dbg40 tp4LAT = 0;
 #define dbg41 tp4LAT = 1;
-#endif /* U5 */
+#endif /* U3 */
 
 #endif	/* PINS_H */
 

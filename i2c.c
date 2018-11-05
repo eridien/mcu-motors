@@ -14,8 +14,6 @@ volatile uint8 i2cSendBytesPtr;
 volatile bool  inPacket;
 volatile bool  packetForUs;
 
-#ifdef BM
-
 void i2cInit() { 
     SSP1CON1bits.SSPM = 0x0e;          // slave mode, 7-bit, S & P ints enabled 
     SSP1MSK           = I2C_ADDR_MASK; // address mask, check top 5 bits
@@ -44,21 +42,6 @@ void i2cInit() {
 #endif  /* B1 */
   
     SSP1CON1bits.SSPEN = 1;            // Enable the serial port
-
-#else /* not BM */
-
-void i2cInit() { 
-    SSP2CON1bits.SSPM = 0x0e;          // slave mode, 7-bit, S & P ints enabled 
-    SSP2MSK           = I2C_ADDR_MASK; // address mask, check top 5 bits
-    SSP2ADD           = I2C_ADDR;      // slave address (7-bit addr)
-    SSP2STATbits.SMP  = 0;             // slew-rate enabled
-    SSP2STATbits.CKE  = 1;             // smb voltage levels
-    SSP2CON2bits.SEN  = 1;             // enable clock stretching 
-    SSP2CON3bits.AHEN = 0;             // no clock stretch before addr ack
-    SSP2CON3bits.DHEN = 0;             // no clock stretch before data ack
-    SSP2CON3bits.BOEN = 1;             // enable buffer overwrite check
-    NotStretch        = 0;             // stretch clk of first start bit
-#endif /* not BM */
 }
 
 // all words are big-endian
@@ -82,14 +65,9 @@ volatile uint8 motIdxInPacket;
 
 #ifdef B1
 void i2cInterrupt(void) {
-#endif
-#ifdef B5
+#else
 void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
   _SSP1IF = 0;
-#endif
-#ifdef U5
-void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP2Interrupt(void) {
-  _SSP2IF = 0;
 #endif
   // SSPxSTATbits.S is set during entire packet
   if(I2C_START_BIT && !inPacket) { 
@@ -140,7 +118,7 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP2Interrupt(void) {
     else {
       if(!RdNotWrite) {
         // received byte (i2c write to slave)
-#ifdef U5
+#ifdef U3
         if(motIdxInPacket == NUM_MOTORS) {
           uint8 leds = I2C_BUF_BYTE;
           led1LAT  = !!(leds & 0xc0);

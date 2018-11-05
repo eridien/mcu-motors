@@ -66,12 +66,7 @@ void homeCommand(bool start) {
     ms->curSpeed = sv->jerk;
     setDacToSpeed();
   }
-#ifdef BM
   if(start && limitPort[motorIdx]) {
-#else
-  if(false) {
-
-#endif
     ms->homing = true;
     ms->homingState = homeStarting;
     switch ((sv->limitSwCtl >> 3) & 0x03) {
