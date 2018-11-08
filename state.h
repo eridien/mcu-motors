@@ -21,6 +21,10 @@ extern volatile int dummy;
 // state byte will have this magic value which can't happen normally
 #define TEST_POS_STATE      0x04
 
+// when returning vacuum ADC instead of cur pos (B1 only)
+// state byte will have this magic value which can't happen normally
+#define RD_VAC_STATE        0x05
+
 // Error codes 
 #define MOTOR_FAULT_ERROR   0x10
 #define I2C_OVERFLOW_ERROR  0x20
@@ -65,6 +69,7 @@ struct motorState {
   bool   resetAfterSoftStop;
   bool   nextStateTestPos; // flag to return homeTestPos on next read
   int16  homeTestPos;      // pos when limit sw closes
+  bool   nextStateVacADC;  // flag to return vacuum ADC value on next read
 };
 
 extern struct motorState mState[NUM_MOTORS];

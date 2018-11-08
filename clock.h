@@ -4,6 +4,8 @@
 
 #include "motor.h"
 
+// mcuClock is usually 30 usecs
+
 #ifdef B1
 #define setTicksSec() (TMR0H = (mSet[0].val.mcuClock/2)-1)     // wraps at ths count
 #else

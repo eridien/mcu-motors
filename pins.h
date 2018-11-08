@@ -29,6 +29,8 @@
 #define resetTRIS TRISB6
 #define resetLAT  LATB6
 
+#define adcTRIS   TRISB7
+
 #define resetPORT  PORTB
 #define resetMASK  0x40
 

@@ -64,7 +64,6 @@ void homeCommand(bool start) {
     ms->lastStepTicks = timeTicks;
     enableAllInts;
     ms->curSpeed = sv->jerk;
-    setDacToSpeed();
   }
   if(start && limitPort[motorIdx]) {
     ms->homing = true;

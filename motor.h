@@ -69,13 +69,6 @@ union settingsUnion{
 extern union settingsUnion mSet[NUM_MOTORS];
 
 #ifdef B1
-// show speed on DAC output pin A0 (ICP Data)
-#define setDacToSpeed() DAC1CON1 = (ms->curSpeed >> 8);
-#else
-#define setDacToSpeed()  
-#endif
-
-#ifdef B1
 extern volatile uint8 *limitPort[NUM_MOTORS];
 extern const    uint8  limitMask[NUM_MOTORS];
 #else

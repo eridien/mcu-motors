@@ -1,6 +1,6 @@
 #ifdef B1
 
-// PIC16F15375 Configuration Bit Settings
+// PIC16F15345 Configuration Bit Settings
 
 #pragma config FEXTOSC = OFF    // External Oscillator mode selection bits (Oscillator not enabled)
 #pragma config RSTOSC = HFINT32 // Power-up default value for COSC bits (HFINTOSC with OSCFRQ= 32 MHz and CDIV = 1:1)
@@ -81,7 +81,7 @@
 
 int main(void) {
 #ifdef B1
- ANSELA = 0; // no analog inputs
+ ANSELA = 0; // no analog inputs for now
  ANSELB = 0;  
  ANSELC = 0; 
 #else
@@ -115,20 +115,7 @@ int main(void) {
  tp3LAT = 0;
  tp4LAT = 0;
 #endif
-  
- #ifdef B1
-// show speed on DAC output pin A0 (ICP Data)
-// always leave enabled, doesn't hurt anything
-// remove pickit debugger to see output
-// see setDacToSpeed() to use
-  DAC1PSS0      = 0;  // DAC top ref is VDD
-  DAC1NSS       = 0;  // DAC bot ref is GND
-  DAC1OE1       = 1;  // enable DAC 1 pin
-  DAC1OE2       = 1;  // enable DAC 2 pin
-  DAC1CON1      = 0;  // DAC input value
-  DAC1EN        = 1;  // turn DAC on
-#endif
-  
+    
   i2cInit();
   clkInit();
   motorInit();

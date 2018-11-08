@@ -192,7 +192,6 @@ void checkMotor() {
       ms->curSpeed = ms->targetSpeed;
     }
   }
-  setDacToSpeed();
   setStep(closing);
 }
 
@@ -213,7 +212,6 @@ void moveCommand(bool noRules) {
     enableAllInts;
     ms->curSpeed = sv->jerk;
     ms->curDir   = ms->targetDir;
-    setDacToSpeed();
   }
   setStateBit(BUSY_BIT, 1);
 }

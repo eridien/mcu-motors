@@ -14,7 +14,6 @@ void stopStepping() {
   ms->slowing     = false;
   ms->stopping    = false;
   ms->curSpeed    = 0;
-  setDacToSpeed();
   setStateBit(BUSY_BIT, 0);
 }
 
@@ -56,7 +55,6 @@ void softStopCommand(bool resetAfter) {
     ms->lastStepTicks = timeTicks;
     enableAllInts;
     ms->curSpeed = sv->jerk; // triggers shutdown code
-    setDacToSpeed();
   }
   setStateBit(BUSY_BIT, 1);
   ms->stopping = true;

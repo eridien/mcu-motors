@@ -9,6 +9,7 @@
 #include "home.h"
 #include "move.h"
 #include "stop.h"
+#include "sens.h"
 
 union settingsUnion mSet[NUM_MOTORS];
 
@@ -183,7 +184,6 @@ void motorInit() {
     msp->stepPending = false;
     msp->stepped = false;
     msp->curSpeed = 0;
-    setDacToSpeed();
     uint8 i;
     for (i = 0; i < NUM_SETTING_WORDS; i++) {
       mSet[motIdx].reg[i] = settingsInit[i];
@@ -374,7 +374,7 @@ void processCommand() {
         case 0: homeCommand(true);
           break; // start homing
         case 1: ms->nextStateTestPos = true;
-          break; // next read pos is test pos
+          break; // next read pos is actually test pos
         case 2: softStopCommand(false);
           break; // stop,no reset
         case 3: softStopCommand(true);
@@ -385,6 +385,10 @@ void processCommand() {
           break; // reset off
         case 6: homeCommand(false);
           break; // stop, set curpos to setting
+        case 7: 
+          startADC();
+          ms->nextStateVacADC = true;
+          break; // next read pos is actually vacuum ADC value (B1 only))
         default: setError(CMD_DATA_ERROR);
       }
     }

@@ -6,6 +6,7 @@
 #include "i2c.h"
 #include "state.h"
 #include "motor.h"
+#include "sens.h"
 
 volatile uint8 i2cRecvBytes[NUM_MOTORS][RECV_BUF_SIZE+1]; // added len byte
 volatile uint8 i2cRecvBytesPtr;
@@ -47,16 +48,22 @@ void i2cInit() {
 // all words are big-endian
 void setSendBytesInt(uint8 motIdx) {
   struct motorState *p = &mState[motIdx];
-  if(!ms->nextStateTestPos) {
-    i2cSendBytes[0] = (p->stateByte | MCU_VERSION);
-    i2cSendBytes[1] =  p->curPos >> 8;
-    i2cSendBytes[2] =  p->curPos & 0x00ff;
-  }
-  else {
+  if(ms->nextStateTestPos) {
     ms->nextStateTestPos = false;
     i2cSendBytes[0]  = (TEST_POS_STATE | MCU_VERSION);
     i2cSendBytes[1]  = p->homeTestPos >> 8;
     i2cSendBytes[2]  = p->homeTestPos & 0x00ff;
+  }
+  else if(ms->nextStateVacADC) {
+    ms->nextStateVacADC = false;
+    i2cSendBytes[0]  = (RD_VAC_STATE | MCU_VERSION);
+    i2cSendBytes[1]  = ADRESH;
+    i2cSendBytes[2]  = ADRESL;
+  }
+  else {
+    i2cSendBytes[0] = (p->stateByte | MCU_VERSION);
+    i2cSendBytes[1] =  p->curPos >> 8;
+    i2cSendBytes[2] =  p->curPos & 0x00ff;
   }
   i2cSendBytes[3] = i2cSendBytes[0] + i2cSendBytes[1] + i2cSendBytes[2];
 }
