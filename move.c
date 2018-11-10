@@ -52,14 +52,14 @@ void setStep(bool closing) {
       if(dist & uStepPhaseMask[ms->ustep]) {
         ms->ustep++;
       }
-      // set step timing
-      switch (ms->ustep) {
-        case 0:  clkTicks = clkTicksPerSec / (ms->curSpeed >> 3); break;
-        case 1:  clkTicks = clkTicksPerSec / (ms->curSpeed >> 2); break;
-        case 2:  clkTicks = clkTicksPerSec / (ms->curSpeed >> 1); break;
-        case 3:  clkTicks = clkTicksPerSec /  ms->curSpeed      ; break;
-        default: clkTicks = 0; // to avoid compiler warning
-      }
+    }
+// set step timing
+    switch (ms->ustep) {
+      case 0:  clkTicks = clkTicksPerSec / (ms->curSpeed >> 3); break;
+      case 1:  clkTicks = clkTicksPerSec / (ms->curSpeed >> 2); break;
+      case 2:  clkTicks = clkTicksPerSec / (ms->curSpeed >> 1); break;
+      case 3:  clkTicks = clkTicksPerSec /  ms->curSpeed      ; break;
+      default: clkTicks = 0; // to avoid compiler warning
     }
   }
 #else /* U3 */

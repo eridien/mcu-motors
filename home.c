@@ -57,7 +57,6 @@ void chkHoming() {
   }
 }
 void homeCommand(bool start) {
-  ms->curBacklashOfs = sv->backlashWid; // ignore actual backlash ofs
   ms->slowing = false;
   if((ms->stateByte & BUSY_BIT) == 0) {
     // not moving -- init speed
@@ -68,6 +67,7 @@ void homeCommand(bool start) {
     ms->curSpeed = sv->jerk;
   }
   if(start && limitPort[motorIdx]) {
+    ms->curBacklashOfs = sv->backlashWid; // ignore actual backlash ofs
     ms->homing = true;
     ms->homingState = homeStarting;
     switch ((sv->limitSwCtl >> 3) & 0x03) {
