@@ -50,6 +50,8 @@ struct motorState {
   int16  curPos;
   uint16 curSpeed;
   bool   curDir;
+  uint16 curBacklashOfs;  // offset always in backwards direction
+  bool   insideBacklash;
   uint8  ustep;
   uint16 acceleration;
   bool   stepPending;

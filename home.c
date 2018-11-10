@@ -50,12 +50,14 @@ void chkHoming() {
         setStateBit(HOMED_BIT, 1);
         ms->curPos = sv->homePos;
         stopStepping();
+        ms->curBacklashOfs = 0;
         return;
       }
       break;
   }
 }
 void homeCommand(bool start) {
+  ms->curBacklashOfs = sv->backlashWid; // ignore actual backlash ofs
   ms->slowing = false;
   if((ms->stateByte & BUSY_BIT) == 0) {
     // not moving -- init speed

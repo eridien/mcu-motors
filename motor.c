@@ -56,6 +56,7 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
   10,   // home offset distance: 0.25 mm
   0,    // home pos value, set cur pos to this after homing
   0,    // limit sw control (0 is normal)
+  0,    // backlash width of dead interval
   30,   // period of clock in usecs  (applies to all motors in mcu)
 };
 
@@ -73,6 +74,7 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
     25, // home offset distance: 0.5 mm
      0, // home pos value, set cur pos to this after homing
      0, // limit sw control (0 is normal)
+     0, // backlash width of dead interval
     30, // period of clock in usecs  (applies to all motors in mcu)
 };
 #endif /* BM */
@@ -101,8 +103,9 @@ const    uint16 resetMask[NUM_MOTORS] = {resetBIT, resetBIT, resetBIT, resetBIT,
 volatile uint16 *faultPort[NUM_MOTORS] = {&faultRPORT, &faultEPORT, &faultXPORT, &faultFPORT, &faultZPORT};
 const    uint16 faultMask[NUM_MOTORS] = {faultRBIT, faultEBIT, faultXBIT, faultFBIT, faultZBIT};
 
-volatile uint16 *limitPort[NUM_MOTORS] = {&limitRPORT, 0, &limitXPORT, &limitFPORT, &limitZPORT};
-const    uint16 limitMask[NUM_MOTORS] = {limitRBIT, 0, limitXBIT, limitFBIT, limitZBIT};
+// debug for broken board -- moved Z limit to E limit -- using E in place of Z
+volatile uint16 *limitPort[NUM_MOTORS] = {&limitRPORT, &limitZPORT, &limitXPORT, &limitFPORT, 0};
+const    uint16 limitMask[NUM_MOTORS]  = { limitRBIT,   limitZBIT,   limitXBIT,   limitFBIT,  0};
 #endif
 
 #ifdef U3
@@ -257,19 +260,28 @@ void checkAll() {
   if (ms->stepPending) {
     return;
   }
+  
   if (ms->stepped) {
     ms->stepped = false;
+    // either adjust curBacklashOfs or curPos
+    if(ms->insideBacklash) {
+      ms->curBacklashOfs += ((ms->curDir) ? -1 : 1);
 #ifdef BM
-    uint8 stepDist = uStepDist[ms->ustep];
-    if (ms->curDir) {
-      ms->curPos += stepDist;
-      ms->phase  += stepDist;
-    } else {
-      ms->curPos -= stepDist;
-      ms->phase -= stepDist;
+      ms->phase += ((ms->curDir) ? 1 : -1); 
+    }
+    else {
+      uint8 stepDist = uStepDist[ms->ustep];
+      if (ms->curDir) {
+        ms->curPos += stepDist;
+        ms->phase  += stepDist;
+      } else {
+        ms->curPos -= stepDist;
+        ms->phase -= stepDist;
+      }
     }
 #else
-    ms->curPos += ((ms->curDir) ? 1 : -1);
+    }
+    else ms->curPos += ((ms->curDir) ? 1 : -1);
 #endif
   }
   if ((ms->stateByte & BUSY_BIT) && !haveError()) {
@@ -416,7 +428,7 @@ void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void) {
       ms1LAT = ((p->ustep & 0x01) ? 1 : 0);
       ms2LAT = ((p->ustep & 0x02) ? 1 : 0);
       ms3LAT = ((p->ustep & 0x04) ? 1 : 0);
-      dirLAT =   p->curDir ? 1 : 0;
+      dirLAT =   p->curDir        ? 1 : 0;
       setBiStepHiInt(motIdx);
 #else
       setUniPortInt(motIdx, p->phase);

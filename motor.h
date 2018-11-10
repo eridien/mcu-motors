@@ -52,13 +52,14 @@ struct motorSettings {
   uint16 homingSpeed;
   uint16 homingBackUpSpeed;
   uint16 homeOfs;
-  uint16 homePos;    // value to set cur pos after homing
-  uint16 limitSwCtl; // codes starting and switch direction and reversing
-  uint16 mcuClock;   // period of clock in usecs  (applies to all motors in mcu)
+  uint16 homePos;        // value to set cur pos after homing
+  uint16 limitSwCtl;     // codes starting and switch direction and reversing
+  uint16 backlashWid;    // backlash width of dead interval
+  uint16 mcuClock;       // period of clock in usecs  (applies to all motors in mcu)
 };
 
-#define mcuClockSettingIdx 9
-#define NUM_SETTING_WORDS 10
+#define mcuClockSettingIdx 10
+#define NUM_SETTING_WORDS  11
 
 extern const uint16 settingsInit[NUM_SETTING_WORDS];
 
