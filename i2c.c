@@ -54,12 +54,14 @@ void setSendBytesInt(uint8 motIdx) {
     i2cSendBytes[1]  = p->homeTestPos >> 8;
     i2cSendBytes[2]  = p->homeTestPos & 0x00ff;
   }
+#ifdef B1
   else if(ms->nextStateVacADC) {
     ms->nextStateVacADC = false;
     i2cSendBytes[0]  = (RD_VAC_STATE | MCU_VERSION);
     i2cSendBytes[1]  = ADRESH;
     i2cSendBytes[2]  = ADRESL;
   }
+#endif
   else {
     i2cSendBytes[0] = (p->stateByte | MCU_VERSION);
     i2cSendBytes[1] =  p->curPos >> 8;

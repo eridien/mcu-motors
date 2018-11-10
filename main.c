@@ -91,6 +91,7 @@ int main(void) {
  _NSTDIS = 1;  // nested interrupts disabled
 #endif
  
+ 
 #ifdef U3
   ANSC     = 0;
   led1TRIS = 0;
@@ -108,12 +109,10 @@ int main(void) {
  tp1TRIS = 0;
  tp2TRIS = 0;
  tp3TRIS = 0;
- tp4TRIS = 0;
  tp1LAT = 0;
  // only 1 led on when debugging
  tp2LAT = 0;
  tp3LAT = 0;
- tp4LAT = 0;
 #endif
     
   i2cInit();

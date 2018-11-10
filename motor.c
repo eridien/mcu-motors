@@ -93,7 +93,7 @@ const    uint8  limitMask[NUM_MOTORS] = {limitMASK};
 
 #ifdef B5
 volatile uint16 *stepPort[NUM_MOTORS] = {&stepRPORT, &stepEPORT, &stepXPORT, &stepFPORT, &stepZPORT};
-const    uint16 stepMask[NUM_MOTORS] = {stepRBIT, stepEBIT, stepXBIT};
+const    uint16 stepMask[NUM_MOTORS] = {stepRBIT, stepEBIT, stepXBIT, stepFBIT, stepZBIT};
 
 volatile uint16 *resetPort[NUM_MOTORS] = {&resetPORT, &resetPORT, &resetPORT, &resetPORT, &resetPORT};
 const    uint16 resetMask[NUM_MOTORS] = {resetBIT, resetBIT, resetBIT, resetBIT, resetBIT};
@@ -145,26 +145,26 @@ void motorInit() {
 
 #ifdef B5
   stepRTRIS = 0;
-  stepRLAT = 1; // step idle is high
+  stepRLAT = 1; 
   stepETRIS = 0;
-  stepELAT = 1; // step idle is high
+  stepELAT = 1; 
   stepXTRIS = 0;
-  stepXLAT = 1; // step idle is high
+  stepXLAT = 1; 
   stepFTRIS = 0;
-  stepFLAT = 1; // step idle is high
+  stepFLAT = 1; 
   stepZTRIS = 0;
-  stepZLAT = 1; // step idle is high
+  stepZLAT = 1; 
 
   faultRTRIS = 1; // zero means motor fault
-  faultETRIS = 1; // zero means motor fault
-  faultXTRIS = 1; // zero means motor fault 
-  faultFTRIS = 1; // zero means motor fault 
-  faultZTRIS = 1; // zero means motor fault 
+  faultETRIS = 1; 
+  faultXTRIS = 1;  
+  faultFTRIS = 1;  
+  faultZTRIS = 1;  
 
   limitRTRIS = 1; // zero means at limit switch
-  limitXTRIS = 1; // zero means at limit switch
-  limitFTRIS = 1; // zero means at limit switch
-  limitZTRIS = 1; // zero means at limit switch
+  limitXTRIS = 1; 
+  limitFTRIS = 1; 
+  limitZTRIS = 1; 
 #endif /* B5 */
 
 #ifdef U3
@@ -204,7 +204,7 @@ bool haveFault() {
 #endif
 #ifdef B5
 #ifdef DEBUG
-  return false
+  return false;
 #else
   volatile uint16 *p = faultPort[motorIdx];
   return !(*p & faultMask[motorIdx]);
@@ -385,10 +385,12 @@ void processCommand() {
           break; // reset off
         case 6: homeCommand(false);
           break; // stop, set curpos to setting
+#ifdef B1
         case 7: 
           startADC();
           ms->nextStateVacADC = true;
-          break; // next read pos is actually vacuum ADC value (B1 only))
+          break; // next read pos is actually vacuum ADC value
+#endif
         default: setError(CMD_DATA_ERROR);
       }
     }

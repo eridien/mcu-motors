@@ -50,12 +50,10 @@
 #define tp1TRIS TRISC4
 #define tp2TRIS TRISC3
 #define tp3TRIS TRISC6
-#define tp4TRIS TRISA4
 
 #define tp1LAT  LATC4
 #define tp2LAT  LATC3
 #define tp3LAT  LATC6
-#define tp4LAT  LATA4
 
 #define dbg10   tp1LAT = 0;
 #define dbg11   tp1LAT = 1;
@@ -63,8 +61,6 @@
 #define dbg21   tp2LAT = 1;
 #define dbg30   tp3LAT = 0;
 #define dbg31   tp3LAT = 1;
-#define dbg40   tp4LAT = 0;
-#define dbg41   tp4LAT = 1;
 
 #endif /* B1 */
 
@@ -89,7 +85,6 @@
 #define stepXTRIS  _TRISB3
 #define stepFTRIS  _TRISB13
 #define stepZTRIS  _TRISA2
-
 #define stepRLAT   _LATB1
 #define stepELAT   _LATB2
 #define stepXLAT   _LATB3
@@ -104,13 +99,18 @@
 #define stepFPORT  PORTB
 #define stepFBIT   0x2000
 #define stepZPORT  PORTA
-#define stepZBIT   0x0002
+#define stepZBIT   0x0004
 
 #define faultRTRIS  _TRISB4
 #define faultETRIS  _TRISA4
 #define faultXTRIS  _TRISB5
 #define faultFTRIS  _TRISB12
 #define faultZTRIS  _TRISA3
+#define faultRLAT  _LATB4
+#define faultELAT  _LATA4
+#define faultXLAT  _LATB5
+#define faultFLAT  _LATB12
+#define faultZLAT  _LATA3
 #define faultRPORT  PORTB
 #define faultRBIT   0x0010
 #define faultEPORT  PORTA
@@ -187,12 +187,10 @@
 #define tp1TRIS    _TRISA4
 #define tp2TRIS    led1TRIS
 #define tp3TRIS    led2TRIS
-#define tp4TRIS    led3TRIS
 
 #define tp1LAT     _LATA4
 #define tp2LAT     led1LAT
 #define tp3LAT     led2LAT
-#define tp4LAT     led3LAT
 
 #define dbg10 tp1LAT = 0;
 #define dbg11 tp1LAT = 1;
@@ -200,8 +198,6 @@
 #define dbg21 tp2LAT = 1;
 #define dbg30 tp3LAT = 0;
 #define dbg31 tp3LAT = 1;
-#define dbg40 tp4LAT = 0;
-#define dbg41 tp4LAT = 1;
 #endif /* U3 */
 
 #endif	/* PINS_H */

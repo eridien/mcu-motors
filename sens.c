@@ -27,7 +27,7 @@ void sensInit(void) {
 
 // set dac output to val/10 volts
 void setDac(uint16 val) {
-  val = (val*34)/33; // measured
+  val = (val*35)/33; // measured
   DAC1CON1bits.DAC1R = (val > 31 ? 31 : val);
 }
 
