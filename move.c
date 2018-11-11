@@ -24,7 +24,7 @@ void setStep(bool closing) {
 #ifdef BM
   if(ms->insideBacklash) {
     ms->ustep = 3;
-    clkTicks = clkTicksPerSec / (sv->jerk >> 3);
+    clkTicks = clkTicksPerSec / (sv->backlashSpeed >> 3);
   }
   else {
     if(!closing) {
@@ -63,7 +63,8 @@ void setStep(bool closing) {
     }
   }
 #else /* U3 */
-  clkTicks = clkTicksPerSec / (ms->insideBacklash ? sv->jerk : ms->curSpeed);
+  clkTicks = clkTicksPerSec / 
+                (ms->insideBacklash ? sv->backlashSpeed : ms->curSpeed);
 #endif
   bool err;
   disableAllInts;

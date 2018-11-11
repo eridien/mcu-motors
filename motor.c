@@ -57,6 +57,7 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
   0,    // home pos value, set cur pos to this after homing
   0,    // limit sw control (0 is normal)
   0,    // backlash width of dead interval
+  2400, // backlash speed over dead interval
   30,   // period of clock in usecs  (applies to all motors in mcu)
 };
 
@@ -75,6 +76,7 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
      0, // home pos value, set cur pos to this after homing
      0, // limit sw control (0 is normal)
      0, // backlash width of dead interval
+  2400, // backlash speed over dead interval
     30, // period of clock in usecs  (applies to all motors in mcu)
 };
 #endif /* BM */
