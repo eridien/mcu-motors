@@ -8,6 +8,7 @@
 #include "clock.h"
 #include "stop.h"
 #include "dist-table.h"
+#include "debug.h"
 
 const uint16 uStepPhaseMask[4] = {0x07, 0x03, 0x01, 0x00};
 const uint16 uStepDist[4]      = {   8,    4,    2,    1};
@@ -42,6 +43,7 @@ void setStep(bool closing) {
         if((ms->phase & uStepPhaseMask[tgtUstep]) == 0) {
           ms->ustep = tgtUstep;
         }
+//        dbgHist(ms->ustep);
       }
     }
     else { 
@@ -52,6 +54,7 @@ void setStep(bool closing) {
       if(dist & uStepPhaseMask[ms->ustep]) {
         ms->ustep++;
       }
+//      dbgHist(ms->ustep);
     }
 // set step timing
     switch (ms->ustep) {
@@ -95,9 +98,13 @@ void checkMotor() {
     if (sv->accelIdx == 0 || 
         ms->curSpeed <= sv->jerk) {
       ms->curSpeed = ms->targetSpeed;
-      ms->curDir = ms->targetDir;
+      ms->curDir   = ms->targetDir;
+      
+//      dbgHist(0xaaaa);
     }
     else {
+//      dbgHist(0xdddd);
+
       decelerate = true;
     }
   }

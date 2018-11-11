@@ -15,6 +15,7 @@
       <itemPath>stop.h</itemPath>
       <itemPath>dist-table.h</itemPath>
       <itemPath>sens.h</itemPath>
+      <itemPath>debug.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -34,6 +35,7 @@
       <itemPath>dist-table.c</itemPath>
       <itemPath>disttable.asm</itemPath>
       <itemPath>sens.c</itemPath>
+      <itemPath>debug.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

@@ -50,6 +50,7 @@ void chkHoming() {
         setStateBit(HOMED_BIT, 1);
         ms->curPos = sv->homePos;
         stopStepping();
+        // we know we are past backlash since switch opened
         ms->curBacklashOfs = 0;
         return;
       }

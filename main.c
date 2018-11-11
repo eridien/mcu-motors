@@ -78,6 +78,7 @@
 #include "clock.h"
 #include "dist-table.h"
 #include "sens.h"
+#include "debug.h"
 
 int main(void) {
 #ifdef B1
@@ -119,6 +120,7 @@ int main(void) {
   clkInit();
   motorInit();
   sensInit();
+  initDebug();
 
 #ifdef B1
   initDistTable();

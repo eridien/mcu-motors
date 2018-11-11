@@ -57,17 +57,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=clock.c home.c i2c.c main.c motor.c move.c state.c stop.c dist-table.c sens.c
+SOURCEFILES_QUOTED_IF_SPACED=clock.c home.c i2c.c main.c motor.c move.c state.c stop.c dist-table.c sens.c debug.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/clock.o ${OBJECTDIR}/home.o ${OBJECTDIR}/i2c.o ${OBJECTDIR}/main.o ${OBJECTDIR}/motor.o ${OBJECTDIR}/move.o ${OBJECTDIR}/state.o ${OBJECTDIR}/stop.o ${OBJECTDIR}/dist-table.o ${OBJECTDIR}/sens.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/clock.o.d ${OBJECTDIR}/home.o.d ${OBJECTDIR}/i2c.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/motor.o.d ${OBJECTDIR}/move.o.d ${OBJECTDIR}/state.o.d ${OBJECTDIR}/stop.o.d ${OBJECTDIR}/dist-table.o.d ${OBJECTDIR}/sens.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/clock.o ${OBJECTDIR}/home.o ${OBJECTDIR}/i2c.o ${OBJECTDIR}/main.o ${OBJECTDIR}/motor.o ${OBJECTDIR}/move.o ${OBJECTDIR}/state.o ${OBJECTDIR}/stop.o ${OBJECTDIR}/dist-table.o ${OBJECTDIR}/sens.o ${OBJECTDIR}/debug.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/clock.o.d ${OBJECTDIR}/home.o.d ${OBJECTDIR}/i2c.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/motor.o.d ${OBJECTDIR}/move.o.d ${OBJECTDIR}/state.o.d ${OBJECTDIR}/stop.o.d ${OBJECTDIR}/dist-table.o.d ${OBJECTDIR}/sens.o.d ${OBJECTDIR}/debug.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/clock.o ${OBJECTDIR}/home.o ${OBJECTDIR}/i2c.o ${OBJECTDIR}/main.o ${OBJECTDIR}/motor.o ${OBJECTDIR}/move.o ${OBJECTDIR}/state.o ${OBJECTDIR}/stop.o ${OBJECTDIR}/dist-table.o ${OBJECTDIR}/sens.o
+OBJECTFILES=${OBJECTDIR}/clock.o ${OBJECTDIR}/home.o ${OBJECTDIR}/i2c.o ${OBJECTDIR}/main.o ${OBJECTDIR}/motor.o ${OBJECTDIR}/move.o ${OBJECTDIR}/state.o ${OBJECTDIR}/stop.o ${OBJECTDIR}/dist-table.o ${OBJECTDIR}/sens.o ${OBJECTDIR}/debug.o
 
 # Source Files
-SOURCEFILES=clock.c home.c i2c.c main.c motor.c move.c state.c stop.c dist-table.c sens.c
+SOURCEFILES=clock.c home.c i2c.c main.c motor.c move.c state.c stop.c dist-table.c sens.c debug.c
 
 
 CFLAGS=
@@ -164,6 +164,13 @@ ${OBJECTDIR}/sens.o: sens.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE)  sens.c  -o ${OBJECTDIR}/sens.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/sens.o.d"      -g -D__DEBUG     -omf=elf -DBM -DB5 -DDEBUG -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -DBM -DB5 -DDEBUG -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/sens.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
+${OBJECTDIR}/debug.o: debug.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/debug.o.d 
+	@${RM} ${OBJECTDIR}/debug.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  debug.c  -o ${OBJECTDIR}/debug.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/debug.o.d"      -g -D__DEBUG     -omf=elf -DBM -DB5 -DDEBUG -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -DBM -DB5 -DDEBUG -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/debug.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
 else
 ${OBJECTDIR}/clock.o: clock.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
@@ -234,6 +241,13 @@ ${OBJECTDIR}/sens.o: sens.c  nbproject/Makefile-${CND_CONF}.mk
 	@${RM} ${OBJECTDIR}/sens.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  sens.c  -o ${OBJECTDIR}/sens.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/sens.o.d"        -g -omf=elf -DBM -DB5 -DDEBUG -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -DBM -DB5 -DDEBUG -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/sens.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/debug.o: debug.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/debug.o.d 
+	@${RM} ${OBJECTDIR}/debug.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  debug.c  -o ${OBJECTDIR}/debug.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/debug.o.d"        -g -omf=elf -DBM -DB5 -DDEBUG -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O0 -DBM -DB5 -DDEBUG -msmart-io=1 -Wall -msfr-warn=off  
+	@${FIXDEPS} "${OBJECTDIR}/debug.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 endif
 
