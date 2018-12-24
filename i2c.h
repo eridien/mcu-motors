@@ -10,9 +10,10 @@
 
 #define I2C_ADDR_MASK 0xf0 // motor idx in d3-d1 (d2-d0 in real addr)
 
-// motor (or leds) is bottom 3 bits in addr
-#define I2C_ADDR      0x20  // real addr:0x10, head mcu (B8) for bipolar motors
-
+// motor is bottom 2 bits in addr
+// addr is set based on ID input pin
+#define I2C_ADDR_0   0x10  // real addr: 0x08+motor
+#define I2C_ADDR_1   0x18  // real addr: 0x0c+motor
 
 #define RdNotWrite SSP1STATbits.I2C_READ
 #define NotAddr    SSP1STATbits.NOT_ADDRESS

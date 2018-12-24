@@ -61,7 +61,6 @@ struct motorState {
   bool   resetAfterSoftStop;
   bool   nextStateTestPos; // flag to return homeTestPos on next read
   int16  homeTestPos;      // pos when limit sw closes
-  bool   nextStateVacADC;  // flag to return vacuum ADC value on next read
 };
 
 extern struct motorState mState[NUM_MOTORS];

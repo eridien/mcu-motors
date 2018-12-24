@@ -7,6 +7,12 @@
 #define I2C_BUF_BYTE  SSP1BUF
 #define I2C_SSPIF     SSP1IF
 
+#define IDTRIS    _TRISB10  // shared with ICSPDAT2
+#define AUXTRIS   _TRISB11  // shared with ICSPCLK2
+
+#define IDLAT     _LATB10
+#define AUXLAT    _LATB11
+
 #define dirTRIS   _TRISA6
 #define ms1TRIS   _TRISA7
 #define ms2TRIS   _TRISB7
@@ -17,74 +23,88 @@
 #define ms2LAT    _LATB7
 #define ms3LAT    _LATB6
 
-#define resetTRIS _TRISB15
-#define resetLAT  _LATB15
-#define resetPORT  PORTB
-#define resetBIT   0x8000
+#define resetATRIS _TRISB15
+#define resetBTRIS _TRISB14
+#define resetCTRIS _TRISB13
+#define resetDTRIS _TRISB12
 
-#define stepRTRIS  _TRISB1
-#define stepETRIS  _TRISB2
-#define stepXTRIS  _TRISB3
-#define stepFTRIS  _TRISB13
-#define stepZTRIS  _TRISA2
-#define stepRLAT   _LATB1
-#define stepELAT   _LATB2
-#define stepXLAT   _LATB3
-#define stepFLAT   _LATB13
-#define stepZLAT   _LATA2
-#define stepRPORT  PORTB
-#define stepRBIT   0x0002
-#define stepEPORT  PORTB
-#define stepEBIT   0x0004
-#define stepXPORT  PORTB
-#define stepXBIT   0x0008
-#define stepFPORT  PORTB
-#define stepFBIT   0x2000
-#define stepZPORT  PORTA
-#define stepZBIT   0x0004
+#define resetALAT  _LATB15
+#define resetBLAT  _LATB14
+#define resetCLAT  _LATB13
+#define resetDLAT  _LATB12
 
-#define faultRTRIS  _TRISB4
-#define faultETRIS  _TRISA4
-#define faultXTRIS  _TRISB5
-#define faultFTRIS  _TRISB12
-#define faultZTRIS  _TRISA3
-#define faultRLAT  _LATB4
-#define faultELAT  _LATA4
-#define faultXLAT  _LATB5
-#define faultFLAT  _LATB12
-#define faultZLAT  _LATA3
-#define faultRPORT  PORTB
-#define faultRBIT   0x0010
-#define faultEPORT  PORTA
-#define faultEBIT   0x0010
-#define faultXPORT  PORTB
-#define faultXBIT   0x0020
-#define faultFPORT  PORTB
-#define faultFBIT   0x1000
-#define faultZPORT  PORTA
-#define faultZBIT   0x0008
+#define resetAPORT  PORTB
+#define resetBPORT  PORTB
+#define resetCPORT  PORTB
+#define resetDPORT  PORTB
 
-#define limitRTRIS  _TRISA0
-#define limitXTRIS  _TRISA1
-#define limitFTRIS  _TRISB14
-#define limitZTRIS  _TRISB0
-#define limitRPORT  PORTA
-#define limitRBIT   0x0001
-#define limitXPORT  PORTA
-#define limitXBIT   0x0002
-#define limitFPORT  PORTB
-#define limitFBIT   0x4000
-#define limitZPORT  PORTB
-#define limitZBIT   0x0001
+#define resetABIT   0x8000
+#define resetBBIT   0x4000
+#define resetCBIT   0x2000
+#define resetDBIT   0x1000
+
+#define stepATRIS  _TRISB1
+#define stepBTRIS  _TRISB2
+#define stepCTRIS  _TRISB3
+#define stepDTRIS  _TRISA2
+
+#define stepALAT   _LATB1
+#define stepBLAT   _LATB2
+#define stepCLAT   _LATB3
+#define stepDLAT   _LATA2
+
+#define stepAPORT  PORTB
+#define stepBPORT  PORTB
+#define stepCPORT  PORTB
+#define stepDPORT  PORTA
+
+#define stepABIT   0x0002
+#define stepBBIT   0x0004
+#define stepCBIT   0x0008
+#define stepDBIT   0x0004
+
+#define faultATRIS  _TRISA3
+#define faultBTRIS  _TRISB4
+#define faultCTRIS  _TRISA4
+#define faultDTRIS  _TRISB5
+
+#define faultALAT  _LATA3
+#define faultBLAT  _LATB4
+#define faultCLAT  _LATA4
+#define faultDLAT  _LATB5
+
+#define faultAPORT  PORTA
+#define faultBPORT  PORTB
+#define faultCPORT  PORTA
+#define faultDPORT  PORTB
+
+#define faultABIT   0x0008
+#define faultBBIT   0x0010
+#define faultCBIT   0x0010
+#define faultDBIT   0x0020
+
+#define limit1TRIS  _TRISA0
+#define limit2TRIS  _TRISA1
+#define limit3TRIS  _TRISB0
+
+#define limit1PORT  PORTA
+#define limit2PORT  PORTA
+#define limit3PORT  PORTB
+
+#define limit1BIT   0x0001
+#define limit2BIT   0x0002
+#define limit3BIT   0x0001
 
 #ifdef DEBUG
-#define tp1TRIS     faultRTRIS
-#define tp2TRIS     faultETRIS
-#define tp3TRIS     faultXTRIS
+#define tp1TRIS faultATRIS
+#define tp2TRIS faultBTRIS
+#define tp3TRIS faultCTRIS
+#define tp4TRIS faultDTRIS
 
-#define tp1LAT      faultRLAT
-#define tp2LAT      faultELAT
-#define tp3LAT      faultXLAT
+#define tp1LAT  faultALAT
+#define tp2LAT  faultBLAT
+#define tp3LAT  faultCLAT
+#define tp4LAT  faultDLAT
 
 #define dbg10 tp1LAT = 0;
 #define dbg11 tp1LAT = 1;
@@ -92,6 +112,8 @@
 #define dbg21 tp2LAT = 1;
 #define dbg30 tp3LAT = 0;
 #define dbg31 tp3LAT = 1;
+#define dbg40 tp4LAT = 0;
+#define dbg41 tp4LAT = 1;
 #endif
 
 #endif	/* PINS_H */

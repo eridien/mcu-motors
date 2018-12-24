@@ -6,7 +6,8 @@
 #include "i2c.h"
 #include "state.h"
 #include "motor.h"
-#include "sens.h"
+
+uint8 i2cAddrBase; 
 
 volatile uint8 i2cRecvBytes[NUM_MOTORS][RECV_BUF_SIZE+1]; // added len byte
 volatile uint8 i2cRecvBytesPtr;
@@ -16,21 +17,30 @@ volatile bool  inPacket;
 volatile bool  packetForUs;
 
 void i2cInit() { 
-    SSP1CON1bits.SSPM = 0x0e;          // slave mode, 7-bit, S & P ints enabled 
-    SSP1MSK           = I2C_ADDR_MASK; // address mask, check top 5 bits
-    SSP1ADD           = I2C_ADDR;      // slave address (7-bit addr)
-    SSP1STATbits.SMP  = 0;             // slew-rate enabled
-    SSP1STATbits.CKE  = 1;             // smb voltage levels
-    SSP1CON2bits.SEN  = 1;             // enable clock stretching 
-    SSP1CON3bits.AHEN = 0;             // no clock stretch before addr ack
-    SSP1CON3bits.DHEN = 0;             // no clock stretch before data ack
-    SSP1CON3bits.BOEN = 1;             // enable buffer overwrite check
-    NotStretch        = 0;             // stretch clk of first start bit
-    
-    _SSP1IF = 0;                       // nothing received yet
-    _SSP1IE = 1;                       // Enable ints
+  IDTRIS  = 1;  // MCU ID input, shared with ICSPDAT2
+  i2cAddrBase = (IDLAT ? I2C_ADDR_1 : I2C_ADDR_0);
+#ifdef FORCE_ID_0
+  i2cAddrBase = I2C_ADDR_0;
+#endif
+#ifdef FORCE_ID_1
+  i2cAddrBase = I2C_ADDR_1;
+#endif
   
-    SSP1CON1bits.SSPEN = 1;            // Enable the serial port
+  SSP1CON1bits.SSPM = 0x0e;          // slave mode, 7-bit, S & P ints enabled 
+  SSP1MSK           = I2C_ADDR_MASK; // address mask, check top 5 bits
+  SSP1ADD           = i2cAddrBase;   // slave address (7-bit addr)
+  SSP1STATbits.SMP  = 0;             // slew-rate enabled
+  SSP1STATbits.CKE  = 1;             // smb voltage levels
+  SSP1CON2bits.SEN  = 1;             // enable clock stretching 
+  SSP1CON3bits.AHEN = 0;             // no clock stretch before addr ack
+  SSP1CON3bits.DHEN = 0;             // no clock stretch before data ack
+  SSP1CON3bits.BOEN = 1;             // enable buffer overwrite check
+  NotStretch        = 0;             // stretch clk of first start bit
+  
+  _SSP1IF = 0;                       // nothing received yet
+  _SSP1IE = 1;                       // Enable ints
+  
+  SSP1CON1bits.SSPEN = 1;            // Enable the serial port
 }
 
 // all words are big-endian

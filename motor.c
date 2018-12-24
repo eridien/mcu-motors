@@ -9,7 +9,6 @@
 #include "home.h"
 #include "move.h"
 #include "stop.h"
-#include "sens.h"
 
 union settingsUnion mSet[NUM_MOTORS];
 

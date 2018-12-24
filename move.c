@@ -183,11 +183,6 @@ void checkMotor() {
   }
   else if (accelerate) {
     // accel/step = accel/sec / steps/sec
-#ifdef B1
-    uint16 deltaSpeed = ((uint24) ms->acceleration * 8) / ms->curSpeed; // accel val is 1/8
-#else
-    uint16 deltaSpeed = ((uint32) ms->acceleration * 8) / ms->curSpeed;
-#endif
     if(deltaSpeed == 0) deltaSpeed = 1;
     ms->curSpeed += deltaSpeed;
     if(ms->curSpeed > ms->targetSpeed) {

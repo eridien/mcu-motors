@@ -44,31 +44,32 @@
 #include "motor.h"
 #include "clock.h"
 #include "dist-table.h"
-#include "sens.h"
 //#include "debug.h"
 
 int main(void) {
- _RCDIV = 0; // switch instruction clock from 4 MHz to 8 MHz
- ANSA = 0;   // no analog inputs
- ANSB = 0;
+ _RCDIV  = 0; // switch instruction clock from 4 MHz to 8 MHz
+ ANSA    = 0;   // no analog inputs
+ ANSB    = 0;
  _NSTDIS = 1;  // nested interrupts disabled
  
- 
+ AUXLAT  = 0;  // aux pin (fan or buzzer in P3))
+ AUXTRIS = 0;  // aux pin output, shared with ICSPCLK2
+
 #ifdef DEBUG
  tp1TRIS = 0;
  tp2TRIS = 0;
  tp3TRIS = 0;
- tp1LAT = 0;
- // only 1 led on when debugging
- tp2LAT = 0;
- tp3LAT = 0;
+ tp4TRIS = 0;
+ 
+ tp1LAT  = 0;
+ tp2LAT  = 0;
+ tp3LAT  = 0;
+ tp4LAT  = 0;
 #endif
     
   i2cInit();
   clkInit();
   motorInit();
-  sensInit();
-//  initDebug();
 
   enableAllInts;
   
