@@ -39,7 +39,7 @@
   0001 0100  reset      hard stop (power down motor with immediate reset)
   0001 0101  motorOn    (power up motor by removing reset)
   0001 0110  fakeHome   set curpos to home pos value setting and turn motor on (fake homing)
-  0000 001x  setAux     set aux ouput pin to x
+  0000 001x  setAux     set aux ouput pin to x (one bit per mcu)
 
   -- 2-byte move command --
   1aaa aaaa    top 7 bits of target position
@@ -72,22 +72,25 @@
     homing back-up speed
     home offset distance (final home distance from switch)
     home pos value (set cur pos to this value after homing, usually 0)
-    limit switch control
+    limit switch control for motor A // see below
+    limit switch control for motor B
+    limit switch control for motor C
+    limit switch control for motor D
     backlash distance
     mcuClock;   // period of clock in usecs  (motor 0 applies to entire mcu)
 
-  limit sw control byte format for settings command above
-  zero-byte is normal behavior
-  00ssl00
-    ss  start dir: 0: rev, 2: limit sw, 3: not limit sw
+  limit sw control word format for settings command above
+  ssss 00dd 0000 000l
+    ssss limit switch number, 0: none, 1,2,3
+    dd  start dir: 0: rev, 2: limit sw, 3: not limit sw
      l  switch pin active voltage, 0: lo,  1: hi
 
-  limit sw control handles limit switch in middle of travel, not on an end
-  start-dir values 2 and 3 allowing homing from either side of switch
+  limit sw control allows limit switch in middle of travel, not on an end
+  start-dir values 2 and 3 allow homing from either side of switch
   ends on dir=1 side of switch no matter what side it started on
 
-  -- 4-byte status read --
-  this is the only read format on i2c -- always 4 bytes including cksum
+  -- 3-byte status read --
+  this is the only read format on i2c
   Error code and error bit are cleared on status read, only on addressed motor
     1) vccc eboh  state byte
         v: version (1-bit)
@@ -96,9 +99,8 @@
         b: busy     (homing, moving, or stopping)
         o: motor on (not in reset)
         h: homed    (motor has been homed since last reset)
-    2) aaaa aaaa  signed motor position, top 8 bits (or test pos or vacuum)
+    2) aaaa aaaa  signed motor position, top 8 bits (or test pos)
     3) aaaa aaaa  followed by bottom 8 bits
-    4) cccc cccc  8-bit cksum, sum of first 3 bytes
 
   Error codes for state byte above 
     MOTOR_FAULT_ERROR   0x10  missing, over-heated, or over-current driver chip
@@ -116,8 +118,3 @@
 
   position values in commands must be positive, top bit is zero
   position returned in status is signed and may be negative (e.g. when homing)
-
-  For MCU B1 only ...
-  Command 0x17 tells next status to return the ADC value for the vacuum sensor
-  This status read will have a magic state value of 0x05 (normally impossible)
-

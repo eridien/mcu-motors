@@ -44,14 +44,11 @@
 #include "motor.h"
 #include "clock.h"
 #include "dist-table.h"
-//#include "debug.h"
 
 int main(void) {
  _RCDIV  = 0; // switch instruction clock from 4 MHz to 8 MHz
  ANSA    = 0;   // no analog inputs
  ANSB    = 0;
- _NSTDIS = 1;  // nested interrupts disabled
- 
  AUXLAT  = 0;  // aux pin (fan or buzzer in P3))
  AUXTRIS = 0;  // aux pin output, shared with ICSPCLK2
 
@@ -71,6 +68,7 @@ int main(void) {
   clkInit();
   motorInit();
 
+ _NSTDIS = 1;  // nested interrupts disabled
   enableAllInts;
   
   // main event loop -- never ends

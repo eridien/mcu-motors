@@ -57,7 +57,6 @@ void setSendBytesInt(uint8 motIdx) {
     i2cSendBytes[1] =  p->curPos >> 8;
     i2cSendBytes[2] =  p->curPos & 0x00ff;
   }
-  i2cSendBytes[3] = i2cSendBytes[0] + i2cSendBytes[1] + i2cSendBytes[2];
 }
 
 volatile uint8 motIdxInPacket;
@@ -113,15 +112,6 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
     else {
       if(!RdNotWrite) {
         // received byte (i2c write to slave)
-#ifdef U3
-        if(motIdxInPacket == NUM_MOTORS) {
-          uint8 leds = I2C_BUF_BYTE;
-          led1LAT  = !!(leds & 0xc0);
-          led2LAT  = !!(leds & 0x30);
-          led3LAT  = !!(leds & 0x0c);
-          led4LAT  = !!(leds & 0x03);
-        } else 
-#endif          
         if (mState[motIdxInPacket].haveCommand) {
             // last command for this motor not handled yet by event loop
             setErrorInt(motIdxInPacket, CMD_NOT_DONE_ERROR);

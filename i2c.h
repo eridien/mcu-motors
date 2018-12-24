@@ -6,7 +6,7 @@
 #include "motor.h"
 
 #define RECV_BUF_SIZE   (NUM_SETTING_WORDS*2 + 1) // + opcode byte
-#define NUM_SEND_BYTES   4  //  state, posH, posL, cksum
+#define NUM_SEND_BYTES   3  //  state, posH, posL
 
 #define I2C_ADDR_MASK 0xf0 // motor idx in d3-d1 (d2-d0 in real addr)
 
