@@ -22,7 +22,6 @@ void setStep(bool closing) {
   uint16 clkTicks;
   ms->insideBacklash = 
           (ms->curBacklashOfs != (ms->curDir ? 0 : sv->backlashWid));
-#ifdef BM
   if(ms->insideBacklash) {
     ms->ustep = 3;
     clkTicks = clkTicksPerSec / (sv->backlashSpeed >> 3);
@@ -65,10 +64,7 @@ void setStep(bool closing) {
       default: clkTicks = 0; // to avoid compiler warning
     }
   }
-#else /* U3 */
-  clkTicks = clkTicksPerSec / 
-                (ms->insideBacklash ? sv->backlashSpeed : ms->curSpeed);
-#endif
+
   bool err;
   disableAllInts;
   ms->nextStepTicks = ms->lastStepTicks + clkTicks;
@@ -80,11 +76,7 @@ void setStep(bool closing) {
     // nextStepTicks is in the past
     setError(STEP_NOT_DONE_ERROR); 
   } else {
-#ifdef BM
     setBiStepLo();
-#else
-    ms->phase += (ms->curDir ? 1 : -1);
-#endif
     ms->stepPending = true;
   }
 }
@@ -180,11 +172,7 @@ void checkMotor() {
   }
   if(decelerate) {
     // accel/step = accel/sec / steps/sec
-#ifdef B1
-    uint16 deltaSpeed = ((uint24) ms->acceleration * 8) / ms->curSpeed; // accel val is 1/8
-#else
     uint16 deltaSpeed = ((uint32) ms->acceleration * 8) / ms->curSpeed;
-#endif
     if(deltaSpeed == 0) deltaSpeed = 1;
     if(ms->curSpeed >= deltaSpeed) {
       ms->curSpeed -= deltaSpeed;

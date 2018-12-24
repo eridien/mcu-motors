@@ -9,21 +9,11 @@
 
 extern volatile int dummy;
 
-#ifdef B1
-    #define disableAllInts GIE=0
-    #define enableAllInts  GIE=1
-#else
-    #define disableAllInts __builtin_disi(0x3FFF)
-    #define enableAllInts  __builtin_disi(0x0000) 
-#endif
+#define enableAllInts  __builtin_disi(0x0000) 
 
 // when returning test pos instead of cur pos
 // state byte will have this magic value which can't happen normally
 #define TEST_POS_STATE      0x04
-
-// when returning vacuum ADC instead of cur pos (B1 only)
-// state byte will have this magic value which can't happen normally
-#define RD_VAC_STATE        0x05
 
 // Error codes 
 #define MOTOR_FAULT_ERROR   0x10

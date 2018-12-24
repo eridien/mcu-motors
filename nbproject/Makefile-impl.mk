@@ -31,7 +31,7 @@ DEFAULTCONF=B3
 CONF=${DEFAULTCONF}
 
 # All Configurations
-ALLCONFS=B1 B3 U6 
+ALLCONFS=B3 
 
 
 # build
@@ -45,17 +45,13 @@ ALLCONFS=B1 B3 U6
 
 # clobber
 .clobber-impl: .clobber-pre .depcheck-impl
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=B1 clean
 	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=B3 clean
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=U6 clean
 
 
 
 # all
 .all-impl: .all-pre .depcheck-impl
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=B1 build
 	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=B3 build
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=U6 build
 
 
 

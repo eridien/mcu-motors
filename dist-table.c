@@ -11,27 +11,6 @@
 // 256 speed values, 128 delta, (6.4 to 819.2 mm/sec)
 // up to 32,767 steps/sec (4 kHz pps)
 
-#ifdef B1
-// disttable is defined in disttable.asm
-extern const uint16 disttable;
-
-uint16 distTableAddr;
-
-void initDistTable(void){
-    distTableAddr = (uint16) &disttable;
-}
-
-uint16 calcDist(uint16 accel, uint16 speed) {
-  if(speed >= 0x8000) speed = 0x7fff;
-  uint16 addr = distTableAddr + ((accel << 8) | (speed >> 7));
-  NVMCON1bits.NVMREGS = 0;
-  NVMADRL = addr & 0xff;
-  NVMADRH = addr >> 8;
-  NVMCON1bits.RD = 1;
-  uint16 dist = (NVMDATH << 8) | NVMDATL;
-  return dist;
-}
-#else
 uint16 calcDist(uint16 accel, uint16 speed) {
   if(speed >= 0x8000) speed = 0x7fff;
   uint16 idx = (accel << 8) | (speed >> 7);
@@ -2093,5 +2072,3 @@ disttable[2048] = {
 10663,
 10748,
 };
-
-#endif

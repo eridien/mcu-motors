@@ -18,9 +18,7 @@ void stopStepping() {
 }
 
 void resetMotor(bool all) {
-#ifdef BM
   resetLAT = 0; 
-#endif
   uint8 savedMotorIdx = motorIdx;
   // set all global motor vars just like event loop
   for(motorIdx=0; motorIdx < NUM_MOTORS; motorIdx++) {
@@ -29,9 +27,6 @@ void resetMotor(bool all) {
     mm = stepMask[motorIdx]; // 0xf0 or 0x0f or step bit
     ms = &mState[motorIdx];
     sv = &(mSet[motorIdx].val);
-#ifndef BM
-    clrUniPort();
-#endif
     stopStepping();
     setStateBit(MOTOR_ON_BIT, 0);
     setStateBit(HOMED_BIT, 0);

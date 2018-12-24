@@ -13,37 +13,7 @@
 
 union settingsUnion mSet[NUM_MOTORS];
 
-#ifdef U3
-volatile uint16 *stepPort[NUM_MOTORS] = {
-  &motAPORT, // tube 1
-  &motBPORT, // tube 2
-  &motPPORT, // paster
-};
-
-const uint16 stepMask[NUM_MOTORS] = {
-  0x000f << motAOFS,
-  0x000f << motBOFS,
-  0x00f0 << motPOFS,
-};
-
-volatile uint16 *faultPort[NUM_MOTORS] = {0, 0, 0};
-const uint16 faultMask[NUM_MOTORS] = {0, 0, 0};
-
-// -------- phases ----------
-// Color        Bl Pi Ye Or  (red is +5))
-//              {1, 1, 0, 0},
-//              {0, 1, 1, 0},
-//              {0, 0, 1, 1},
-//              {1, 0, 0, 1}
-uint16 motPhaseValue[NUM_MOTORS][4] = {// motor, phase
-  {0x0c << motAOFS, 0x06 << motAOFS, 0x03 << motAOFS, 0x09 << motAOFS},
-  {0x0c << motBOFS, 0x06 << motBOFS, 0x03 << motBOFS, 0x09 << motBOFS},
-  {0x0c << motPOFS, 0x06 << motPOFS, 0x03 << motPOFS, 0x09 << motPOFS},
-};
-#endif
-
 // must match settingsStruct
-#ifdef BM
 // assumes 1/40 mm per step
 // default is same for all motors
 const uint16 settingsInit[NUM_SETTING_WORDS] = {
@@ -61,41 +31,6 @@ const uint16 settingsInit[NUM_SETTING_WORDS] = {
   30,   // period of clock in usecs  (applies to all motors in mcu)
 };
 
-#else
-
-// assumes 1/50 mm per step
-// default is same for all motors
-const uint16 settingsInit[NUM_SETTING_WORDS] = {
-     4, // acceleration index,  0 is no acceleration
-   400, // default speed is 8 mm/sec (20 mm/sec is max motor can go w no torque)
-   100, // jerk (start/stop speed limit) (2 mm/sec)
- 32767, // max pos is 600 mm (debug))
-   200, // homing speed (4 mm/sec)
-    60, // homing back-up ms->speed (1.2 mm/sec)
-    25, // home offset distance: 0.5 mm
-     0, // home pos value, set cur pos to this after homing
-     0, // limit sw control (0 is normal)
-     0, // backlash width of dead interval
-   200, // backlash speed over dead interval
-    30, // period of clock in usecs  (applies to all motors in mcu)
-};
-#endif /* BM */
-
-#ifdef B1
-volatile uint8 *stepPort[NUM_MOTORS] = {&stepPORT};
-const    uint8  stepMask[NUM_MOTORS] =  {stepMASK};
-
-volatile uint8 *resetPort[NUM_MOTORS] = {&resetPORT};
-const     uint8 resetMask[NUM_MOTORS] = {resetMASK};
-
-volatile uint8 *faultPort[NUM_MOTORS] = {&faultPORT};
-const    uint8  faultMask[NUM_MOTORS] = {faultMASK};
-
-volatile uint8 *limitPort[NUM_MOTORS] = {&limitPORT};
-const    uint8  limitMask[NUM_MOTORS] = {limitMASK};
-#endif
-
-#ifdef B5
 volatile uint16 *stepPort[NUM_MOTORS] = {&stepRPORT, &stepEPORT, &stepXPORT, &stepFPORT, &stepZPORT};
 const    uint16 stepMask[NUM_MOTORS] = {stepRBIT, stepEBIT, stepXBIT, stepFBIT, stepZBIT};
 
@@ -108,12 +43,6 @@ const    uint16 faultMask[NUM_MOTORS] = {faultRBIT, faultEBIT, faultXBIT, faultF
 // debug for broken board -- moved Z limit to E limit -- using E in place of Z
 volatile uint16 *limitPort[NUM_MOTORS] = {&limitRPORT, &limitZPORT, &limitXPORT, &limitFPORT, 0};
 const    uint16 limitMask[NUM_MOTORS]  = { limitRBIT,   limitZBIT,   limitXBIT,   limitFBIT,  0};
-#endif
-
-#ifdef U3
-volatile uint16 *limitPort[NUM_MOTORS] = {&limitAPORT, &limitBPORT, 0};
-const    uint16  limitMask[NUM_MOTORS] = { limitABIT,   limitBBIT,  0};
-#endif
 
 // globals for use in main chk loop
 uint8 motorIdx;
@@ -121,34 +50,13 @@ struct motorState *ms;
 struct motorSettings *sv;
 uint8 mm; // current motor mask (0xf0 or 0x0f or step bit)
 
-#ifdef B1
-volatile unsigned char *mp; // current motor port (like &PORTA)
-#else
-volatile uint16 *mp; // current motor port (like &PORTA)
-#endif
-
 void motorInit() {
-#ifdef BM
   dirTRIS = 0;
   ms1TRIS = 0;
   ms2TRIS = 0;
   ms3TRIS = 0;
-#ifdef B1
   resetLAT = 0; // start with reset on
   resetTRIS = 0;
-#else
-  resetLAT = 0; // start with reset on
-  resetTRIS = 0;
-#endif
-#endif
-
-#ifdef B1
-  stepTRIS = 0;
-  faultTRIS = 1; // zero means motor fault
-  limitTRIS = 1; // zero means at limit switch  // may be used by dbg4
-#endif
-
-#ifdef B5
   stepRTRIS = 0;
   stepRLAT = 1; 
   stepETRIS = 0;
@@ -170,15 +78,6 @@ void motorInit() {
   limitXTRIS = 1; 
   limitFTRIS = 1; 
   limitZTRIS = 1; 
-#endif /* B5 */
-
-#ifdef U3
-  motATRIS = (motATRIS & ~(0x0f << motAOFS));
-  motBTRIS = (motBTRIS & ~(0x0f << motBOFS));
-  motPTRIS = (motPTRIS & ~(0x0f << motPOFS));
-  limitATRIS = 1; // zero means at limit switch
-  limitBTRIS = 1; // zero means at limit switch
-#endif
 
   uint8 motIdx;
   for (motIdx = 0; motIdx < NUM_MOTORS; motIdx++) {
@@ -203,35 +102,20 @@ void motorInit() {
 }
 
 bool haveFault() {
-#ifdef B1
-  volatile uint8 *p = faultPort[motorIdx];
-  return !(*p & faultMask[motorIdx]);
-#endif
-#ifdef B5
 #ifdef DEBUG
   return false;
 #else
   volatile uint16 *p = faultPort[motorIdx];
   return !(*p & faultMask[motorIdx]);
 #endif
-#endif
-#ifdef U3
-  return false;
-#endif
 }
 
 bool limitSwOn() {
-#ifndef U3
-#ifdef B1
-  volatile uint8 *p = limitPort[motorIdx];
-#else
-  volatile uint16 *p = limitPort[motorIdx];
-#endif
+volatile uint16 *p = limitPort[motorIdx];
   if (p != 0) {
     return (ms->limitSwPolarity ? (*p & limitMask[motorIdx])
             : !(*p & limitMask[motorIdx]));
   }
-#endif /* not U3 */
   return false;
 }
 
@@ -399,23 +283,13 @@ void processCommand() {
           break; // reset off
         case 6: homeCommand(false);
           break; // stop, set curpos to setting
-#ifdef B1
-        case 7: 
-          startADC();
-          ms->nextStateVacADC = true;
-          break; // next read pos is actually vacuum ADC value
-#endif
         default: setError(CMD_DATA_ERROR);
       }
     }
   } else setError(CMD_DATA_ERROR);
 }
-#ifdef B1
-void clockInterrupt(void) {
-#else
 void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void) {
   _T1IF = 0;
-#endif
   timeTicks++;
   int motIdx;
   for (motIdx = 0; motIdx < NUM_MOTORS; motIdx++) {
@@ -426,15 +300,11 @@ void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void) {
         setErrorInt(motIdx, STEP_NOT_DONE_ERROR);
         return;
       }
-#ifdef BM
       ms1LAT = ((p->ustep & 0x01) ? 1 : 0);
       ms2LAT = ((p->ustep & 0x02) ? 1 : 0);
       ms3LAT = ((p->ustep & 0x04) ? 1 : 0);
       dirLAT =   p->curDir        ? 1 : 0;
       setBiStepHiInt(motIdx);
-#else
-      setUniPortInt(motIdx, p->phase);
-#endif
       p->stepPending = false;
       p->lastStepTicks = timeTicks;
       p->stepped = true;

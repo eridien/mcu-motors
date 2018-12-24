@@ -11,26 +11,12 @@
 #define I2C_ADDR_MASK 0xf0 // motor idx in d3-d1 (d2-d0 in real addr)
 
 // motor (or leds) is bottom 3 bits in addr
-#ifdef B1
-#define I2C_ADDR      0x10  // real addr:0x08, box mcu (B1), motor always 0
-#endif
-#ifdef B5
-#define I2C_ADDR      0x20  // real addr:0x10, head mcu (B5) for bipolar motors
-#endif
-#ifdef U3
-#define I2C_ADDR      0x30  // real addr:0x18, head mcu (U3) for unipolar motors
-#endif
+#define I2C_ADDR      0x20  // real addr:0x10, head mcu (B8) for bipolar motors
 
 
-#ifdef B1
-    #define RdNotWrite SSP1STATbits.I2C_READ
-    #define NotAddr    SSP1STATbits.DA
-    #define NotStretch SSP1CON1bits.CKP1
-#else
-    #define RdNotWrite SSP1STATbits.I2C_READ
-    #define NotAddr    SSP1STATbits.NOT_ADDRESS
-    #define NotStretch SSP1CON1bits.CKP
-#endif
+#define RdNotWrite SSP1STATbits.I2C_READ
+#define NotAddr    SSP1STATbits.NOT_ADDRESS
+#define NotStretch SSP1CON1bits.CKP
 
 extern volatile uint8 i2cRecvBytes[NUM_MOTORS][RECV_BUF_SIZE + 1];
 extern volatile uint8 i2cRecvBytesPtr;

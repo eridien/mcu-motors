@@ -27,20 +27,8 @@ void i2cInit() {
     SSP1CON3bits.BOEN = 1;             // enable buffer overwrite check
     NotStretch        = 0;             // stretch clk of first start bit
     
-#ifdef B1
-    SSP1CLKPPS = 0x10;           // RC0
-    SSP1DATPPS = 0x11;           // RC1
-    RC0PPS     = 0x15;           // SCL1
-    RC1PPS     = 0x16;           // SDA1
-    
-    SSP1IF = 0;                        // nothing received yet
-    SSP1IE = 1;                        // Enable ints
-#else
-    // no pps
     _SSP1IF = 0;                       // nothing received yet
     _SSP1IE = 1;                       // Enable ints
-    
-#endif  /* B1 */
   
     SSP1CON1bits.SSPEN = 1;            // Enable the serial port
 }
@@ -54,14 +42,6 @@ void setSendBytesInt(uint8 motIdx) {
     i2cSendBytes[1]  = p->homeTestPos >> 8;
     i2cSendBytes[2]  = p->homeTestPos & 0x00ff;
   }
-#ifdef B1
-  else if(ms->nextStateVacADC) {
-    ms->nextStateVacADC = false;
-    i2cSendBytes[0]  = (RD_VAC_STATE | MCU_VERSION);
-    i2cSendBytes[1]  = ADRESH;
-    i2cSendBytes[2]  = ADRESL;
-  }
-#endif
   else {
     i2cSendBytes[0] = (p->stateByte | MCU_VERSION);
     i2cSendBytes[1] =  p->curPos >> 8;
@@ -72,12 +52,8 @@ void setSendBytesInt(uint8 motIdx) {
 
 volatile uint8 motIdxInPacket;
 
-#ifdef B1
-void i2cInterrupt(void) {
-#else
 void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
   _SSP1IF = 0;
-#endif
   // SSPxSTATbits.S is set during entire packet
   if(I2C_START_BIT && !inPacket) { 
     // received start bit, prepare for packet
