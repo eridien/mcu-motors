@@ -9,6 +9,7 @@
 
 extern volatile int dummy;
 
+#define disableAllInts __builtin_disi(0x3FFF)
 #define enableAllInts  __builtin_disi(0x0000) 
 
 // when returning test pos instead of cur pos
