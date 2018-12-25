@@ -32,7 +32,7 @@
   Changed settings take effect immediately even when motor is busy
 
   -- one-byte commands --
-  0001 0000  home       start homing
+  0001 0000  home       start homing (or fake home if no limit switch)
   0001 0001  test       next read position is end position of homing (test pos)
   0001 0010  stop       soft stop, decelerates, no reset
   0001 0011  stopRst    decelerates and then resets
@@ -61,7 +61,7 @@
   001d ssss    d: direction  
     ssss ssss  s: number of steps
 
-  -- 3-byte to 21-byte settings command --
+  -- 3-byte to 23-byte settings command --
   write may be short, only setting first entries
   0001 1111  load settings, all are two-byte, big-endian, 16-bit values
     acceleration rate table index 0..7, 0 is off
@@ -77,14 +77,9 @@
     mcuClock;   // period of clock in usecs  (motor 0 applies to entire mcu)
 
   limit sw control word format for settings command above
-  ssss 00dd 0000 000l
-    ssss limit switch number, 0: none, 1,2,3
-    dd  start dir: 0: rev, 2: limit sw, 3: not limit sw
-     l  switch pin active voltage, 0: lo,  1: hi
-
-  limit sw control allows limit switch in middle of travel, not on an end
-  start-dir values 2 and 3 allow homing from either side of switch
-  ends on dir=1 side of switch no matter what side it started on
+  0000 0000 00ss 000p
+    ss: limit switch number, 0 is none
+     p:  switch polarity, 0: active voltage low,  1: high
 
   -- 3-byte status read --
   this is the only read format on i2c

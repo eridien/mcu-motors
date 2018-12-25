@@ -46,8 +46,6 @@ struct motorState {
   bool   stopping;
   bool   homing;
   uint8  homingState;
-  uint8  homeDir;
-  uint8  homeWillReverse;
   uint8  limitSwPolarity;
   bool   slowing;
   uint8  phase;  // bipolar: matches phase inside drv8825, unipolar: step phase

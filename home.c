@@ -11,41 +11,36 @@
 
 void chkHoming() {
   switch(ms->homingState) {
-    case homeStarting:
-      ms->targetSpeed = sv->homingSpeed;
-      ms->targetDir   = ms->homeDir;
-      ms->homingState = goingHome;
+    case movingToFwdSide:
+      if(!limitSwOn()) {
+        // start normal homing
+        ms->targetDir = 0;
+        ms->homingState = goingHome;
+      }
       break;
-
+            
     case goingHome:
-      if(limitSwOn() != ms->homeWillReverse) {
-        // passed switch
+      if(limitSwOn()) {
+        // arrived at switch while homing backward
+        // HOMED_BIT not cleared until now, homing might have been interrupted
         setStateBit(HOMED_BIT, false);
-        if(ms->homeWillReverse) {
-          // start homing again in the other direction
-          ms->homeWillReverse = false;
-          ms->homeDir         = !ms->homeDir;
-          ms->homingState     = homeStarting;
-        }
-        else {
-          ms->targetDir   = !ms->homeDir;
-          ms->targetSpeed =  sv->homingBackUpSpeed;
-          ms->homingState =  homeReversing;
-        }
+        ms->targetDir   = 1;
+        ms->targetSpeed = sv->homingBackUpSpeed;
+        ms->homingState = homeReversing;
       }
       break;
       
     case homeReversing:
       if(!limitSwOn()) {
-        // passed switch second time
+        // passed switch second (or third) time
         ms->homeTestPos = ms->curPos;
-        ms->curPos = 0;
+        ms->curPos      = 0;
         ms->homingState = homingToOfs;
        }
       break;
     
     case homingToOfs: 
-      if((ms->curPos >= sv->homeOfs) != ms->homeDir) {
+      if(ms->curPos >= sv->homeOfs) {
         ms->homing = false;
         setStateBit(HOMED_BIT, 1);
         ms->curPos = sv->homePos;
@@ -67,18 +62,19 @@ void homeCommand(bool start) {
   }
   if(start && limitPort[motorIdx]) {
     ms->homing = true;
-    ms->homingState = homeStarting;
-    switch ((sv->limitSwCtl >> 3) & 0x03) {
-      case 0: ms->homeDir = 0;            break;
-      case 1: ms->homeDir = 1;            break;
-      case 2: ms->homeDir =  limitSwOn(); break;
-      case 3: ms->homeDir = !limitSwOn(); break;
+    if(limitSwOn()) {
+      // go to fwd side of switch at full homing speed
+      ms->homingState = movingToFwdSide;
+      ms->targetDir   = 1;
     }
-    ms->homeWillReverse = ((ms->homeEndSide == 1 &&  limitSwOn()) ||
-                           (ms->homeEndSide == 2 && !limitSwOn()));
+    else {
+      ms->homingState = goingHome;
+      ms->targetDir   = 0;
+    }
+    ms->targetSpeed = sv->homingSpeed;
     setStateBit(BUSY_BIT,  1);
     // homed state bit unchanged until we get to limit switch
-    // so homing can be interrupted by move command
+    //   so homing can be interrupted by move command
   }
   else {
     // fake homing for motors with no limit switch

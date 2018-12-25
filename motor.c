@@ -115,7 +115,7 @@ void setMotorSettings(uint8 numWordsRecvd) {
   msp->acceleration = accelTable[mSet[motorIdx].val.accelIdx];
   uint8 lsc = mSet[motorIdx].val.limitSwCtl;
   if(lsc) {
-    switch(lsc >> 12) {
+    switch(lsc >> 4) {
       case 1: 
         limitPort[motorIdx] = &limit1PORT;
         limitMask[motorIdx] =  limit1BIT; 
@@ -130,7 +130,6 @@ void setMotorSettings(uint8 numWordsRecvd) {
         break;
     }
     msp->limitSwPolarity =  lsc & 0x01;
-    msp->homeDir         = (lsc & 0x0300) >> 8;
   }
   setTicksSec();
   clkTicksPerSec = ((uint16) (1000000 / mSet[0].val.mcuClock));
