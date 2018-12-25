@@ -10,12 +10,11 @@
 
 #define DEF_MCU_CLK 30
 
-// global for use in main chk loop
+// globals for use in main event loop
 extern volatile uint16        *mp;
 extern uint8                   motorIdx;
 extern struct motorState      *ms;
 extern struct motorSettings   *sv;
-extern uint8                   mm; // motor mask (step bit))
 
 #define setBiStepLo()           *stepPort[motorIdx] &= ~stepMask[motorIdx]
 #define setBiStepHiInt(_motIdx) *stepPort[_motIdx]  |=  stepMask[_motIdx]
@@ -58,8 +57,8 @@ extern const    uint16  resetMask[NUM_MOTORS];
 extern volatile uint16 *faultPort[NUM_MOTORS];
 extern const    uint16  faultMask[NUM_MOTORS];
 
-volatile uint16 *limitPort[NUM_MOTORS]; // set when settings loaded
-volatile uint16  limitMask[NUM_MOTORS];
+extern volatile uint16 *limitPort[NUM_MOTORS]; // set when settings loaded
+extern          uint16  limitMask[NUM_MOTORS];
 
 void motorInit(void);
 void checkAll(void);

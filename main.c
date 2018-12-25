@@ -77,7 +77,6 @@ int main(void) {
     // motorIdx, mp, mm, ms, and sv are globals
     for(motorIdx=0; motorIdx < NUM_MOTORS; motorIdx++) {
       mp = stepPort[motorIdx]; // (&PORT)
-      mm = stepMask[motorIdx]; // 0x000f, 0x00f0, 0x0f00, 0xf000, or step bit
       ms = &mState[motorIdx];
       sv = &(mSet[motorIdx].val);
       if(errorIntCode && errorIntMot == motorIdx) {

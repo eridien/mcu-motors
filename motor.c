@@ -23,16 +23,13 @@ volatile uint16 *faultPort[NUM_MOTORS] = {&faultAPORT, &faultBPORT, &faultCPORT,
 const    uint16  faultMask[NUM_MOTORS] = {faultABIT, faultBBIT, faultCBIT, faultDBIT};
 
 volatile uint16 *limitPort[NUM_MOTORS]; // set when settings loaded
-const    uint16  limitMask[NUM_MOTORS];
+         uint16  limitMask[NUM_MOTORS];
 
 // globals for use in main chk loop
-uint8  motorIdx;
-struct motorState *ms;
+volatile uint16      *mp;
+uint8                 motorIdx;
+struct motorState    *ms;
 struct motorSettings *sv;
-uint8  mm; // current motor mask (0xf0 or 0x0f or step bit)
-
-volatile uint16 *limitPort[NUM_MOTORS]; // set when settings loaded
-const    uint16  limitMask[NUM_MOTORS];
 
 void motorInit() {
   dirTRIS = 0;
