@@ -55,7 +55,7 @@ int main(void) {
  ANSB    = 0;
  AUXLAT  = 0;  // aux pin (fan or buzzer in P3))
  AUXTRIS = 0;  // aux pin output, shared with ICSPCLK2
-
+ 
 #ifdef DEBUG
  tp1TRIS = 0;
  tp2TRIS = 0;

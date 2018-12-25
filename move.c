@@ -42,20 +42,19 @@ void setStep(bool closing) {
         if((ms->phase & uStepPhaseMask[tgtUstep]) == 0) {
           ms->ustep = tgtUstep;
         }
-//        dbgHist(ms->ustep);
       }
     }
     else { 
     // we are closing in (very close to target))
       // if needed, adjust ustep to hit exact position
+      // phase is always correct since only decreasing step size
       int8 dist = ms->targetPos - ms->curPos;
       if(dist < 0) dist = -dist;
       if(dist & uStepPhaseMask[ms->ustep]) {
         ms->ustep++;
       }
-//      dbgHist(ms->ustep);
     }
-// set step timing
+    // set step timing
     switch (ms->ustep) {
       case 0:  clkTicks = clkTicksPerSec / (ms->curSpeed >> 3); break;
       case 1:  clkTicks = clkTicksPerSec / (ms->curSpeed >> 2); break;
@@ -91,12 +90,8 @@ void checkMotor() {
         ms->curSpeed <= sv->jerk) {
       ms->curSpeed = ms->targetSpeed;
       ms->curDir   = ms->targetDir;
-      
-//      dbgHist(0xaaaa);
     }
     else {
-//      dbgHist(0xdddd);
-
       decelerate = true;
     }
   }
@@ -125,7 +120,7 @@ void checkMotor() {
       if (sv->accelIdx == 0) {
         // not using acceleration
         ms->curSpeed = ms->targetSpeed;
-        ms->curDir = ms->targetDir = (ms->targetPos > ms->curPos);
+        ms->curDir   = ms->targetDir = (ms->targetPos > ms->curPos);
       }
       else {
         // using acceleration
@@ -183,7 +178,8 @@ void checkMotor() {
   }
   else if (accelerate) {
     // accel/step = accel/sec / steps/sec
-    if(deltaSpeed == 0) deltaSpeed = 1;
+   uint16 deltaSpeed = ((uint32) ms->acceleration * 8) / ms->curSpeed;
+   if(deltaSpeed == 0) deltaSpeed = 1;
     ms->curSpeed += deltaSpeed;
     if(ms->curSpeed > ms->targetSpeed) {
       // we just passed target speed
@@ -198,7 +194,7 @@ void moveCommand(bool noRules) {
   ms->noBounds = noRules;
   
   if((ms->stateByte & HOMED_BIT) == 0 && !noRules) {
-    setError(NOT_HOMED_ERROR);
+    setError(NOT_READY_ERROR);
     return;
   }
   ms->slowing     = false;

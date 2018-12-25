@@ -17,7 +17,8 @@ void stopStepping() {
   setStateBit(BUSY_BIT, 0);
 }
 
-void resetMotor(bool all) {
+// motIdx = 0xff means all motors
+void resetMotor(uint8 motIdx) {
   resetLAT = 0; 
   uint8 savedMotorIdx = motorIdx;
   // set all global motor vars just like event loop

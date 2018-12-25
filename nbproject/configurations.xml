@@ -113,7 +113,7 @@
         <property key="optimization-level" value="3"/>
         <property key="post-instruction-scheduling" value="default"/>
         <property key="pre-instruction-scheduling" value="default"/>
-        <property key="preprocessor-macros" value="DEBUG;FORCE_ID_0"/>
+        <property key="preprocessor-macros" value="DEBUG;FORCE_ID_0;REV4"/>
         <property key="scalar-model" value="default"/>
         <property key="use-cci" value="false"/>
         <property key="use-iar" value="false"/>

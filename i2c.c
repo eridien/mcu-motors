@@ -17,7 +17,7 @@ volatile bool  inPacket;
 volatile bool  packetForUs;
 
 void i2cInit() { 
-  IDTRIS  = 1;  // MCU ID input, shared with ICSPDAT2
+  IDTRIS  = 1;  // MCU ID pin, 0 for MCU0 (mcuA in p3), 1 for MCU1 (mcuB in p3)
   i2cAddrBase = (IDLAT ? I2C_ADDR_1 : I2C_ADDR_0);
 #ifdef FORCE_ID_0
   i2cAddrBase = I2C_ADDR_0;
@@ -80,8 +80,7 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
       setErrorInt(motIdxInPacket, I2C_OVERFLOW_ERROR);
     }
     else {
-      // motIdxInPacket == NUM_MOTORS for LEDs
-      if(packetForUs && motIdxInPacket < NUM_MOTORS) {
+      if(packetForUs) {
         if(!RdNotWrite) {
           // done receiving -- total length of recv is stored in first byte
           i2cRecvBytes[motIdxInPacket][0] = i2cRecvBytesPtr-1;
@@ -101,7 +100,7 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
     if(!NotAddr) { 
       // received addr byte, extract motor number
       packetForUs = true;
-      motIdxInPacket = (I2C_BUF_BYTE & 0x0e) >> 1;
+      motIdxInPacket = (I2C_BUF_BYTE & 0x06) >> 1;
       if(RdNotWrite) {
         // prepare all send data
         setSendBytesInt(motIdxInPacket);

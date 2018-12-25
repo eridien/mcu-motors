@@ -98,63 +98,63 @@ ${OBJECTDIR}/clock.o: clock.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/clock.o.d 
 	@${RM} ${OBJECTDIR}/clock.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  clock.c  -o ${OBJECTDIR}/clock.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/clock.o.d"      -g -D__DEBUG     -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -msmart-io=1 -Wall -msfr-warn=off  
+	${MP_CC} $(MP_EXTRA_CC_PRE)  clock.c  -o ${OBJECTDIR}/clock.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/clock.o.d"      -g -D__DEBUG     -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -DREV4 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/clock.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/home.o: home.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/home.o.d 
 	@${RM} ${OBJECTDIR}/home.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  home.c  -o ${OBJECTDIR}/home.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/home.o.d"      -g -D__DEBUG     -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -msmart-io=1 -Wall -msfr-warn=off  
+	${MP_CC} $(MP_EXTRA_CC_PRE)  home.c  -o ${OBJECTDIR}/home.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/home.o.d"      -g -D__DEBUG     -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -DREV4 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/home.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/i2c.o: i2c.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/i2c.o.d 
 	@${RM} ${OBJECTDIR}/i2c.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  i2c.c  -o ${OBJECTDIR}/i2c.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/i2c.o.d"      -g -D__DEBUG     -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -msmart-io=1 -Wall -msfr-warn=off  
+	${MP_CC} $(MP_EXTRA_CC_PRE)  i2c.c  -o ${OBJECTDIR}/i2c.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/i2c.o.d"      -g -D__DEBUG     -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -DREV4 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/i2c.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/main.o: main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/main.o.d 
 	@${RM} ${OBJECTDIR}/main.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  main.c  -o ${OBJECTDIR}/main.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/main.o.d"      -g -D__DEBUG     -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -msmart-io=1 -Wall -msfr-warn=off  
+	${MP_CC} $(MP_EXTRA_CC_PRE)  main.c  -o ${OBJECTDIR}/main.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/main.o.d"      -g -D__DEBUG     -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -DREV4 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/main.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/motor.o: motor.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/motor.o.d 
 	@${RM} ${OBJECTDIR}/motor.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  motor.c  -o ${OBJECTDIR}/motor.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/motor.o.d"      -g -D__DEBUG     -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -msmart-io=1 -Wall -msfr-warn=off  
+	${MP_CC} $(MP_EXTRA_CC_PRE)  motor.c  -o ${OBJECTDIR}/motor.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/motor.o.d"      -g -D__DEBUG     -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -DREV4 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/motor.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/move.o: move.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/move.o.d 
 	@${RM} ${OBJECTDIR}/move.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  move.c  -o ${OBJECTDIR}/move.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/move.o.d"      -g -D__DEBUG     -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -msmart-io=1 -Wall -msfr-warn=off  
+	${MP_CC} $(MP_EXTRA_CC_PRE)  move.c  -o ${OBJECTDIR}/move.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/move.o.d"      -g -D__DEBUG     -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -DREV4 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/move.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/state.o: state.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/state.o.d 
 	@${RM} ${OBJECTDIR}/state.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  state.c  -o ${OBJECTDIR}/state.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/state.o.d"      -g -D__DEBUG     -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -msmart-io=1 -Wall -msfr-warn=off  
+	${MP_CC} $(MP_EXTRA_CC_PRE)  state.c  -o ${OBJECTDIR}/state.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/state.o.d"      -g -D__DEBUG     -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -DREV4 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/state.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/stop.o: stop.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/stop.o.d 
 	@${RM} ${OBJECTDIR}/stop.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  stop.c  -o ${OBJECTDIR}/stop.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/stop.o.d"      -g -D__DEBUG     -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -msmart-io=1 -Wall -msfr-warn=off  
+	${MP_CC} $(MP_EXTRA_CC_PRE)  stop.c  -o ${OBJECTDIR}/stop.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/stop.o.d"      -g -D__DEBUG     -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -DREV4 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/stop.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/dist-table.o: dist-table.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/dist-table.o.d 
 	@${RM} ${OBJECTDIR}/dist-table.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  dist-table.c  -o ${OBJECTDIR}/dist-table.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/dist-table.o.d"      -g -D__DEBUG     -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -msmart-io=1 -Wall -msfr-warn=off  
+	${MP_CC} $(MP_EXTRA_CC_PRE)  dist-table.c  -o ${OBJECTDIR}/dist-table.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/dist-table.o.d"      -g -D__DEBUG     -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -DREV4 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/dist-table.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 else
@@ -162,63 +162,63 @@ ${OBJECTDIR}/clock.o: clock.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/clock.o.d 
 	@${RM} ${OBJECTDIR}/clock.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  clock.c  -o ${OBJECTDIR}/clock.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/clock.o.d"        -g -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -msmart-io=1 -Wall -msfr-warn=off  
+	${MP_CC} $(MP_EXTRA_CC_PRE)  clock.c  -o ${OBJECTDIR}/clock.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/clock.o.d"        -g -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -DREV4 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/clock.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/home.o: home.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/home.o.d 
 	@${RM} ${OBJECTDIR}/home.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  home.c  -o ${OBJECTDIR}/home.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/home.o.d"        -g -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -msmart-io=1 -Wall -msfr-warn=off  
+	${MP_CC} $(MP_EXTRA_CC_PRE)  home.c  -o ${OBJECTDIR}/home.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/home.o.d"        -g -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -DREV4 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/home.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/i2c.o: i2c.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/i2c.o.d 
 	@${RM} ${OBJECTDIR}/i2c.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  i2c.c  -o ${OBJECTDIR}/i2c.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/i2c.o.d"        -g -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -msmart-io=1 -Wall -msfr-warn=off  
+	${MP_CC} $(MP_EXTRA_CC_PRE)  i2c.c  -o ${OBJECTDIR}/i2c.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/i2c.o.d"        -g -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -DREV4 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/i2c.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/main.o: main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/main.o.d 
 	@${RM} ${OBJECTDIR}/main.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  main.c  -o ${OBJECTDIR}/main.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/main.o.d"        -g -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -msmart-io=1 -Wall -msfr-warn=off  
+	${MP_CC} $(MP_EXTRA_CC_PRE)  main.c  -o ${OBJECTDIR}/main.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/main.o.d"        -g -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -DREV4 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/main.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/motor.o: motor.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/motor.o.d 
 	@${RM} ${OBJECTDIR}/motor.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  motor.c  -o ${OBJECTDIR}/motor.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/motor.o.d"        -g -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -msmart-io=1 -Wall -msfr-warn=off  
+	${MP_CC} $(MP_EXTRA_CC_PRE)  motor.c  -o ${OBJECTDIR}/motor.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/motor.o.d"        -g -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -DREV4 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/motor.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/move.o: move.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/move.o.d 
 	@${RM} ${OBJECTDIR}/move.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  move.c  -o ${OBJECTDIR}/move.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/move.o.d"        -g -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -msmart-io=1 -Wall -msfr-warn=off  
+	${MP_CC} $(MP_EXTRA_CC_PRE)  move.c  -o ${OBJECTDIR}/move.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/move.o.d"        -g -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -DREV4 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/move.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/state.o: state.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/state.o.d 
 	@${RM} ${OBJECTDIR}/state.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  state.c  -o ${OBJECTDIR}/state.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/state.o.d"        -g -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -msmart-io=1 -Wall -msfr-warn=off  
+	${MP_CC} $(MP_EXTRA_CC_PRE)  state.c  -o ${OBJECTDIR}/state.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/state.o.d"        -g -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -DREV4 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/state.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/stop.o: stop.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/stop.o.d 
 	@${RM} ${OBJECTDIR}/stop.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  stop.c  -o ${OBJECTDIR}/stop.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/stop.o.d"        -g -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -msmart-io=1 -Wall -msfr-warn=off  
+	${MP_CC} $(MP_EXTRA_CC_PRE)  stop.c  -o ${OBJECTDIR}/stop.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/stop.o.d"        -g -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -DREV4 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/stop.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/dist-table.o: dist-table.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/dist-table.o.d 
 	@${RM} ${OBJECTDIR}/dist-table.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE)  dist-table.c  -o ${OBJECTDIR}/dist-table.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/dist-table.o.d"        -g -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -msmart-io=1 -Wall -msfr-warn=off  
+	${MP_CC} $(MP_EXTRA_CC_PRE)  dist-table.c  -o ${OBJECTDIR}/dist-table.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/dist-table.o.d"        -g -omf=elf -DXPRJ_B3=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -O3 -DDEBUG -DFORCE_ID_0 -DREV4 -msmart-io=1 -Wall -msfr-warn=off  
 	@${FIXDEPS} "${OBJECTDIR}/dist-table.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 endif

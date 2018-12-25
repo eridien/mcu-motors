@@ -23,11 +23,11 @@ extern volatile int dummy;
 #define CMD_NOT_DONE_ERROR  0x40
 #define STEP_NOT_DONE_ERROR 0x50
 #define BOUNDS_ERROR        0x60
-#define NOT_HOMED_ERROR     0x70
+#define NOT_READY_ERROR     0x70
 #define CLEAR_ERROR         0xff // magic code to clear error
 
 // state bits
-#define ERROR_BIT           0x08
+#define AUX_RES_BIT         0x08 // last three bits indicate what is in pos word
 #define BUSY_BIT            0x04
 #define MOTOR_ON_BIT        0x02
 #define HOMED_BIT           0x01
@@ -51,7 +51,6 @@ struct motorState {
   bool   homing;
   uint8  homingState;
   uint8  homeDir;
-  uint8  homeEndSide;
   uint8  homeWillReverse;
   uint8  limitSwPolarity;
   bool   slowing;

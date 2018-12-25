@@ -25,15 +25,14 @@ void setError(uint8 err) {
     dummy = I2C_BUF_BYTE;   // clear SSPOV
   }
   else {
-    // an error in one motor sets error bit in all motors
-    // but error code is only in motor that reported error
+    // error code is only in motor that reported error
     uint8 motIdx;
     for(motIdx = 0; motIdx < NUM_MOTORS; motIdx++) {
       mState[motIdx].stateByte = ERROR_BIT;
     }
     ms->stateByte = (err | ERROR_BIT);
-    // reset all motors
-    resetMotor(true);
+    // reset motor
+    resetMotor(motorIdx);
   }
 }
 

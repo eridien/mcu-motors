@@ -72,11 +72,8 @@
     homing back-up speed
     home offset distance (final home distance from switch)
     home pos value (set cur pos to this value after homing, usually 0)
-    limit switch control for motor A // see below
-    limit switch control for motor B
-    limit switch control for motor C
-    limit switch control for motor D
-    backlash distance
+    limit switch control   (see below)
+    backlash distance    
     mcuClock;   // period of clock in usecs  (motor 0 applies to entire mcu)
 
   limit sw control word format for settings command above
@@ -109,7 +106,7 @@
     CMD_NOT_DONE_ERROR  0x40  new command arrived before old cmd finished
     STEP_NOT_DONE_ERROR 0x50  step rate too fast for MCU
     BOUNDS_ERROR        0x60  position < 0 or > max setting when moving
-    NOT_HOMED_ERROR     0x70  attempt to do a move when not homed yet
+    NOT_READY_ERROR     0x70  no settings set or move cmd when not homed
 
   motor position is stored for testing when homing first closes limit switch
   this allows testing to make sure no steps are missed when doing move/home
