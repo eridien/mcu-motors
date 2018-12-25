@@ -88,15 +88,15 @@
 
   -- 3-byte status read --
   this is the only read format on i2c
-  Error code and error bit are cleared on status read, only on addressed motor
-    1) vccc eboh  state byte
+  Error code is cleared on status read
+    1) veee sboh  state byte
         v: version (1-bit)
-      ccc: error code (see below) (code only set on motor causing error)
-        e: error bit              (bit set on all motors in mcu on every error)
+      eee: error code (see below)
+        s: special status returned in bytes 2 and 3
         b: busy     (homing, moving, or stopping)
         o: motor on (not in reset)
         h: homed    (motor has been homed since last reset)
-    2) aaaa aaaa  signed motor position, top 8 bits (or test pos)
+    2) aaaa aaaa  signed motor position, top 8 bits (or special value)
     3) aaaa aaaa  followed by bottom 8 bits
 
   Error codes for state byte above 
@@ -111,7 +111,7 @@
   motor position is stored for testing when homing first closes limit switch
   this allows testing to make sure no steps are missed when doing move/home
   Command 0x11 tells next status read to return this test position
-  This status read will have a magic state value of 0x04 (normally impossible)
+  This status read will have the status byte value of 0x08
 
   position values in commands must be positive, top bit is zero
   position returned in status is signed and may be negative (e.g. when homing)

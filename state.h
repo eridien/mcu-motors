@@ -12,10 +12,6 @@ extern volatile int dummy;
 #define disableAllInts __builtin_disi(0x3FFF)
 #define enableAllInts  __builtin_disi(0x0000) 
 
-// when returning test pos instead of cur pos
-// state byte will have this magic value which can't happen normally
-#define TEST_POS_STATE      0x04
-
 // Error codes 
 #define MOTOR_FAULT_ERROR   0x10
 #define I2C_OVERFLOW_ERROR  0x20
@@ -26,7 +22,8 @@ extern volatile int dummy;
 #define NOT_READY_ERROR     0x70
 #define CLEAR_ERROR         0xff // magic code to clear error
 
-// state bits
+// state byte
+#define ERR_CODE            0xf0
 #define AUX_RES_BIT         0x08 // last three bits indicate what is in pos word
 #define BUSY_BIT            0x04
 #define MOTOR_ON_BIT        0x02
@@ -41,8 +38,7 @@ struct motorState {
   int16  curPos;
   uint16 curSpeed;
   bool   curDir;
-  uint16 curBacklashOfs;  // offset always in backwards direction
-  bool   insideBacklash;
+  int16  backlashPos; // neg is left of dead zone, >= backlashWid is right
   uint8  ustep;
   uint16 acceleration;
   bool   stepPending;
@@ -65,7 +61,7 @@ struct motorState {
 
 extern struct motorState mState[NUM_MOTORS];
 
-#define haveError() (errorIntCode || (ms->stateByte & ERROR_BIT))
+#define haveError() (errorIntCode || (ms->stateByte & ERR_CODE))
 
 extern volatile uint8 errorIntMot;
 extern volatile uint8 errorIntCode;

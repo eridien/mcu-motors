@@ -50,8 +50,6 @@ void chkHoming() {
         setStateBit(HOMED_BIT, 1);
         ms->curPos = sv->homePos;
         stopStepping();
-        // we know we are past backlash since switch opened
-        ms->curBacklashOfs = 0;
         return;
       }
       break;
@@ -68,7 +66,6 @@ void homeCommand(bool start) {
     ms->curSpeed = sv->jerk;
   }
   if(start && limitPort[motorIdx]) {
-    ms->curBacklashOfs = sv->backlashWid; // ignore actual backlash ofs
     ms->homing = true;
     ms->homingState = homeStarting;
     switch ((sv->limitSwCtl >> 3) & 0x03) {

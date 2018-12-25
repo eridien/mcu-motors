@@ -18,7 +18,7 @@
 #define RdNotWrite SSP1STATbits.I2C_READ
 #define NotAddr    SSP1STATbits.NOT_ADDRESS
 #define NotStretch SSP1CON1bits.CKP
-#define I2C_WCOL   SSP1CON1bits.I2C_WCOL
+#define I2C_WCOL   SSP1CON1bits.WCOL
 #define I2C_SSPOV  SSP1CON1bits.SSPOV
 
 extern volatile uint8 i2cRecvBytes[NUM_MOTORS][RECV_BUF_SIZE + 1];

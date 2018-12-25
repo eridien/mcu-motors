@@ -19,20 +19,14 @@ void setStateBit(uint8 mask, uint8 set){
 void setError(uint8 err) {
   if(err == CLEAR_ERROR) {
     disableAllInts;
-    ms->stateByte = ms->stateByte & (BUSY_BIT | MOTOR_ON_BIT | HOMED_BIT);
+    ms->stateByte = ms->stateByte & ~ERR_CODE;
     enableAllInts;
     I2C_WCOL = 0;           // clear WCOL
     dummy = I2C_BUF_BYTE;   // clear SSPOV
   }
   else {
-    // error code is only in motor that reported error
-    uint8 motIdx;
-    for(motIdx = 0; motIdx < NUM_MOTORS; motIdx++) {
-      mState[motIdx].stateByte = ERROR_BIT;
-    }
-    ms->stateByte = (err | ERROR_BIT);
-    // reset motor
-    resetMotor(motorIdx);
+    ms->stateByte = err;
+    resetMotor();
   }
 }
 

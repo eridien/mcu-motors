@@ -15,7 +15,7 @@
 uint16 clkTicksPerSec;
 
 void clkInit(void) {
-  uint16 clkUsec =  defaultMcuClk;
+  uint16 clkUsec =  DEF_MCU_CLK;
   // timer 0
   _TSYNC              =  0;              // sync clock
   _TCS                =  0;              // Clock Source Internal clock (FOSC/2)

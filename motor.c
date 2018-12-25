@@ -13,16 +13,17 @@
 bool haveSettings[NUM_MOTORS];
 union settingsUnion mSet[NUM_MOTORS];
 
-uint16 defaultMcuClk = 30;
-
 volatile uint16 *stepPort[NUM_MOTORS] = {&stepAPORT, &stepBPORT, &stepCPORT, &stepDPORT};
-const    uint16 stepMask[NUM_MOTORS] = {stepABIT, stepBBIT, stepCBIT, stepDBIT};
+const    uint16  stepMask[NUM_MOTORS] = {stepABIT, stepBBIT, stepCBIT, stepDBIT};
 
 volatile uint16 *resetPort[NUM_MOTORS] = {&resetAPORT, &resetBPORT, &resetCPORT, &resetDPORT};
-const    uint16 resetMask[NUM_MOTORS] = {resetABIT, resetBBIT, resetCBIT, resetDBIT};
+const    uint16  resetMask[NUM_MOTORS] = {resetABIT, resetBBIT, resetCBIT, resetDBIT};
 
 volatile uint16 *faultPort[NUM_MOTORS] = {&faultAPORT, &faultBPORT, &faultCPORT, &faultDPORT};
-const    uint16 faultMask[NUM_MOTORS] = {faultABIT, faultBBIT, faultCBIT, faultDBIT};
+const    uint16  faultMask[NUM_MOTORS] = {faultABIT, faultBBIT, faultCBIT, faultDBIT};
+
+volatile uint16 *limitPort[NUM_MOTORS]; // set when settings loaded
+const    uint16  limitMask[NUM_MOTORS];
 
 // globals for use in main chk loop
 uint8  motorIdx;
@@ -150,21 +151,36 @@ void checkAll() {
   
   if (ms->stepped) {
     ms->stepped = false;
-    // either adjust curBacklashOfs or curPos
-    if(ms->insideBacklash) {
-      ms->curBacklashOfs += ((ms->curDir) ? -1 : 1);
-      ms->phase += ((ms->curDir) ? 1 : -1); 
-    }
-    else {
-      uint8 stepDist = uStepDist[ms->ustep];
-      if (ms->curDir) {
-        ms->curPos += stepDist;
-        ms->phase  += stepDist;
-      } else {
-        ms->curPos -= stepDist;
-        ms->phase -= stepDist;
+    uint8 stepDist = uStepDist[ms->ustep];
+    int8  signedDist = ((ms->curDir) ? stepDist : -stepDist); 
+    ms->phase += signedDist;
+    
+    if(sv->backlashWid) {
+      if((ms->backlashPos < 0) && ms->curDir) {
+        // reversing from backward to forward outside dead zone
+        ms->backlashPos = stepDist;
+        signedDist -= sv->backlashWid;
+        if(signedDist < 0) signedDist = 0;
+      }
+      else if((ms->backlashPos >= sv->backlashWid) && !ms->curDir) {
+        // reversing from forward to backward outside dead zone
+        ms->backlashPos = sv->backlashWid - stepDist;
+        signedDist += sv->backlashWid;
+        if(signedDist > 0) signedDist = 0;
+      }
+      else if(ms->backlashPos >= 0 && ms->backlashPos < sv->backlashWid){
+        // moving inside backlash dead zone
+        ms->backlashPos += signedDist;
+        if(ms->backlashPos < 0) {
+          signedDist = ms->backlashPos;
+        }
+        else if(ms->backlashPos >= sv->backlashWid) {
+          signedDist = ms->backlashPos - sv->backlashWid;
+        }
+        else signedDist = 0;
       }
     }
+    ms->curPos += signedDist;
   }
   if ((ms->stateByte & BUSY_BIT) && !haveError()) {
     if (ms->homing) {
@@ -189,7 +205,7 @@ void motorOn() {
   if (resetIsLo()) {
     setResetHi();
     // counter in drv8825 is cleared by reset
-    // phase always matches counter in drv8825
+    // ms->phase always matches internal phase counter in drv8825
     ms->phase = 0;
   }
 }
@@ -274,7 +290,7 @@ void processCommand() {
           break; // stop,no reset
         case 3: softStopCommand(true);
           break; // stop with reset
-        case 4: resetMotor(false);
+        case 4: resetMotor();
           break; // hard stop (immediate reset)
         case 5: motorOn();
           break; // reset off

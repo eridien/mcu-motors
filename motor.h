@@ -8,6 +8,8 @@
 
 #define NUM_MOTORS 4
 
+#define DEF_MCU_CLK 30
+
 // global for use in main chk loop
 extern volatile uint16        *mp;
 extern uint8                   motorIdx;
@@ -34,7 +36,7 @@ struct motorSettings {
   uint16 homeOfs;
   uint16 homePos;        // value to set cur pos after homing
   uint16 limitSwCtl;     // limit sw assignment
-  uint16 backlashWid;    // backlash width of dead interval
+  uint16 backlashWid;    // backlash dead width in steps
   uint16 mcuClock;       // period of clock in usecs  (applies to all motors in mcu)
 };
 
@@ -55,6 +57,9 @@ extern const    uint16  resetMask[NUM_MOTORS];
 
 extern volatile uint16 *faultPort[NUM_MOTORS];
 extern const    uint16  faultMask[NUM_MOTORS];
+
+volatile uint16 *limitPort[NUM_MOTORS]; // set when settings loaded
+volatile uint16  limitMask[NUM_MOTORS];
 
 void motorInit(void);
 void checkAll(void);

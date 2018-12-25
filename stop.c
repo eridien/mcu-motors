@@ -17,27 +17,11 @@ void stopStepping() {
   setStateBit(BUSY_BIT, 0);
 }
 
-// motIdx = 0xff means all motors
-void resetMotor(uint8 motIdx) {
-  resetLAT = 0; 
-  uint8 savedMotorIdx = motorIdx;
-  // set all global motor vars just like event loop
-  for(motorIdx=0; motorIdx < NUM_MOTORS; motorIdx++) {
-    if(!all && motorIdx != savedMotorIdx) continue;
-    mp = stepPort[motorIdx]; // (&PORT)
-    mm = stepMask[motorIdx]; // 0xf0 or 0x0f or step bit
-    ms = &mState[motorIdx];
-    sv = &(mSet[motorIdx].val);
-    stopStepping();
-    setStateBit(MOTOR_ON_BIT, 0);
-    setStateBit(HOMED_BIT, 0);
-  }
-  // restore global motor vars
-  motorIdx = savedMotorIdx;
-  mp = stepPort[motorIdx]; // (&PORT)
-  mm = stepMask[motorIdx]; // 0xf0 or 0x0f or step bit
-  ms = &mState[motorIdx];
-  sv = &(mSet[motorIdx].val);
+void resetMotor() {
+  setResetLo();
+  stopStepping();
+  setStateBit(MOTOR_ON_BIT, 0);
+  setStateBit(HOMED_BIT, 0);
 }
 
 void softStopCommand(bool resetAfter) {
@@ -60,8 +44,7 @@ void chkStopping() {
   if(ms->curSpeed <= sv->jerk || sv->accelIdx == 0) {
     stopStepping();
     if(ms->resetAfterSoftStop) {
-      // reset only this motor
-      resetMotor(false);
+      resetMotor();
     }
     return;
   }

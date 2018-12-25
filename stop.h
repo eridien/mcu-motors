@@ -1,7 +1,7 @@
 #ifndef STOP_H
 #define	STOP_H
 
-void resetMotor(bool all);
+void resetMotor(void);
 void stopStepping(void);
 void softStopCommand(bool reset);
 void chkStopping(void);
