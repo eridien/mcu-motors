@@ -4,12 +4,11 @@
 #include "types.h"
 #include "pins.h"
 
-// table is 8 (accel) by 256 (speed)
-// entry is dist of decel in 1/8 steps
+// table is 8 (accel) by 256 (speed) entries
+// entry is dist of decelleration
 
-// speed resolution of 3.2 mm/sec (128/40)  (assuming 40 steps/mm)
-// 256 speed values, 128 delta, (6.4 to 819.2 mm/sec)
-// up to 32,767 steps/sec (4 kHz pps)
+// speed resolution of 3.2 mm/sec (assuming 40 steps/mm)
+// 256 speed values (6.4 to 819.2 mm/sec)
 
 uint16 calcDist(uint16 accel, uint16 speed) {
   if(speed >= 0x8000) speed = 0x7fff;

@@ -186,7 +186,7 @@ void moveCommand(bool noRules) {
   ms->noBounds = noRules;
   
   if((ms->stateByte & HOMED_BIT) == 0 && !noRules) {
-    setError(NOT_READY_ERROR);
+    setError(NOT_HOMED);
     return;
   }
   ms->slowing     = false;

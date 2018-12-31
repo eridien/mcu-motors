@@ -9,14 +9,15 @@
 
 #ifdef REV4
 #define IDTRIS    _TRISB10  // shared with ICSPDAT2
-#define IDLAT     _LATB10
+#define IDPORT    _RB10
+#define AUXTRIS   _TRISB11  // shared with ICSPDAT2
+#define AUXLAT    _LATB11
 #else
 #define IDTRIS    _TRISB6   // mcu ID, sets i2c base addr
-#define IDLAT     _LATB6
+#define IDPORT     _RB6
+#define AUXTRIS   _TRISB10  // shared with ICSPDAT2
+#define AUXLAT    _LATB10
 #endif
-
-#define AUXTRIS   _TRISB11  // shared with ICSPCLK2
-#define AUXLAT    _LATB11
 
 #define dirTRIS   _TRISA6
 #define ms1TRIS   _TRISA7

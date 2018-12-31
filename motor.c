@@ -32,7 +32,10 @@ struct motorState    *ms;
 struct motorSettings *sv;
 
 void motorInit() {
-  dirTRIS = 0;
+ AUXLAT  = 0;  // aux pin (fan or buzzer in P3))
+ AUXTRIS = 0;
+
+ dirTRIS = 0;
   ms1TRIS = 0;
   ms2TRIS = 0;
 #ifdef REV4
@@ -209,9 +212,9 @@ void motorOn() {
 uint8 numBytesRecvd;
 
 // called on every command except settings
-bool lenIs(uint8 expected) {
-  if(!haveSettings[motorIdx]) {
-    setError(NOT_READY_ERROR);
+bool lenIs(uint8 expected, bool chkSettings) {
+  if(chkSettings && !haveSettings[motorIdx]) {
+    setError(NO_SETTINGS);
     return false;
   }
   if (expected != numBytesRecvd) {
@@ -223,11 +226,15 @@ bool lenIs(uint8 expected) {
 
 void processCommand() {
   volatile uint8 *rb = ((volatile uint8 *) i2cRecvBytes[motorIdx]);
-  numBytesRecvd = rb[0];
+  numBytesRecvd   = rb[0];
   uint8 firstByte = rb[1];
-
-  if ((firstByte & 0x80) == 0x80) {
-    if (lenIs(2)) {
+  
+  if ((firstByte & 0xfe) == 0x02) {
+    if (lenIs(1, true))
+      AUXLAT = firstByte & 0x01; // fan (mcu A) or buzzer (mcu B)
+  }
+  else if ((firstByte & 0x80) == 0x80) {
+    if (lenIs(2, true)) {
       // move command
       ms->targetSpeed = sv->speed;
       ms->targetPos = ((int16) (firstByte & 0x7f) << 8) | rb[2];
@@ -235,7 +242,7 @@ void processCommand() {
     }
   } else if ((firstByte & 0xc0) == 0x40) {
     // speed-move command
-    if (lenIs(3)) {
+    if (lenIs(3, true)) {
       // changes settings for speed
       sv->speed = (uint16) (firstByte & 0x3f) << 8;
       ms->targetSpeed = sv->speed;
@@ -244,7 +251,7 @@ void processCommand() {
     }
   } else if ((firstByte & 0xf8) == 0x08) {
     // accel-speed-move command
-    if (lenIs(5)) {
+    if (lenIs(5, true)) {
       // changes settings for acceleration and speed
       sv->accelIdx = (firstByte & 0x07);
       sv->speed = (((uint16) rb[2] << 8) | rb[3]);
@@ -255,7 +262,7 @@ void processCommand() {
     }
   } else if ((firstByte & 0xe0) == 0x20) {
     // jog command - no bounds checking and doesn't need to be homed
-    if (lenIs(2)) {
+    if (lenIs(2, true)) {
       motorOn();
       uint16 dist = (((uint16) (firstByte & 0x0f) << 8) | rb[2]);
       // direction bit is 0x10
@@ -275,23 +282,17 @@ void processCommand() {
       setError(CMD_DATA_ERROR);
     }
   } else if ((firstByte & 0xf0) == 0x10) {
+    uint8 bottomNib = firstByte & 0x0f;
     // one-byte commands
-    if (lenIs(1)) {
-      switch (firstByte & 0x0f) {
-        case 0: homeCommand(true);
-          break; // start homing
-        case 1: ms->nextStateTestPos = true;
-          break; // next read pos is actually test pos
-        case 2: softStopCommand(false);
-          break; // stop,no reset
-        case 3: softStopCommand(true);
-          break; // stop with reset
-        case 4: resetMotor();
-          break; // hard stop (immediate reset)
-        case 5: motorOn();
-          break; // reset off
-        case 6: homeCommand(false);
-          break; // stop, set curpos to setting
+    if (lenIs(1, (bottomNib != 4))) {
+      switch (bottomNib) {
+        case 0: homeCommand(true);           break; // start homing
+        case 1: ms->nextStateTestPos = true; break; // next read pos is actually test pos
+        case 2: softStopCommand(false);      break; // stop,no reset
+        case 3: softStopCommand(true);       break; // stop with reset
+        case 4: resetMotor();                break; // hard stop (immediate reset)
+        case 5: motorOn();                   break; // reset off
+        case 6: homeCommand(false);          break; // stop, set curpos to setting
         default: setError(CMD_DATA_ERROR);
       }
     }

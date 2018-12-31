@@ -50,8 +50,6 @@ int main(void) {
  _RCDIV  = 0; // switch instruction clock from 4 MHz to 8 MHz
  ANSA    = 0;   // no analog inputs
  ANSB    = 0;
- AUXLAT  = 0;  // aux pin (fan or buzzer in P3))
- AUXTRIS = 0;  // aux pin output, shared with ICSPCLK2
  
 #ifdef DEBUG
  tp1TRIS = 0;

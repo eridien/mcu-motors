@@ -14,12 +14,12 @@ extern volatile int dummy;
 
 // Error codes 
 #define MOTOR_FAULT_ERROR   0x10
-#define I2C_OVERFLOW_ERROR  0x20
+#define OVERFLOW_ERROR      0x20
 #define CMD_DATA_ERROR      0x30
-#define CMD_NOT_DONE_ERROR  0x40
-#define STEP_NOT_DONE_ERROR 0x50
-#define BOUNDS_ERROR        0x60
-#define NOT_READY_ERROR     0x70
+#define STEP_NOT_DONE_ERROR 0x40
+#define BOUNDS_ERROR        0x50
+#define NO_SETTINGS         0x60
+#define NOT_HOMED           0x70
 #define CLEAR_ERROR         0xff // magic code to clear error
 
 // state byte

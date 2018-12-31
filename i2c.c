@@ -18,7 +18,7 @@ volatile bool  packetForUs;
 
 void i2cInit() { 
   IDTRIS  = 1;  // MCU ID pin, 0 for MCU0 (mcuA in p3), 1 for MCU1 (mcuB in p3)
-  i2cAddrBase = (IDLAT ? I2C_ADDR_1 : I2C_ADDR_0);
+  i2cAddrBase = (IDPORT ? I2C_ADDR_1 : I2C_ADDR_0);
 #ifdef FORCE_ID_0
   i2cAddrBase = I2C_ADDR_0;
 #endif
@@ -28,7 +28,7 @@ void i2cInit() {
   
   SSP1CON1bits.SSPM = 0x0e;          // slave mode, 7-bit, S & P ints enabled 
   SSP1MSK           = I2C_ADDR_MASK; // address mask, check top 5 bits
-  SSP1ADD           = i2cAddrBase;   // slave address (7-bit addr)
+  SSP1ADD           = i2cAddrBase;   // slave address (7-bit addr << 1)
   SSP1STATbits.SMP  = 0;             // slew-rate enabled
   SSP1STATbits.CKE  = 1;             // smb voltage levels
   SSP1CON2bits.SEN  = 1;             // enable clock stretching 
@@ -77,7 +77,7 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
     // received stop bit
     inPacket = false;
     if (I2C_WCOL || I2C_SSPOV) {
-      setErrorInt(motIdxInPacket, I2C_OVERFLOW_ERROR);
+      setErrorInt(motIdxInPacket, OVERFLOW_ERROR);
     }
     else {
       if(packetForUs) {
@@ -113,7 +113,7 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
         // received byte (i2c write to slave)
         if (mState[motIdxInPacket].haveCommand) {
             // last command for this motor not handled yet by event loop
-            setErrorInt(motIdxInPacket, CMD_NOT_DONE_ERROR);
+            setErrorInt(motIdxInPacket, OVERFLOW_ERROR);
         } 
         else {
           if(i2cRecvBytesPtr < RECV_BUF_SIZE + 1) 

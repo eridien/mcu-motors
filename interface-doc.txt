@@ -24,7 +24,7 @@
   accel is 0..7: none, 4000, 8000, 20000, 40000, 80000, 200000, 400000 steps/sec/sec
   for 1/40 mm steps: none, 100, 200, 500, 1000, 2000, 5000, 10000 mm/sec/sec
   
-  Any I2C write to MCU is a command.  Any read returns a 4-byte status.
+  Any I2C write to MCU is a command.  Any read returns a 3-byte status.
   All commands are started immediately even when motor is busy (moving, homing, etc.)
   If needed, the host can check for finished by polling busy-bit in state
   No commands are buffered like G-Code commands
@@ -96,12 +96,12 @@
 
   Error codes for state byte above 
     MOTOR_FAULT_ERROR   0x10  missing, over-heated, or over-current driver chip
-    I2C_OVERFLOW_ERROR  0x20  i2c byte received before last taken
+    OVERFLOW_ERROR      0x20  data received before last used
     CMD_DATA_ERROR      0x30  command format incorrect
-    CMD_NOT_DONE_ERROR  0x40  new command arrived before old cmd finished
-    STEP_NOT_DONE_ERROR 0x50  step rate too fast for MCU
-    BOUNDS_ERROR        0x60  position < 0 or > max setting when moving
-    NOT_READY_ERROR     0x70  no settings set or move cmd when not homed
+    STEP_NOT_DONE_ERROR 0x40  step rate too fast for MCU
+    BOUNDS_ERROR        0x50  position < 0 or > max setting when moving
+    NO_SETTINGS         0x60  no settings
+    NOT_HOMED           0x70  move cmd when not homed
 
   motor position is stored for testing when homing first closes limit switch
   this allows testing to make sure no steps are missed when doing move/home
