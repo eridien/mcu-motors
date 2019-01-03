@@ -39,6 +39,7 @@
   0001 0100  reset      hard stop (power down motor with immediate reset)
   0001 0101  motorOn    (power up motor by removing reset)
   0001 0110  fakeHome   set curpos to home pos value setting and turn motor on (fake homing)
+  0001 0111  resetMcu   reboot this mcu
   0000 001x  setAux     set aux ouput pin to x (one bit per mcu)
 
   -- 2-byte move command --

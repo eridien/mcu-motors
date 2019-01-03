@@ -15,8 +15,6 @@
 #else
 #define IDTRIS    _TRISB6   // mcu ID, sets i2c base addr
 #define IDPORT     _RB6
-#define AUXTRIS   _TRISB10  // shared with ICSPDAT2
-#define AUXLAT    _LATB10
 #endif
 
 #define dirTRIS   _TRISA6

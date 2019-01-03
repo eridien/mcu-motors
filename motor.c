@@ -147,7 +147,6 @@ void checkAll() {
   if (ms->stepPending) {
     return;
   }
-  
   if (ms->stepped) {
     ms->stepped = false;
     uint8 stepDist = uStepDist[ms->ustep];
@@ -161,19 +160,19 @@ void checkAll() {
         signedDist -= sv->backlashWid;
         if(signedDist < 0) signedDist = 0;
       }
-      else if((ms->backlashPos >= sv->backlashWid) && !ms->curDir) {
+      else if((ms->backlashPos >= (int16) sv->backlashWid) && !ms->curDir) {
         // reversing from forward to backward outside dead zone
         ms->backlashPos = sv->backlashWid - stepDist;
         signedDist += sv->backlashWid;
         if(signedDist > 0) signedDist = 0;
       }
-      else if(ms->backlashPos >= 0 && ms->backlashPos < sv->backlashWid){
+      else if(ms->backlashPos >= 0 && ms->backlashPos < (int16) sv->backlashWid){
         // moving inside backlash dead zone
         ms->backlashPos += signedDist;
         if(ms->backlashPos < 0) {
           signedDist = ms->backlashPos;
         }
-        else if(ms->backlashPos >= sv->backlashWid) {
+        else if(ms->backlashPos >= (int16) sv->backlashWid) {
           signedDist = ms->backlashPos - sv->backlashWid;
         }
         else signedDist = 0;
@@ -228,12 +227,7 @@ void processCommand() {
   volatile uint8 *rb = ((volatile uint8 *) i2cRecvBytes[motorIdx]);
   numBytesRecvd   = rb[0];
   uint8 firstByte = rb[1];
-  
-  if ((firstByte & 0xfe) == 0x02) {
-    if (lenIs(1, true))
-      AUXLAT = firstByte & 0x01; // fan (mcu A) or buzzer (mcu B)
-  }
-  else if ((firstByte & 0x80) == 0x80) {
+  if ((firstByte & 0x80) == 0x80) {
     if (lenIs(2, true)) {
       // move command
       ms->targetSpeed = sv->speed;
@@ -281,10 +275,19 @@ void processCommand() {
     } else {
       setError(CMD_DATA_ERROR);
     }
-  } else if ((firstByte & 0xf0) == 0x10) {
+  } 
+#ifdef REV4
+  else if ((firstByte & 0xfe) == 0x02) {
+
+    if (lenIs(1, false))
+      AUXLAT = firstByte & 0x01; // fan (mcu A) or buzzer (mcu B)
+  }
+#endif
+  else if ((firstByte & 0xf0) == 0x10) {
+
     uint8 bottomNib = firstByte & 0x0f;
     // one-byte commands
-    if (lenIs(1, (bottomNib != 4))) {
+    if (lenIs(1, (bottomNib != 4 && bottomNib != 7))) {
       switch (bottomNib) {
         case 0: homeCommand(true);           break; // start homing
         case 1: ms->nextStateTestPos = true; break; // next read pos is actually test pos
@@ -293,6 +296,7 @@ void processCommand() {
         case 4: resetMotor();                break; // hard stop (immediate reset)
         case 5: motorOn();                   break; // reset off
         case 6: homeCommand(false);          break; // stop, set curpos to setting
+        case 7: asm ("RESET");               break; // reboot mcu
         default: setError(CMD_DATA_ERROR);
       }
     }

@@ -18,60 +18,6 @@ const uint16 uStepDist[4]      = {   8,    4,    2,    1};
 const uint16 accelTable[8] = // (steps/sec/sec accel) / 8
        {0, 500, 1000, 2500, 5000, 10000, 25000, 50000};
 
-void setStep(bool closing) {
-  uint16 clkTicks;
-  if(!closing) {
-    // adjust ustep
-    uint8 tgtUstep;
-    // we want pps to be between 750 and 1500, if possible
-    // low pps gives sw more time to keep up
-    if      (ms->curSpeed > (8192 + 4096) / 2) tgtUstep = 0;
-    else if (ms->curSpeed > (4096 + 2048) / 2) tgtUstep = 1;
-    else if (ms->curSpeed > (2048 + 1024) / 2) tgtUstep = 2;
-    else                                       tgtUstep = 3;
-
-    if(tgtUstep != ms->ustep) {
-      // you can only change ustep when the drv8825 phase is correct
-      if((ms->phase & uStepPhaseMask[tgtUstep]) == 0) {
-        ms->ustep = tgtUstep;
-      }
-    }
-  }
-  else { 
-  // we are closing in (very close to target))
-    // if needed, adjust ustep to hit exact position
-    // phase is always correct since only decreasing step size
-    int8 dist = ms->targetPos - ms->curPos;
-    if(dist < 0) dist = -dist;
-    if(dist & uStepPhaseMask[ms->ustep]) {
-      ms->ustep++;
-    }
-  }
-  // set step timing
-  switch (ms->ustep) {
-    case 0:  clkTicks = clkTicksPerSec / (ms->curSpeed >> 3); break;
-    case 1:  clkTicks = clkTicksPerSec / (ms->curSpeed >> 2); break;
-    case 2:  clkTicks = clkTicksPerSec / (ms->curSpeed >> 1); break;
-    case 3:  clkTicks = clkTicksPerSec /  ms->curSpeed      ; break;
-    default: clkTicks = 0; // to avoid compiler warning
-  }
-
-  bool err;
-  disableAllInts;
-  ms->nextStepTicks = ms->lastStepTicks + clkTicks;
-  // modulo 2**16 arithmetic
-  err = (ms->nextStepTicks - (timeTicks+1)) > 32000;
-  enableAllInts;
-  ms->stepped = false;
-  if(err) { 
-    // nextStepTicks is in the past
-    setError(STEP_NOT_DONE_ERROR); 
-  } else {
-    setBiStepLo();
-    ms->stepPending = true;
-  }
-}
-
 void checkMotor() {
   bool  accelerate = false;
   bool  decelerate = false;
@@ -179,7 +125,57 @@ void checkMotor() {
       ms->curSpeed = ms->targetSpeed;
     }
   }
-  setStep(closing);
+  uint16 clkTicks;
+  if(!closing) {
+    // adjust ustep
+    uint8 tgtUstep;
+    // we want pps to be between 750 and 1500, if possible
+    // low pps gives sw more time to keep up
+    if      (ms->curSpeed > (8192 + 4096) / 2) tgtUstep = 0;
+    else if (ms->curSpeed > (4096 + 2048) / 2) tgtUstep = 1;
+    else if (ms->curSpeed > (2048 + 1024) / 2) tgtUstep = 2;
+    else                                       tgtUstep = 3;
+
+    if(tgtUstep != ms->ustep) {
+      // you can only change ustep when the drv8825 phase is correct
+      if((ms->phase & uStepPhaseMask[tgtUstep]) == 0) {
+        ms->ustep = tgtUstep;
+      }
+    }
+  }
+  else { 
+  // we are closing in (very close to target))
+    // if needed, adjust ustep to hit exact position
+    // phase is always correct since only decreasing step size
+    int8 dist = ms->targetPos - ms->curPos;
+    if(dist < 0) dist = -dist;
+    while(ms->ustep < 3 && uStepDist[ms->ustep] > dist) {
+      ms->ustep++;
+    }
+  }
+  // set step timing
+  switch (ms->ustep) {
+    case 0:  clkTicks = clkTicksPerSec / (ms->curSpeed >> 3); break;
+    case 1:  clkTicks = clkTicksPerSec / (ms->curSpeed >> 2); break;
+    case 2:  clkTicks = clkTicksPerSec / (ms->curSpeed >> 1); break;
+    case 3:  clkTicks = clkTicksPerSec /  ms->curSpeed      ; break;
+    default: clkTicks = 0; // to avoid compiler warning
+  }
+
+  bool err;
+  disableAllInts;
+  ms->nextStepTicks = ms->lastStepTicks + clkTicks;
+  // modulo 2**16 arithmetic
+  err = (ms->nextStepTicks - (timeTicks+1)) > 32000;
+  enableAllInts;
+  ms->stepped = false;
+  if(err) { 
+    // nextStepTicks is in the past
+    setError(STEP_NOT_DONE_ERROR); 
+  } else {
+    setBiStepLo();
+    ms->stepPending = true;
+  }
 }
 
 void moveCommand(bool noRules) {

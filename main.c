@@ -87,6 +87,6 @@ int main(void) {
         ms->haveCommand = false;
       }
       checkAll();
-    }
+   }
   }
 }
