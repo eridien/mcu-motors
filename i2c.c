@@ -46,8 +46,8 @@ void i2cInit() {
 // all words are big-endian
 void setSendBytesInt(uint8 motIdx) {
   struct motorState *p = &mState[motIdx];
-  if(ms->nextStateTestPos) {
-    ms->nextStateTestPos = false;
+  if(ms->nextStateTestPos > 0) {
+    ms->nextStateTestPos = 0;
     i2cSendBytes[0]  = (MCU_VERSION | AUX_RES_BIT);
     i2cSendBytes[1]  = p->homeTestPos >> 8;
     i2cSendBytes[2]  = p->homeTestPos & 0x00ff;

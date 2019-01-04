@@ -187,7 +187,8 @@ void checkAll() {
       chkStopping();
     } else {
       // normal moving
-      if ((ms->curPos < 0 || ms->curPos >= sv->maxPos) && !ms->noBounds) {
+      if ((ms->curPos < (int16) sv->minPos || ms->curPos > sv->maxPos) 
+           && !ms->noBounds) {
         setError(BOUNDS_ERROR);
         return;
       }
@@ -240,7 +241,7 @@ void processCommand() {
       // changes settings for speed
       sv->speed = (uint16) (firstByte & 0x3f) << 8;
       ms->targetSpeed = sv->speed;
-      ms->targetPos = ((int16) rb[2] << 8) | rb[3];
+      ms->targetPos = (int16) (((uint16) rb[2] << 8) | rb[3]);
       moveCommand(false);
     }
   } else if ((firstByte & 0xf8) == 0x08) {
@@ -251,7 +252,7 @@ void processCommand() {
       sv->speed = (((uint16) rb[2] << 8) | rb[3]);
       ms->acceleration = accelTable[sv->accelIdx];
       ms->targetSpeed = sv->speed;
-      ms->targetPos = ((int16) rb[4] << 8) | rb[5];
+      ms->targetPos = (int16) (((uint16) rb[4] << 8) | rb[5]);
       moveCommand(false);
     }
   } else if ((firstByte & 0xe0) == 0x20) {
@@ -259,7 +260,7 @@ void processCommand() {
     if (lenIs(2, true)) {
       motorOn();
       uint16 dist = (((uint16) (firstByte & 0x0f) << 8) | rb[2]);
-      // direction bit is 0x10
+      // direction bit is in d4
       if(firstByte & 0x10) ms->targetPos = ms->curPos + dist;
       else                 ms->targetPos = ms->curPos - dist;
       ms->acceleration = 0;
@@ -272,6 +273,13 @@ void processCommand() {
     if ((numBytesRecvd & 0x01) == 1 &&
             numWords > 0 && numWords <= NUM_SETTING_WORDS) {
       setMotorSettings(numWords);
+    } else {
+      setError(CMD_DATA_ERROR);
+    }
+  } else if((firstByte & 0xfc) == 0x04) {
+   // next status contains special value
+    if (lenIs(1, true)) {
+      ms->nextStateTestPos = (firstByte & 0x03) + 1;
     } else {
       setError(CMD_DATA_ERROR);
     }
@@ -290,7 +298,6 @@ void processCommand() {
     if (lenIs(1, (bottomNib != 4 && bottomNib != 7))) {
       switch (bottomNib) {
         case 0: homeCommand(true);           break; // start homing
-        case 1: ms->nextStateTestPos = true; break; // next read pos is actually test pos
         case 2: softStopCommand(false);      break; // stop,no reset
         case 3: softStopCommand(true);       break; // stop with reset
         case 4: resetMotor();                break; // hard stop (immediate reset)

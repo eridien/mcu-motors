@@ -29,6 +29,7 @@ struct motorSettings {
   uint16 accelIdx;
   uint16 speed;
   uint16 jerk;
+   int16 minPos;
   uint16 maxPos;
   uint16 homingSpeed;
   uint16 homingBackUpSpeed;
@@ -39,8 +40,8 @@ struct motorSettings {
   uint16 mcuClock;       // period of clock in usecs  (applies to all motors in mcu)
 };
 
-#define mcuClockSettingIdx 10
-#define NUM_SETTING_WORDS  11
+#define mcuClockSettingIdx 11
+#define NUM_SETTING_WORDS  12
 
 union settingsUnion{
   uint16 reg[NUM_SETTING_WORDS];

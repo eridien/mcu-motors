@@ -24,7 +24,7 @@ extern volatile int dummy;
 
 // state byte
 #define ERR_CODE            0xf0
-#define AUX_RES_BIT         0x08 // last three bits indicate what is in pos word
+#define AUX_RES_BIT         0x08 // do-d1 indicate what is in pos word
 #define BUSY_BIT            0x04
 #define MOTOR_ON_BIT        0x02
 #define HOMED_BIT           0x01
