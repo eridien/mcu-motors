@@ -95,6 +95,10 @@
 #define limit2TRIS  _TRISA1
 #define limit3TRIS  _TRISB0
 
+#define limit1Pin   _RA0
+#define limit2Pin   _RA1
+#define limit3Pin   _RB0
+
 #define limit1PORT  PORTA
 #define limit2PORT  PORTA
 #define limit3PORT  PORTB

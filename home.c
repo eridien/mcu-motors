@@ -60,7 +60,8 @@ void homeCommand(bool start) {
     enableAllInts;
     ms->curSpeed = sv->jerk;
   }
-  if(start && limitPort[motorIdx]) {
+  if(start && ms->limitPort) {
+    ms->limitCountHi = ms->limitCountLo = 0;
     ms->homing = true;
     if(limitSwOn()) {
       // go to fwd side of switch at full homing speed
@@ -73,7 +74,7 @@ void homeCommand(bool start) {
     }
     ms->targetSpeed = sv->homingSpeed;
     setStateBit(BUSY_BIT,  1);
-    // homed state bit unchanged until we get to limit switch
+    // homed sState bit unchanged until we get to limit switch
     //   so homing can be interrupted by move command
   }
   else {

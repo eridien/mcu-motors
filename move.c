@@ -54,6 +54,8 @@ void checkMotor() {
       // adjust ustep each pulse to make sure to hit target exactly
       closing = true;
     }
+    
+    
     else {
       if (sv->accelIdx == 0) {
         // not using acceleration

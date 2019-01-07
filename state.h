@@ -46,15 +46,19 @@ struct motorState {
   bool   stopping;
   bool   homing;
   uint8  homingState;
-  uint8  limitSwPolarity;
   bool   slowing;
   uint8  phase;  // bipolar: matches phase inside drv8825, unipolar: step phase
   uint16 nextStepTicks;
   uint16 lastStepTicks;
   bool   haveCommand;
   bool   resetAfterSoftStop;
-  bool   nextStateTestPos; // flag to return homeTestPos on next read
-  int16  homeTestPos;      // pos when limit sw closes
+  bool   nextStateTestPos;    // flag to return homeTestPos on next read
+  int16  homeTestPos;         // pos when limit sw closes
+  uint16 limActSetting;       // convenience from limit sw ctl setting
+  uint16 limitCountLo;        // num steps pin is low
+  uint16 limitCountHi;        // num steps pin is high
+  volatile uint16 *limitPort; // set when settings loaded
+  uint16 limitMask;           // set when settings loaded
 };
 
 extern struct motorState mState[NUM_MOTORS];

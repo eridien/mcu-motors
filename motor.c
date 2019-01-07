@@ -13,6 +13,8 @@
 bool haveSettings[NUM_MOTORS];
 union settingsUnion mSet[NUM_MOTORS];
 
+// these should be in state record
+
 volatile uint16 *stepPort[NUM_MOTORS] = {&stepAPORT, &stepBPORT, &stepCPORT, &stepDPORT};
 const    uint16  stepMask[NUM_MOTORS] = {stepABIT, stepBBIT, stepCBIT, stepDBIT};
 
@@ -21,10 +23,7 @@ const    uint16  resetMask[NUM_MOTORS] = {resetABIT, resetBBIT, resetCBIT, reset
 
 volatile uint16 *faultPort[NUM_MOTORS] = {&faultAPORT, &faultBPORT, &faultCPORT, &faultDPORT};
 const    uint16  faultMask[NUM_MOTORS] = {faultABIT, faultBBIT, faultCBIT, faultDBIT};
-
-volatile uint16 *limitPort[NUM_MOTORS]; // set when settings loaded
-         uint16  limitMask[NUM_MOTORS];
-
+         
 // globals for use in main chk loop
 volatile uint16      *mp;
 uint8                 motorIdx;
@@ -93,14 +92,17 @@ bool haveFault() {
 }
 
 bool limitSwOn() {
-volatile uint16 *p = limitPort[motorIdx];
+  volatile uint16 *p = ms->limitPort;
   if (p != 0) {
-    return (ms->limitSwPolarity ?  (*p & limitMask[motorIdx])
-                                : !(*p & limitMask[motorIdx]));
+    bool swOn;
+    if(ms->limActSetting)
+         swOn = (ms->limitCountHi > ms->limActSetting ||
+                 ms->limitCountLo > ms->limActSetting);
+    else swOn = !(*p & ms->limitMask);
+    return ((sv->limitSwCtl & LIM_POL_MASK) ? !swOn : swOn);
   }
   return false;
 }
-
 
 // setting words are big endian
 // write may be short, only setting first entries
@@ -111,29 +113,27 @@ void setMotorSettings(uint8 numWordsRecvd) {
     mSet[motorIdx].reg[i] = (i2cRecvBytes[motorIdx][2 * i + 2] << 8) |
                              i2cRecvBytes[motorIdx][2 * i + 3];
   }
-  struct motorState *msp = &mState[motorIdx];
-  msp->acceleration = accelTable[mSet[motorIdx].val.accelIdx];
-  uint8 lsc = mSet[motorIdx].val.limitSwCtl;
+  ms->acceleration = accelTable[mSet[motorIdx].val.accelIdx];
+  uint16 lsc = mSet[motorIdx].val.limitSwCtl;
   if(lsc) {
-    switch(lsc >> 4) {
+    switch((lsc & LIM_IDX_MASK) >> LIM_IDX_OFS) {
       case 1: 
-        limitPort[motorIdx] = &limit1PORT;
-        limitMask[motorIdx] =  limit1BIT; 
+        ms->limitPort = &limit1PORT;
+        ms->limitMask =  limit1BIT; 
         break;
       case 2: 
-        limitPort[motorIdx] = &limit2PORT;
-        limitMask[motorIdx] =  limit2BIT; 
+        ms->limitPort = &limit2PORT;
+        ms->limitMask =  limit2BIT; 
         break;
       case 3: 
-        limitPort[motorIdx] = &limit3PORT;
-        limitMask[motorIdx] =  limit3BIT; 
+        ms->limitPort = &limit3PORT;
+        ms->limitMask =  limit3BIT; 
         break;
     }
-    msp->limitSwPolarity =  lsc & 0x01;
+    ms->limActSetting = (lsc & LIM_ACT_MASK) << (8-LIM_ACT_OFS);
   }
   setTicksSec();
   clkTicksPerSec = ((uint16) (1000000 / mSet[0].val.mcuClock));
-  
   haveSettings[motorIdx] = true;
 }
 
@@ -179,6 +179,17 @@ void checkAll() {
       }
     }
     ms->curPos += signedDist;
+    
+    if(ms->limActSetting) {
+      if(*ms->limitPort & ms->limitMask) {
+        ms->limitCountHi++;
+        ms->limitCountLo = 0;
+      }
+      else {
+        ms->limitCountLo++;
+        ms->limitCountHi = 0;
+      }
+    }
   }
   if ((ms->stateByte & BUSY_BIT) && !haveError()) {
     if (ms->homing) {
@@ -286,7 +297,6 @@ void processCommand() {
   } 
 #ifdef REV4
   else if ((firstByte & 0xfe) == 0x02) {
-
     if (lenIs(1, false))
       AUXLAT = firstByte & 0x01; // fan (mcu A) or buzzer (mcu B)
   }

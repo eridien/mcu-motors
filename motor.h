@@ -30,11 +30,11 @@ struct motorSettings {
   uint16 speed;
   uint16 jerk;
    int16 minPos;
-  uint16 maxPos;
+   int16 maxPos;
   uint16 homingSpeed;
   uint16 homingBackUpSpeed;
-  uint16 homeOfs;
-  uint16 homePos;        // value to set cur pos after homing
+   int16 homeOfs;
+   int16 homePos;        // value to set cur pos after homing
   uint16 limitSwCtl;     // limit sw assignment
   uint16 backlashWid;    // backlash dead width in steps
   uint16 mcuClock;       // period of clock in usecs  (applies to all motors in mcu)
@@ -42,6 +42,14 @@ struct motorSettings {
 
 #define mcuClockSettingIdx 11
 #define NUM_SETTING_WORDS  12
+
+#define LIM_IDX_MASK 0x7000
+#define LIM_ACT_MASK 0x00f0
+#define LIM_POL_MASK 0x0001
+
+#define LIM_IDX_OFS  12
+#define LIM_ACT_OFS   4
+#define LIM_POL_OFS   0
 
 union settingsUnion{
   uint16 reg[NUM_SETTING_WORDS];
@@ -57,9 +65,6 @@ extern const    uint16  resetMask[NUM_MOTORS];
 
 extern volatile uint16 *faultPort[NUM_MOTORS];
 extern const    uint16  faultMask[NUM_MOTORS];
-
-extern volatile uint16 *limitPort[NUM_MOTORS]; // set when settings loaded
-extern          uint16  limitMask[NUM_MOTORS];
 
 void motorInit(void);
 void checkAll(void);
