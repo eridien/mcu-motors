@@ -70,6 +70,8 @@
     jerk (start/stop speed and above this speed acceleration is needed)
     min bounds (usually 0)
     max bounds
+    reverse homing dir (0: normal backwards, 1:forwards)
+    homing dir
     homing speed
     homing back-up speed
     home offset distance (final home distance from switch)

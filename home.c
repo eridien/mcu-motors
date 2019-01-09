@@ -14,7 +14,7 @@ void chkHoming() {
     case movingToFwdSide:
       if(!limitSwOn()) {
         // start normal homing
-        ms->targetDir = 0;
+        ms->targetDir = sv->homingDir;
         ms->homingState = goingHome;
       }
       break;
@@ -24,7 +24,7 @@ void chkHoming() {
         // arrived at switch while homing backward
         // HOMED_BIT not cleared until now, homing might have been interrupted
         setStateBit(HOMED_BIT, false);
-        ms->targetDir   = 1;
+        ms->targetDir   = !sv->homingDir;
         ms->targetSpeed = sv->homingBackUpSpeed;
         ms->homingState = homeReversing;
       }
@@ -40,7 +40,8 @@ void chkHoming() {
       break;
     
     case homingToOfs: 
-      if(ms->curPos >= sv->homeOfs) {
+      if(sv->homingDir ? (ms->curPos <= sv->homeOfs) 
+                       : (ms->curPos >= sv->homeOfs)) {
         ms->homing = false;
         setStateBit(HOMED_BIT, 1);
         ms->curPos = sv->homePos;
@@ -66,11 +67,11 @@ void homeCommand(bool start) {
     if(limitSwOn()) {
       // go to fwd side of switch at full homing speed
       ms->homingState = movingToFwdSide;
-      ms->targetDir   = 1;
+      ms->targetDir   = !sv->homingDir;
     }
     else {
       ms->homingState = goingHome;
-      ms->targetDir   = 0;
+      ms->targetDir   = sv->homingDir;
     }
     ms->targetSpeed = sv->homingSpeed;
     setStateBit(BUSY_BIT,  1);
