@@ -54,11 +54,13 @@ struct motorState {
   bool   resetAfterSoftStop;
   bool   nextStateTestPos;    // flag to return homeTestPos on next read
   int16  homeTestPos;         // pos when limit sw closes
-  uint16 limActSetting;       // convenience from limit sw ctl setting
-  uint16 limitCountLo;        // num steps pin is low
-  uint16 limitCountHi;        // num steps pin is high
   volatile uint16 *limitPort; // set when settings loaded
   uint16 limitMask;           // set when settings loaded
+  uint16 limActThres;         // convenience from limit sw ctl setting
+  uint16 limActHyst;          // convenience from limit sw ctl setting
+  uint16 limitCntTimeout;     // num steps since pin chg (after hyst)
+  uint16 limitCountLo;        // num steps pin is low
+  uint16 limitCountHi;        // num steps pin is high
 };
 
 extern struct motorState mState[NUM_MOTORS];

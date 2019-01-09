@@ -43,13 +43,15 @@ struct motorSettings {
 #define mcuClockSettingIdx 11
 #define NUM_SETTING_WORDS  12
 
-#define LIM_IDX_MASK 0x7000
-#define LIM_ACT_MASK 0x00f0
-#define LIM_POL_MASK 0x0001
+#define LIM_IDX_MASK         0x7000
+#define LIM_ACT_TIMEOUT_MASK 0x0f00
+#define LIM_ACT_HYST_MASK    0x00f0
+#define LIM_POL_MASK         0x0001
 
-#define LIM_IDX_OFS  12
-#define LIM_ACT_OFS   4
-#define LIM_POL_OFS   0
+#define LIM_IDX_OFS         12
+#define LIM_ACT_TIMEOUT_OFS  8
+#define LIM_ACT_HYST_OFS     4
+#define LIM_POL_OFS          0
 
 union settingsUnion{
   uint16 reg[NUM_SETTING_WORDS];

@@ -95,9 +95,8 @@ bool limitSwOn() {
   volatile uint16 *p = ms->limitPort;
   if (p != 0) {
     bool swOn;
-    if(ms->limActSetting)
-         swOn = (ms->limitCountHi > ms->limActSetting ||
-                 ms->limitCountLo > ms->limActSetting);
+    if(ms->limActThres)
+         swOn =  (ms->limitCntTimeout > ms->limActThres);
     else swOn = !(*p & ms->limitMask);
     return ((sv->limitSwCtl & LIM_POL_MASK) ? !swOn : swOn);
   }
@@ -130,7 +129,8 @@ void setMotorSettings(uint8 numWordsRecvd) {
         ms->limitMask =  limit3BIT; 
         break;
     }
-    ms->limActSetting = (lsc & LIM_ACT_MASK) << (8-LIM_ACT_OFS);
+    ms->limActThres = (lsc & LIM_ACT_TIMEOUT_MASK) >> (LIM_ACT_TIMEOUT_OFS-6);
+    ms->limActHyst  = (lsc & LIM_ACT_HYST_MASK)    << (5-LIM_ACT_HYST_OFS);
   }
   setTicksSec();
   clkTicksPerSec = ((uint16) (1000000 / mSet[0].val.mcuClock));
@@ -180,12 +180,15 @@ void checkAll() {
     }
     ms->curPos += signedDist;
     
-    if(ms->limActSetting) {
+    if(ms->limActThres) {
+      ms->limitCntTimeout ++;
       if(*ms->limitPort & ms->limitMask) {
+        if(ms->limitCountLo > ms->limActHyst) ms->limitCntTimeout = 0;
         ms->limitCountHi++;
         ms->limitCountLo = 0;
       }
       else {
+        if(ms->limitCountHi > ms->limActHyst) ms->limitCntTimeout = 0;
         ms->limitCountLo++;
         ms->limitCountHi = 0;
       }
