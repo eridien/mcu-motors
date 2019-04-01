@@ -27,11 +27,11 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 PROJECTNAME=mcu-motors
 
 # Active Configuration
-DEFAULTCONF=mcuB
+DEFAULTCONF=mcuAB
 CONF=${DEFAULTCONF}
 
 # All Configurations
-ALLCONFS=mcuA mcuB 
+ALLCONFS=mcuAB mcuA mcuB 
 
 
 # build
@@ -45,6 +45,7 @@ ALLCONFS=mcuA mcuB
 
 # clobber
 .clobber-impl: .clobber-pre .depcheck-impl
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=mcuAB clean
 	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=mcuA clean
 	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=mcuB clean
 
@@ -52,6 +53,7 @@ ALLCONFS=mcuA mcuB
 
 # all
 .all-impl: .all-pre .depcheck-impl
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=mcuAB build
 	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=mcuA build
 	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=mcuB build
 

@@ -7,15 +7,8 @@
 #define I2C_BUF_BYTE  SSP1BUF
 #define I2C_SSPIF     SSP1IF
 
-#ifdef REV4
-#define IDTRIS    _TRISB10  // shared with ICSPDAT2
-#define IDPORT    _RB10
-#define AUXTRIS   _TRISB11  // shared with ICSPDAT2
-#define AUXLAT    _LATB11
-#else
-#define IDTRIS    _TRISB6   // mcu ID, sets i2c base addr
-#define IDPORT     _RB6
-#endif
+#define IDTRIS    _TRISB1   // mcu ID, sets i2c base addr
+#define IDPORT    _RB1     // 0: mcuA, 1: mcuB, only valid at startup
 
 #define dirTRIS   _TRISA6
 #define ms1TRIS   _TRISA7
@@ -24,12 +17,6 @@
 #define dirLAT    _LATA6
 #define ms1LAT    _LATA7
 #define ms2LAT    _LATB7
-
-#ifdef REV4
-#define ms3TRIS   _TRISB6
-#define ms3LAT    _LATB6
-#endif
-
 
 #define resetATRIS _TRISB15
 #define resetBTRIS _TRISB14
@@ -91,21 +78,20 @@
 #define faultCBIT   0x0010
 #define faultDBIT   0x0020
 
-#define limit1TRIS  _TRISA0
-#define limit2TRIS  _TRISA1
-#define limit3TRIS  _TRISB0
+#define limATRIS  _TRISA0
+#define limBTRIS  _TRISA1
+#define limCTRIS  _TRISB0
+#define limDTRIS  _TRISB6
 
-#define limit1Pin   _RA0
-#define limit2Pin   _RA1
-#define limit3Pin   _RB0
+#define limAPORT  PORTA
+#define limBPORT  PORTA
+#define limCPORT  PORTB
+#define limDPORT  PORTB
 
-#define limit1PORT  PORTA
-#define limit2PORT  PORTA
-#define limit3PORT  PORTB
-
-#define limit1BIT   0x0001
-#define limit2BIT   0x0002
-#define limit3BIT   0x0001
+#define limABIT   0x0001
+#define limBBIT   0x0002
+#define limCBIT   0x0001
+#define limDBIT   0x0040
 
 #ifdef DEBUG
 #define tp1TRIS faultATRIS

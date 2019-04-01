@@ -155,6 +155,9 @@ void checkMotor() {
       ms->ustep++;
     }
   }
+  if(ms->ustep > mSet->val.maxUstep) {
+     ms->ustep = mSet->val.maxUstep;
+  }
   // set step timing
   switch (ms->ustep) {
     case 0:  clkTicks = clkTicksPerSec / (ms->curSpeed >> 3); break;

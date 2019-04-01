@@ -51,6 +51,8 @@ int main(void) {
  ANSA    = 0;   // no analog inputs
  ANSB    = 0;
  
+ setI2cId();  // read I2C bit before pin set to output
+ 
 #ifdef DEBUG
  tp1TRIS = 0;
  tp2TRIS = 0;

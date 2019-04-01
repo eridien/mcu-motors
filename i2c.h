@@ -26,6 +26,7 @@ extern volatile uint8 i2cRecvBytesPtr;
 extern volatile uint8 i2cSendBytes[NUM_SEND_BYTES];
 extern volatile uint8 i2cSendBytesPtr;
 
+void setI2cId(void);
 void i2cInit(void);
 void i2cInterrupt(void);
 

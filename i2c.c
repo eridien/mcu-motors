@@ -16,16 +16,13 @@ volatile uint8 i2cSendBytesPtr;
 volatile bool  inPacket;
 volatile bool  packetForUs;
 
-void i2cInit() { 
+// must be run before RA0 tristate turned off
+void setI2cId(void) {
   IDTRIS  = 1;  // MCU ID pin, 0 for MCU0 (mcuA in p3), 1 for MCU1 (mcuB in p3)
-  i2cAddrBase = (IDPORT ? I2C_ADDR_1 : I2C_ADDR_0);
-#ifdef FORCE_ID_0
-  i2cAddrBase = I2C_ADDR_0;
-#endif
-#ifdef FORCE_ID_1
-  i2cAddrBase = I2C_ADDR_1;
-#endif
-  
+  i2cAddrBase = (IDPORT ? I2C_ADDR_1 : I2C_ADDR_0);  
+}
+
+void i2cInit() { 
   SSP1CON1bits.SSPM = 0x0e;          // slave mode, 7-bit, S & P ints enabled 
   SSP1MSK           = I2C_ADDR_MASK; // address mask, check top 5 bits
   SSP1ADD           = i2cAddrBase;   // slave address (7-bit addr << 1)
@@ -46,17 +43,29 @@ void i2cInit() {
 // all words are big-endian
 void setSendBytesInt(uint8 motIdx) {
   struct motorState *p = &mState[motIdx];
-  if(ms->nextStateTestPos > 0) {
-    ms->nextStateTestPos = 0;
-    i2cSendBytes[0]  = (MCU_VERSION | AUX_RES_BIT);
-    i2cSendBytes[1]  = p->homeTestPos >> 8;
-    i2cSendBytes[2]  = p->homeTestPos & 0x00ff;
+  switch (p->nextStateSpecialVal) {
+    case 0:
+      i2cSendBytes[0] = (MCU_VERSION | p->stateByte);
+      i2cSendBytes[1] =  p->curPos >> 8;
+      i2cSendBytes[2] =  p->curPos & 0x00ff;   
+      break;
+    case 1: 
+      i2cSendBytes[0] = (MCU_VERSION | AUX_RES_BIT | 0);
+      i2cSendBytes[1] = p->homeTestPos >> 8;
+      i2cSendBytes[2] = p->homeTestPos & 0x00ff;
+      break;        
+    case 2: 
+      i2cSendBytes[0] = (MCU_VERSION | AUX_RES_BIT | 1);
+      i2cSendBytes[1] = 0; 
+      volatile uint16 *lp = p->limitPort;
+      i2cSendBytes[2] = (lp ? !(*(lp) & p->limitMask) ^ 
+                             !!(mSet[motIdx].val.limitSwCtl & LIM_POL_MASK)
+        : 0);
+      break;      
+    default: 
+      setErrorInt(motIdx, CMD_DATA_ERROR);
   }
-  else {
-    i2cSendBytes[0] = (p->stateByte | MCU_VERSION);
-    i2cSendBytes[1] =  p->curPos >> 8;
-    i2cSendBytes[2] =  p->curPos & 0x00ff;
-  }
+  p->nextStateSpecialVal = 0;
 }
 
 volatile uint8 motIdxInPacket;

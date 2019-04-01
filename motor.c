@@ -31,15 +31,9 @@ struct motorState    *ms;
 struct motorSettings *sv;
 
 void motorInit() {
- AUXLAT  = 0;  // aux pin (fan or buzzer in P3))
- AUXTRIS = 0;
-
  dirTRIS = 0;
   ms1TRIS = 0;
   ms2TRIS = 0;
-#ifdef REV4
-  ms3TRIS = 0;
-#endif
   
   resetALAT  = 0; // start with reset on
   resetATRIS = 0;
@@ -65,9 +59,10 @@ void motorInit() {
   faultCTRIS = 1;  
   faultDTRIS = 1;  
 
-  limit1TRIS = 1; // limit switch input
-  limit2TRIS = 1; 
-  limit3TRIS = 1; 
+  limATRIS = 1; // limit switch input
+  limBTRIS = 1; 
+  limCTRIS = 1; 
+  limDTRIS = 1; 
 
   uint8 motIdx;
   for (motIdx = 0; motIdx < NUM_MOTORS; motIdx++) {
@@ -115,18 +110,23 @@ void setMotorSettings(uint8 numWordsRecvd) {
   ms->acceleration = accelTable[mSet[motorIdx].val.accelIdx];
   uint16 lsc = mSet[motorIdx].val.limitSwCtl;
   if(lsc) {
-    switch((lsc & LIM_IDX_MASK) >> LIM_IDX_OFS) {
+    // this should be an array of ports/bits, like all other settings. TODO
+    switch(motorIdx) {
+      case 0: 
+        ms->limitPort = &limAPORT;
+        ms->limitMask =  limABIT; 
+        break;
       case 1: 
-        ms->limitPort = &limit1PORT;
-        ms->limitMask =  limit1BIT; 
+        ms->limitPort = &limBPORT;
+        ms->limitMask =  limBBIT; 
         break;
       case 2: 
-        ms->limitPort = &limit2PORT;
-        ms->limitMask =  limit2BIT; 
+        ms->limitPort = &limCPORT;
+        ms->limitMask =  limCBIT; 
         break;
       case 3: 
-        ms->limitPort = &limit3PORT;
-        ms->limitMask =  limit3BIT; 
+        ms->limitPort = &limDPORT;
+        ms->limitMask =  limDBIT; 
         break;
     }
     ms->limActThres = (lsc & LIM_ACT_TIMEOUT_MASK) >> (LIM_ACT_TIMEOUT_OFS-6);
@@ -270,16 +270,39 @@ void processCommand() {
       moveCommand(false);
     }
   } else if ((firstByte & 0xe0) == 0x20) {
-    // jog command - no bounds checking and doesn't need to be homed
+    // jog command relative - no bounds checking and doesn't need to be homed
     if (lenIs(2, true)) {
       motorOn();
-      uint16 dist = (((uint16) (firstByte & 0x0f) << 8) | rb[2]);
+      uint16 dist = ((( (uint16) firstByte & 0x0f) << 8) | rb[2]);
       // direction bit is in d4
       if(firstByte & 0x10) ms->targetPos = ms->curPos + dist;
       else                 ms->targetPos = ms->curPos - dist;
       ms->acceleration = 0;
       ms->targetSpeed  = sv->jerk;
       moveCommand(true);
+    }
+  } else if (firstByte == 0x02) {
+    // jog command relative - no bounds checking and doesn't need to be homed
+    if (lenIs(3, true)) {
+      motorOn(); 
+      ms->targetPos    = ms->curPos + (int16) (((uint16) rb[2] << 8) | rb[3]);
+      ms->acceleration = 0;
+      ms->targetSpeed  = sv->jerk;
+      moveCommand(true);
+    }
+  } else if (firstByte == 0x03) {
+    // jog command relative - no bounds checking and doesn't need to be homed
+    if (lenIs(3, true)) {
+      motorOn();
+      ms->targetPos    = (int16) (((uint16) rb[2] << 8) | rb[3]);
+      ms->acceleration = 0;
+      ms->targetSpeed  = sv->jerk;
+      moveCommand(true);
+    }
+  } else if (firstByte == 0x01) {
+    // setPos command
+    if (lenIs(3, false)) {
+      ms->curPos =  (int16) (((uint16) rb[2] << 8) | rb[3]);
     }
   } else if (firstByte == 0x1f) {
     // load settings command
@@ -293,17 +316,11 @@ void processCommand() {
   } else if((firstByte & 0xfc) == 0x04) {
    // next status contains special value
     if (lenIs(1, true)) {
-      ms->nextStateTestPos = (firstByte & 0x03) + 1;
+      ms->nextStateSpecialVal = (firstByte & 0x03) + 1;
     } else {
       setError(CMD_DATA_ERROR);
     }
   } 
-#ifdef REV4
-  else if ((firstByte & 0xfe) == 0x02) {
-    if (lenIs(1, false))
-      AUXLAT = firstByte & 0x01; // fan (mcu A) or buzzer (mcu B)
-  }
-#endif
   else if ((firstByte & 0xf0) == 0x10) {
 
     uint8 bottomNib = firstByte & 0x0f;
@@ -337,9 +354,6 @@ void __attribute__((interrupt, shadow, auto_psv)) _T1Interrupt(void) {
       }
       ms1LAT = ((p->ustep & 0x01) ? 1 : 0);
       ms2LAT = ((p->ustep & 0x02) ? 1 : 0);
-#ifdef REV4
-      ms3LAT = ((p->ustep & 0x04) ? 1 : 0);
-#endif
       dirLAT =   p->curDir        ? 1 : 0;
       setBiStepHiInt(motIdx);
       p->stepPending = false;

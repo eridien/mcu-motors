@@ -15,6 +15,10 @@
             <sourceRootList/>
             <confList>
                 <confElem>
+                    <name>mcuAB</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
                     <name>mcuA</name>
                     <type>2</type>
                 </confElem>

@@ -52,7 +52,7 @@ struct motorState {
   uint16 lastStepTicks;
   bool   haveCommand;
   bool   resetAfterSoftStop;
-  bool   nextStateTestPos;    // flag to return homeTestPos on next read
+  bool   nextStateSpecialVal; // flag to return homeTestPos on next read
   int16  homeTestPos;         // pos when limit sw closes
   volatile uint16 *limitPort; // set when settings loaded
   uint16 limitMask;           // set when settings loaded
