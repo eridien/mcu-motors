@@ -11,7 +11,6 @@
 #define DEF_MCU_CLK 30
 
 // globals for use in main event loop
-extern volatile uint16        *mp;
 extern uint8                   motorIdx;
 extern struct motorState      *ms;
 extern struct motorSettings   *sv;

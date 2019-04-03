@@ -24,8 +24,10 @@ const    uint16  resetMask[NUM_MOTORS] = {resetABIT, resetBBIT, resetCBIT, reset
 volatile uint16 *faultPort[NUM_MOTORS] = {&faultAPORT, &faultBPORT, &faultCPORT, &faultDPORT};
 const    uint16  faultMask[NUM_MOTORS] = {faultABIT, faultBBIT, faultCBIT, faultDBIT};
          
+volatile uint16 *limPort[NUM_MOTORS]   = {&limAPORT, &limBPORT, &limCPORT, &limDPORT};
+const    uint16  limMask[NUM_MOTORS]   = {limABIT, limBBIT, limCBIT, limDBIT};
+         
 // globals for use in main chk loop
-volatile uint16      *mp;
 uint8                 motorIdx;
 struct motorState    *ms;
 struct motorSettings *sv;
@@ -110,25 +112,8 @@ void setMotorSettings(uint8 numWordsRecvd) {
   ms->acceleration = accelTable[mSet[motorIdx].val.accelIdx];
   uint16 lsc = mSet[motorIdx].val.limitSwCtl;
   if(lsc) {
-    // this should be an array of ports/bits, like all other settings. TODO
-    switch(motorIdx) {
-      case 0: 
-        ms->limitPort = &limAPORT;
-        ms->limitMask =  limABIT; 
-        break;
-      case 1: 
-        ms->limitPort = &limBPORT;
-        ms->limitMask =  limBBIT; 
-        break;
-      case 2: 
-        ms->limitPort = &limCPORT;
-        ms->limitMask =  limCBIT; 
-        break;
-      case 3: 
-        ms->limitPort = &limDPORT;
-        ms->limitMask =  limDBIT; 
-        break;
-    }
+    ms->limitPort   = limPort[motorIdx];
+    ms->limitMask   = faultMask[motorIdx];
     ms->limActThres = (lsc & LIM_ACT_TIMEOUT_MASK) >> (LIM_ACT_TIMEOUT_OFS-6);
     ms->limActHyst  = (lsc & LIM_ACT_HYST_MASK)    << (5-LIM_ACT_HYST_OFS);
   }
@@ -201,7 +186,7 @@ void checkAll() {
       chkStopping();
     } else {
       // normal moving
-      if ((ms->curPos < (int16) sv->minPos || ms->curPos > sv->maxPos) 
+      if ((ms->curPos < sv->minPos || ms->curPos > sv->maxPos) 
            && !ms->noBounds) {
         setError(BOUNDS_ERROR);
         return;

@@ -11,12 +11,12 @@
 
 // FOSCSEL
 #pragma config FNOSC = FRCPLL           // Oscillator Select (Fast RC Oscillator with Postscaler and PLL Module (FRCDIV+PLL))
-#pragma config SOSCSRC = ANA            // SOSC Source Type (Analog Mode for use with crystal)
+#pragma config SOSCSRC = DIG            // SOSC Source Type (Analog Mode for use with crystal)
 #pragma config LPRCSEL = HP             // LPRC Oscillator Power and Accuracy (High Power, High Accuracy Mode)
 #pragma config IESO = OFF               // Internal External Switch Over bit (Internal External Switchover mode enabled (Two-speed Start-up enabled))
 
 // FOSC
-#pragma config POSCMOD = HS             // Primary Oscillator Configuration bits (HS oscillator mode selected)
+#pragma config POSCMOD = NONE           // Primary Oscillator Configuration bits (none selected)
 #pragma config OSCIOFNC = IO            // CLKO Enable Configuration bit (Port I/O enabled (CLKO disabled))
 #pragma config POSCFREQ = HS            // Primary Oscillator Frequency Range Configuration bits (Primary oscillator/external clock input frequency greater than 8MHz)
 #pragma config SOSCSEL = SOSCHP         // SOSC Power Selection Configuration bits (Secondary Oscillator configured for high-power operation)
@@ -50,8 +50,8 @@ int main(void) {
  _RCDIV  = 0; // switch instruction clock from 4 MHz to 8 MHz
  ANSA    = 0;   // no analog inputs
  ANSB    = 0;
- 
- setI2cId();  // read I2C bit before pin set to output
+
+ setI2cId();  // read mcu number before pin set to output
  
 #ifdef DEBUG
  tp1TRIS = 0;
@@ -69,16 +69,15 @@ int main(void) {
   clkInit();
   motorInit();
 
- _NSTDIS = 1;  // nested interrupts disabled
+  _NSTDIS = 1;  // nested interrupts disabled
   enableAllInts;
   
   // main event loop -- never ends
   while(true) {
-    // motorIdx, mp, mm, ms, and sv are globals
+    // motorIdx, ms, and sv are globals
     for(motorIdx=0; motorIdx < NUM_MOTORS; motorIdx++) {
-      mp = stepPort[motorIdx]; // (&PORT)
-      ms = &mState[motorIdx];
-      sv = &(mSet[motorIdx].val);
+      ms = &mState[motorIdx];      // state array
+      sv = &(mSet[motorIdx].val);  // settings array
       if(errorIntCode && errorIntMot == motorIdx) {
         // error happened during interrupt
         setError(errorIntCode);
@@ -88,7 +87,7 @@ int main(void) {
         processCommand();
         ms->haveCommand = false;
       }
-      checkAll();
+      checkAll();  // foreground event loop
    }
   }
 }

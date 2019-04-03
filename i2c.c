@@ -119,11 +119,12 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
     }
     else {
       if(!RdNotWrite) {
+        volatile uint8 temp = mState[motIdxInPacket].haveCommand;
         // received byte (i2c write to slave)
-        if (mState[motIdxInPacket].haveCommand) {
+        if (temp != 0) {
             // last command for this motor not handled yet by event loop
             setErrorInt(motIdxInPacket, OVERFLOW_ERROR);
-        } 
+        }
         else {
           if(i2cRecvBytesPtr < RECV_BUF_SIZE + 1) 
             i2cRecvBytes[motIdxInPacket][i2cRecvBytesPtr++] = I2C_BUF_BYTE;
