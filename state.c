@@ -21,7 +21,6 @@ void setError(uint8 err) {
     disableAllInts;
     ms->stateByte = ms->stateByte & ~ERR_CODE;
     enableAllInts;
-    I2C_WCOL = 0;           // clear WCOL
     dummy = I2C_BUF_BYTE;   // clear SSPOV
   }
   else {

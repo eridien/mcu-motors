@@ -14,7 +14,6 @@ volatile uint8 i2cRecvBytesPtr;
 volatile uint8 i2cSendBytes[NUM_SEND_BYTES];
 volatile uint8 i2cSendBytesPtr;
 volatile bool  inPacket;
-volatile bool  readInPacket;
 volatile bool  packetForUs;
 
 // must be run before RA0 tristate turned off
@@ -73,26 +72,26 @@ volatile uint8 motIdxInPacket;
 
 void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
   _SSP1IF = 0;
+  
   // SSPxSTATbits.S is set during entire packet
   if(I2C_START_BIT && !inPacket) { 
     // received start bit, prepare for packet
     i2cRecvBytesPtr = 1;    // skip over length byte
     i2cSendBytesPtr = 1;    // first is hard-wired to zero
-    I2C_WCOL     = 0;              // clear WCOL
-    dummy        = I2C_BUF_BYTE;   // clear SSPOV
+    I2C_SSPOV       = 0;    // clear SSPOV
     inPacket     = true;
-    readInPacket = false;
     packetForUs  = false;
   }
   else if(I2C_STOP_BIT) { 
     // received stop bit
     inPacket = false;
-    if (I2C_WCOL || I2C_SSPOV) {
-      setErrorInt(motIdxInPacket, OVERFLOW_ERROR);
-    }
-    else {
-      if(packetForUs) {
-        if(!readInPacket) {
+    if(packetForUs) {
+      if (I2C_SSPOV) {
+        setErrorInt(motIdxInPacket, OVERFLOW_ERROR);
+        I2C_SSPOV = 0;   // clear SSPOV
+      }
+      else {
+        if(!RdNotWrite) {
           // done receiving -- total length of recv is stored in first byte
           i2cRecvBytes[motIdxInPacket][0] = i2cRecvBytesPtr-1;
           // tell event loop that data is available
@@ -111,9 +110,8 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
     if(!NotAddr) { 
       // received addr byte, extract motor number and read bit
       packetForUs    = true;
-      readInPacket   = (I2C_BUF_BYTE & 0x01);
       motIdxInPacket = (I2C_BUF_BYTE & 0x06) >> 1;
-      if(readInPacket) {
+      if(RdNotWrite) {
         // prepare all send data
         setSendBytesInt(motIdxInPacket);
         // send packet (i2c read from slave), load buffer for first byte
@@ -121,7 +119,7 @@ void __attribute__ ((interrupt,shadow,auto_psv)) _MSSP1Interrupt(void) {
       }
     }
     else {
-      if(!readInPacket) {
+      if(!RdNotWrite) {
         // received byte (i2c write to slave)
         if (mState[motIdxInPacket].haveCommand != 0) {
             // last command for this motor not handled yet by event loop

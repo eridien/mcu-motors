@@ -41,8 +41,8 @@ struct motorSettings {
   uint16 mcuClock;       // period of clock in usecs  (applies to all motors in mcu)
 };
 
-#define mcuClockSettingIdx 12
-#define NUM_SETTING_WORDS  13
+#define mcuClockSettingIdx 13
+#define NUM_SETTING_WORDS  14
 
 #define LIM_ENBL_MASK        0x8000
 #define LIM_ACT_TIMEOUT_MASK 0x0f00
