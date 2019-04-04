@@ -15,7 +15,7 @@
 #define I2C_ADDR_0   0x08  // real addr: 0x04+motor
 #define I2C_ADDR_1   0x10  // real addr: 0x08+motor
   
-#define RdNotWrite SSP1STATbits.I2C_READ
+// #define RdNotWrite SSP1STATbits.I2C_READ  // this status bit was flakey ???
 #define NotAddr    SSP1STATbits.NOT_ADDRESS
 #define NotStretch SSP1CON1bits.CKP
 #define I2C_WCOL   SSP1CON1bits.WCOL

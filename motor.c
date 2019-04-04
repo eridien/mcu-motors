@@ -56,11 +56,13 @@ void motorInit() {
   stepCTRIS  = 0;
   stepDTRIS  = 0;
 
+#ifndef DEBUG
   faultATRIS = 1; // zero input means motor fault
   faultBTRIS = 1; 
   faultCTRIS = 1;  
   faultDTRIS = 1;  
-
+#endif
+  
   limATRIS = 1; // limit switch input
   limBTRIS = 1; 
   limCTRIS = 1; 

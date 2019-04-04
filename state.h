@@ -23,7 +23,7 @@ extern volatile int dummy;
 #define CLEAR_ERROR         0xff // magic code to clear error
 
 // state byte
-#define ERR_CODE            0xf0
+#define ERR_CODE            0x70
 #define AUX_RES_BIT         0x08 // do-d1 indicate what is in pos word
 #define BUSY_BIT            0x04
 #define MOTOR_ON_BIT        0x02
