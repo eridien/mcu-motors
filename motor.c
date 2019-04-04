@@ -115,7 +115,7 @@ void setMotorSettings(uint8 numWordsRecvd) {
   uint16 lsc = mSet[motorIdx].val.limitSwCtl;
   if(lsc) {
     ms->limitPort   = limPort[motorIdx];
-    ms->limitMask   = faultMask[motorIdx];
+    ms->limitMask   = limMask[motorIdx];
     ms->limActThres = (lsc & LIM_ACT_TIMEOUT_MASK) >> (LIM_ACT_TIMEOUT_OFS-6);
     ms->limActHyst  = (lsc & LIM_ACT_HYST_MASK)    << (5-LIM_ACT_HYST_OFS);
   }

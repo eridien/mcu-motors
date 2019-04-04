@@ -84,14 +84,14 @@
 #define limDTRIS  _TRISB6
 
 #define limAPORT  PORTA
-#define limBPORT  PORTA
+#define limBPORT  PORTB
 #define limCPORT  PORTB
-#define limDPORT  PORTB
+#define limDPORT  PORTA
 
 #define limABIT   0x0001
-#define limBBIT   0x0002
-#define limCBIT   0x0001
-#define limDBIT   0x0040
+#define limBBIT   0x0001
+#define limCBIT   0x0040
+#define limDBIT   0x0002
 
 #ifdef DEBUG
 #define tp1TRIS faultATRIS
