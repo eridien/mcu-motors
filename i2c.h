@@ -12,6 +12,7 @@
 
 // motor is bottom 2 bits in addr
 // addr is set based on ID input pin
+extern uint8 i2cAddrBase; 
 #define I2C_ADDR_0   0x08  // real addr: 0x04+motor
 #define I2C_ADDR_1   0x10  // real addr: 0x08+motor
   

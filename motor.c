@@ -80,11 +80,14 @@ void motorInit() {
     msp->curSpeed = 0;
   }
 }
+#include "i2c.h" // DEBUG
 
 bool haveFault() {
 #ifdef DEBUG
   return false;
 #else
+  if(i2cAddrBase == I2C_ADDR_1 && motorIdx == 2) 
+           return false;  // DEBUG -- IGNORE BAD MCUB CHIP A4 input -- TODO
   volatile uint16 *p = faultPort[motorIdx];
   return !(*p & faultMask[motorIdx]);
 #endif
@@ -300,6 +303,23 @@ void processCommand() {
     } else {
       setError(CMD_DATA_ERROR);
     }
+  } else if(firstByte == 0x07) {
+   // 2-byte extra commands
+    if (lenIs(2, true)) {
+      if((rb[2] & 0xf8) == 0x08) {
+        // clamp or unclamp limit switch to ground
+        switch(rb[2] & 0x06) {
+          case 0: limALAT = 0; limATRIS = (rb[2] & 0x01); break;
+          case 2: limBLAT = 0; limBTRIS = (rb[2] & 0x01); break;
+          case 4: limCLAT = 0; limCTRIS = (rb[2] & 0x01); break;
+          case 6: limDLAT = 0; limDTRIS = (rb[2] & 0x01); break;
+        }
+      } else {
+        setError(CMD_DATA_ERROR);
+      }
+    } else {
+      setError(CMD_DATA_ERROR);
+    }
   } else if((firstByte & 0xfc) == 0x04) {
    // next status contains special value
     if (lenIs(1, true)) {
@@ -307,8 +327,7 @@ void processCommand() {
     } else {
       setError(CMD_DATA_ERROR);
     }
-  } 
-  else if ((firstByte & 0xf0) == 0x10) {
+  } else if ((firstByte & 0xf0) == 0x10) {
 
     uint8 bottomNib = firstByte & 0x0f;
     // one-byte commands
@@ -320,7 +339,6 @@ void processCommand() {
         case 4: resetMotor();                break; // hard stop (immediate reset)
         case 5: motorOn();                   break; // reset off
         case 6: homeCommand(false);          break; // stop, set curpos to setting
-        case 7: asm ("RESET");               break; // reboot mcu
         default: setError(CMD_DATA_ERROR);
       }
     }

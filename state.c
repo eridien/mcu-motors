@@ -32,7 +32,6 @@ void setError(uint8 err) {
 volatile uint8 errorIntMot;
 volatile uint8 errorIntCode;
 
-
 // used in interrupt
 void setErrorInt(uint8 motIdx, uint8 err) {
   errorIntMot  = motIdx;

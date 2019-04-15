@@ -78,6 +78,11 @@
 #define faultCBIT   0x0010
 #define faultDBIT   0x0020
 
+#define limALAT   _LATA0
+#define limBLAT   _LATA1
+#define limCLAT   _LATB0
+#define limDLAT   _LATB6
+
 #define limATRIS  _TRISA0
 #define limBTRIS  _TRISA1
 #define limCTRIS  _TRISB0

@@ -37,9 +37,13 @@
   0001 0100  reset       hard stop (power down motor with immediate reset)
   0001 0101  motorOn     (power up motor by removing reset)
   0001 0110  fakeHome    set curpos to home pos value setting, turn motor on
-  0001 0111  resetMcu    reboot this mcu
   0000 01ss  specialRead next status bytes 2-3 are special value 
-                              (ss 0: test pos, ss 1: misc)
+                              (ss 0: test pos, ss 1: misc, ss 2: reserved)
+
+  -- 2-byte extra commands --
+  0000 0111 cccc cccc  
+	  0000 1xx0  clamp limit sw xx (force closed, i.e. ground it)
+	  0000 1xx1  unclamp limit sw xx (normal)
 
   -- 2-byte move command --
   1aaa aaaa    top 7 bits of target position (always positive)
